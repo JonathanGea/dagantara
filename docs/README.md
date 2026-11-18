@@ -20,4 +20,14 @@ Ada dua lapisan operasional utama:
 
 ## Kesepakatan dokumentasi
 
-Setiap pembahasan disimpan dalam **file Markdown terpisah sesuai modul**. `README.md` berfungsi sebagai indeks tautan dokumen; `index.html` hanya menampilkan isi file Markdown, bukan menjadi tempat menyimpan materi.
+### Isi dokumentasi
+
+- Cantumkan **hanya keputusan yang telah disepakati**. Jangan mencatat fitur atau alternatif yang tidak dipilih.
+- Tulis aturan sekali, secara singkat, jelas, dan konsisten. Gunakan judul langsung pada fungsi yang dibahas.
+- Setiap modul memiliki file Markdown sendiri. `README.md` menjadi indeks; `index.html` menampilkan file Markdown.
+- Sertakan **Database ERD**, **Business Rules & Validation**, dan **Tenant Admin — Menu & Features** sesuai keputusan modul.
+- Pada bagian **Tenant Admin — Menu & Features**, petakan menu, submenu, halaman, fitur, dan aksi **yang sudah disepakati**. Satu aksi tidak harus menjadi submenu.
+- Tambahkan **Permissions**, **Lifecycle / Workflow**, dan **Cross-Module Relationships** hanya bila aturannya relevan dan telah disepakati.
+- Gunakan Mermaid untuk memperlihatkan struktur atau alur yang memang membutuhkan diagram.
+- Jangan mengisi kolom, permission code, kontrak API, status implementasi, atau struktur menu dengan asumsi. Jangan membuat section kosong hanya demi memenuhi template.
+- Saat keputusan berubah, perbarui dokumen modul dan diagram yang terdampak; jangan mengubah modul lain tanpa kebutuhan.
