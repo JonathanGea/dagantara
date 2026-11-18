@@ -1,18 +1,20 @@
 # Product Management
 
-## Catalog
+## Business Rules & Validation
 
-Setiap tenant memiliki katalog produk sendiri.
+- Setiap tenant mengelola katalog produknya sendiri (**Independent Catalog**).
+- Satu produk dapat terhubung ke beberapa kategori dan memiliki satu **Primary Category**.
+- Media dimiliki oleh produk.
+- **Product Media** dan **Product Option Values** memiliki relasi many-to-many: satu media dapat terhubung ke beberapa nilai opsi dan satu nilai opsi dapat terhubung ke beberapa media.
 
-## Kategori Produk
+## Tenant Admin — Menu & Features
 
-Satu produk dapat masuk ke beberapa kategori, dengan tepat satu **Primary Category**.
+| Area | Fitur dan aksi |
+| --- | --- |
+| Produk | Menentukan kategori produk dan Primary Category |
+| Media Produk | Mengaitkan media produk dengan nilai opsi produk |
 
-## Media Produk
-
-Media dimiliki oleh produk. Relasi antara **Product Media** dan **Product Option Values** bersifat many-to-many: satu media dapat terkait dengan beberapa nilai opsi, dan satu nilai opsi dapat terkait dengan beberapa media.
-
-## Diagram Relasi
+## Database — Entity Relationship Diagram
 
 ```mermaid
 erDiagram
