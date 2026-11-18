@@ -71,6 +71,28 @@ erDiagram
 
 **Keterangan:** relasi `TENANTS → USERS` dan `TENANTS → ROLES` bersifat opsional di sisi user/role karena akun platform dan role sistem dapat memiliki `tenant_id = NULL`.
 
+### Penjelasan tabel
+
+| Tabel | Fungsi |
+| --- | --- |
+| `tenants` | Menyimpan tenant yang menggunakan Dagantara. |
+| `tenant_domains` | Menyimpan hostname/domain yang terhubung dengan tenant. |
+| `users` | Menyimpan akun pengguna, tenant pengguna, dan role aktif pengguna. |
+| `roles` | Menyimpan role yang dapat ditetapkan kepada pengguna. |
+| `permissions` | Menyimpan kode permission yang digunakan untuk otorisasi. |
+| `role_permissions` | Menghubungkan role dengan permission yang dimilikinya. |
+
+### Penjelasan relasi
+
+| Relasi | Makna |
+| --- | --- |
+| `tenants → tenant_domains` | Satu tenant dapat memiliki beberapa domain. |
+| `tenants → users` | Satu tenant dapat memiliki banyak pengguna. Akun platform tidak memiliki `tenant_id`. |
+| `tenants → roles` | Tenant dapat memiliki role tenant; role sistem dapat memiliki `tenant_id = NULL`. |
+| `roles → users` | Setiap pengguna memiliki satu role aktif melalui `users.role_id`. |
+| `roles ↔ permissions` | Many-to-many melalui `role_permissions` dengan pasangan `(role_id, permission_id)` sebagai primary key. |
+| `users → users` | `users.created_by` mereferensikan pengguna pembuat akun. |
+
 ## Business Rules & Validation
 
 - Pengguna platform memiliki `users.tenant_id = NULL`; pengguna tenant terhubung ke satu tenant.
@@ -82,10 +104,17 @@ erDiagram
 
 ## Tenant Admin — Menu & Features
 
-| Area | Fitur dan aksi |
-| --- | --- |
-| Pengguna | Membuat pengguna; menetapkan role pengguna |
-| Role | Membuat role; menetapkan permission pada role |
+```text
+Tenant Admin
+└── User Management
+    ├── Users
+    └── Roles
+```
+
+| Menu | Submenu | Fitur / aksi |
+| --- | --- | --- |
+| User Management | Users | Membuat pengguna, menetapkan role pengguna |
+| User Management | Roles | Membuat role, menetapkan permission pada role |
 
 ## Permissions
 
