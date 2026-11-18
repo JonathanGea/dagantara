@@ -2,91 +2,999 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#ffffff" />
-  <title>User Management — Database Diagram</title>
+  <meta name="description" content="Dagantara developer documentation. Dokumentasi teknis e-commerce multi-tenant yang ditulis di README.md." />
+  <title>Dagantara — Developer Docs</title>
+
+  <!-- Tailwind utility layer; layout and documentation typography are customized below. -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
   <style>
-    body { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #37352f; }
-    .diagram svg { display: block; max-width: none; height: auto; margin: 0 auto; }
-    .diagram { overflow: auto; scrollbar-color: #d6d5d2 transparent; }
+    :root {
+      --ink:#37352f; --muted:#787774; --subtle:#9b9a97; --line:#e9e9e7;
+      --side:#f7f7f5; --hover:#efefed; --blue:#2383e2; --content:780px;
+    }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth}
+    body {font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);background:white;font-size:14px;-webkit-font-smoothing:antialiased}
+    button,input {font:inherit}
+    button:focus-visible,a:focus-visible,input:focus-visible {outline:2px solid #2383e2;outline-offset:2px}
+    ::selection {background:#d3e5ef;color:#1e4867}
+    .icon {width:17px;height:17px;stroke-width:1.75}
+    .small-icon {width:15px;height:15px;stroke-width:1.8}
+    .side-scroll::-webkit-scrollbar,.toc-scroll::-webkit-scrollbar {width:6px}
+    .side-scroll::-webkit-scrollbar-thumb,.toc-scroll::-webkit-scrollbar-thumb {background:#d9d9d5;border-radius:8px}
+    .side-link {display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:6px 10px;border-radius:6px;color:#5e5e5b;min-height:32px;font-size:13px;line-height:1.35;transition:background .14s,color .14s}
+    .side-link:hover,.side-link.active {background:#e9e9e7;color:#37352f}
+    .side-link.active {font-weight:600}
+    .side-link span:last-child {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cmd-key {font-size:11px;color:#9a9a97;border:1px solid #dededb;padding:2px 5px;border-radius:4px;line-height:1.1}
+    .toc-link {display:block;padding:4px 0 4px 12px;border-left:1px solid transparent;color:#9b9a97;font-size:12px;line-height:1.6;text-decoration:none;transition:color .15s}
+    .toc-link:hover {color:#37352f}
+    .toc-link.active {color:#37352f;border-left-color:#37352f;font-weight:600}
+    .toc-link.depth-3 {padding-left:24px}
+    .doc-content {font-size:15.3px;line-height:1.83;color:#37352f;word-break:normal;overflow-wrap:break-word}
+    .doc-content > :first-child {margin-top:0}
+    .doc-content h1 {font-size:39px;line-height:1.22;letter-spacing:-1.45px;font-weight:750;margin:5px 0 16px;color:#242321}
+    .doc-content h2 {font-size:23px;line-height:1.35;letter-spacing:-.55px;font-weight:700;margin:54px 0 14px;color:#292825;scroll-margin-top:93px}
+    .doc-content h3 {font-size:18px;line-height:1.45;letter-spacing:-.25px;font-weight:680;margin:31px 0 9px;scroll-margin-top:93px}
+    .doc-content p {margin:12px 0}
+    .doc-content > blockquote:first-of-type {font-size:15px;color:#686763;border-left:none;padding:0;margin:0 0 27px}
+    .doc-content blockquote {border-left:3px solid #dededb;padding:1px 0 1px 17px;margin:20px 0;color:#65645f}
+    .doc-content blockquote p:first-child {margin-top:0}.doc-content blockquote p:last-child {margin-bottom:0}
+    .doc-content blockquote.callout {display:flex;gap:10px;align-items:flex-start;border:0;border-radius:4px;padding:15px 17px;color:#37352f;background:#f1f1ef}
+    .doc-content blockquote.callout.important {background:#fef3df}
+    .doc-content blockquote.callout.note {background:#eef3f9}
+    .callout-icon {flex:none;font-size:18px;line-height:1.4}
+    .doc-content a {color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+    .doc-content strong {font-weight:680}
+    .doc-content ul,.doc-content ol {padding-left:25px;margin:12px 0}
+    .doc-content li {padding-left:4px;margin:5px 0}
+    .doc-content li::marker {color:#777670}
+    .doc-content li > p {margin:0}
+    .doc-content code:not(pre code) {padding:2px 5px;border-radius:4px;background:#f1f1ef;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:0.85em;color:#d44b4b;white-space:break-spaces}
+    .doc-content .table-wrap {width:100%;overflow-x:auto;margin:18px 0 27px;border:1px solid #e7e7e4;border-radius:7px}
+    .doc-content table {border-collapse:collapse;width:100%;min-width:490px;font-size:13.5px;line-height:1.55}
+    .doc-content th {font-weight:650;text-align:left;background:#fafaf9;color:#555450}
+    .doc-content td,.doc-content th {border-bottom:1px solid #eaeae8;padding:10px 14px;vertical-align:top}
+    .doc-content tr:last-child td {border-bottom:0}
+    .doc-content tbody tr:hover {background:#fbfbfa}
+    .doc-content hr {border:0;border-top:1px solid #e9e9e7;margin:30px 0}
+    .doc-content .code-wrap {position:relative;margin:20px 0 24px;border:1px solid #eaeae7;border-radius:8px;overflow:hidden;background:#f7f7f5}
+    .doc-content pre {margin:0;padding:39px 18px 18px;white-space:pre;overflow:auto;font-size:12.8px;line-height:1.7;tab-size:2}
+    .doc-content pre code {font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:transparent;display:block;color:#3f3e3a}
+    .code-lang {position:absolute;top:11px;left:17px;font-size:10px;letter-spacing:.08em;font-weight:700;color:#999893;text-transform:uppercase}
+    .copy-code {position:absolute;top:7px;right:8px;padding:5px 8px;border-radius:4px;color:#777671;font-size:11px;display:flex;gap:5px;align-items:center}
+    .copy-code:hover {background:#e9e9e6;color:#37352f}
+    .doc-content .mermaid-wrap {position:relative;border:1px solid #e9e9e7;border-radius:9px;background:#fff;overflow:hidden;margin:20px 0 28px}
+    .doc-content .mermaid-toolbar {display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid #f0f0ee;color:#a0a09b;font-size:11px}
+    .doc-content .mermaid-canvas {overflow:auto;padding:23px 16px;min-height:170px;text-align:center}
+    .doc-content .mermaid-canvas svg {display:block;margin:auto;max-width:100%;height:auto}
+    .doc-content .diagram-fullscreen {display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:5px;color:#777670}
+    .doc-content .diagram-fullscreen:hover {background:#f3f3f1;color:#37352f}
+    .doc-content input[type="checkbox"] {accent-color:#2383e2;margin-right:8px;width:15px;height:15px;vertical-align:-2px}
+    .doc-content .task-list-item {list-style:none;margin-left:-22px}
+    .doc-content .heading-anchor {color:#c5c5c1;text-decoration:none;margin-left:10px;font-size:15px;opacity:0}
+    .doc-content h2:hover .heading-anchor,.doc-content h3:hover .heading-anchor {opacity:1}
+    #search-dialog::backdrop,#diagram-dialog::backdrop {background:rgba(15,15,15,.38);backdrop-filter:blur(2px)}
+    #search-dialog[open],#diagram-dialog[open] {border:0;outline:0}
+    #search-dialog {position:fixed;top:min(16vh,140px);margin:auto;inset-inline:12px;width:min(640px,calc(100vw - 24px));max-height:min(70vh,680px);padding:0;border-radius:12px;box-shadow:0 20px 75px #0003;overflow:hidden}
+    #diagram-dialog {position:fixed;margin:auto;inset:4%;width:92%;height:92%;max-width:none;max-height:none;border-radius:12px;box-shadow:0 20px 75px #0003;padding:0}
+    #diagram-dialog .diagram-view {overflow:auto;height:calc(100% - 60px);padding:36px;display:flex;justify-content:center;align-items:flex-start}
+    #diagram-dialog .diagram-view svg {max-width:none;max-height:none;transform-origin:top center}
+    .search-result {display:block;width:100%;padding:11px 15px;text-align:left;border-radius:6px;margin-bottom:3px}
+    .search-result:hover,.search-result.selected {background:#f3f3f1}
+    .search-result .result-sub {font-size:12px;color:#a0a09b;line-height:1.5;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .doc-loading {height:11px;background:#f0f0ee;border-radius:4px;animation:pulse 1.6s ease-in-out infinite alternate}
+    @keyframes pulse {to{opacity:.35}}
+    @media (max-width:1023px) {
+      #sidebar {transform:translateX(-100%);transition:transform .2s ease;z-index:60;box-shadow:none}
+      #sidebar.show {transform:translateX(0);box-shadow:8px 0 30px #0002}
+      #sidebar-scrim.show {display:block}
+    }
+    @media (max-width:639px) {
+      .doc-content {font-size:14.5px;line-height:1.78}
+      .doc-content h1 {font-size:33px;letter-spacing:-1px}
+      .doc-content h2 {font-size:21px;margin-top:42px}
+      .doc-content h3 {font-size:17px}
+      .doc-content td,.doc-content th {padding:9px 11px}
+      .doc-content pre {font-size:11.5px}
+    }
+    @media print {
+      #sidebar,#topbar,#right-toc,#sidebar-scrim,#mobile-actions,#source-note,.mermaid-toolbar,.code-lang,.copy-code,.heading-anchor {display:none!important}
+      #main-area {margin:0!important;overflow:visible!important;height:auto!important}
+      #reading-shell {padding:0!important;display:block!important}
+      #page {max-width:100%!important;padding:0!important}
+      body {font-size:12px;color:#111}
+      .doc-content h2 {break-after:avoid}
+      .doc-content .table-wrap {overflow:visible}
+      .doc-content .code-wrap {break-inside:avoid}
+    }
   </style>
 </head>
-<body class="min-h-screen bg-white">
-  <div class="min-h-screen md:flex">
-    <aside class="hidden md:flex md:w-60 md:shrink-0 flex-col border-r border-[#e9e9e7] bg-[#f7f7f5] px-3 py-5">
-      <div class="flex items-center gap-2 px-2 text-sm font-semibold tracking-tight">
-        <span class="flex h-6 w-6 items-center justify-center rounded-md border border-[#e1e1df] bg-white text-xs">N</span>
-        Database Docs
+<body class="overflow-hidden">
+  <div id="sidebar-scrim" class="hidden fixed inset-0 z-50 bg-black/30 lg:hidden" aria-hidden="true"></div>
+
+  <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-[264px] bg-[#f7f7f5] border-r border-[#eaeae8] flex flex-col z-40" aria-label="Navigasi dokumentasi">
+    <div class="px-3 pt-3 pb-2">
+      <button id="workspace-button" class="flex w-full items-center gap-2 p-1.5 rounded-md hover:bg-[#efefed] text-left" title="Dagantara Workspace">
+        <span class="w-[29px] h-[29px] bg-[#242321] text-white rounded-[6px] text-[17px] font-bold flex items-center justify-center tracking-[-2px] pr-[2px]" aria-hidden="true">N</span>
+        <span class="flex-1 min-w-0">
+          <span class="block text-[13px] font-semibold text-[#37352f] leading-tight">Dagantara</span>
+          <span class="block text-[11px] text-[#9b9a97] leading-tight mt-[3px]">Engineering workspace</span>
+        </span>
+        <i data-lucide="chevrons-up-down" class="small-icon text-[#a5a5a0]"></i>
+      </button>
+    </div>
+
+    <div class="px-3 mt-2">
+      <button id="search-trigger" class="side-link group" aria-label="Cari dokumentasi">
+        <i data-lucide="search" class="icon text-[#888782]"></i><span class="flex-1">Search</span>
+        <span class="hidden sm:inline cmd-key" aria-hidden="true">Ctrl K</span>
+      </button>
+      <button id="overview-trigger" class="side-link" aria-label="Kembali ke atas dokumen">
+        <i data-lucide="house" class="icon text-[#888782]"></i><span>Overview</span>
+      </button>
+    </div>
+
+    <div class="h-px bg-[#eaeae8] mx-4 mt-4 mb-3"></div>
+    <div class="flex items-center justify-between px-[21px] mb-2">
+      <span class="text-[11px] font-semibold tracking-[.03em] text-[#999893]">PRIVATE</span>
+      <i data-lucide="more-horizontal" class="small-icon text-[#aaa9a5]"></i>
+    </div>
+    <div class="px-3 mb-1">
+      <div class="side-link active" id="page-sidebar-root">
+        <i data-lucide="file-text" class="icon text-[#676661]"></i>
+        <span>Developer Documentation</span>
       </div>
-      <div class="mt-8 px-2 text-[11px] font-semibold text-[#9b9a97]">DATABASE</div>
-      <div class="mt-2 rounded-md bg-[#e9e9e7] px-3 py-2 text-[13px] font-medium">▦ &nbsp; User Management</div>
-    </aside>
+    </div>
+    <div class="overflow-y-auto side-scroll flex-1 px-3 pb-7">
+      <div id="sidebar-sections" class="pl-[16px] ml-[17px] border-l border-[#e3e3df] space-y-[2px]"></div>
+      <div class="mt-8 pt-4 border-t border-[#e9e9e6] mx-2">
+        <div class="text-[11px] text-[#9b9a97] leading-relaxed mb-3">Documentation sources</div>
+        <div class="flex gap-2 items-center text-[12px] text-[#787774]">
+          <i data-lucide="file-code-2" class="small-icon"></i>
+          <span class="font-mono text-[11px]">README.md</span>
+          <span id="sidebar-source-state" class="ml-auto w-1.5 h-1.5 bg-[#88b394] rounded-full" title="Ready"></span>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-[#e9e9e7] p-3">
+      <div class="flex items-center gap-2 px-2 py-2 text-[12px] text-[#969591]">
+        <i data-lucide="book-open-text" class="small-icon"></i>
+        <span>Docs for developers</span>
+        <span class="ml-auto">v0.1</span>
+      </div>
+    </div>
+  </aside>
 
-    <main class="min-w-0 flex-1">
-      <header class="flex h-12 items-center border-b border-[#f0f0ee] px-5 text-[13px] text-[#787774] md:px-10">
-        <span class="md:hidden mr-2 text-[#37352f] font-semibold">Database Docs</span>
-        <span class="hidden md:inline">Database</span>
-        <span class="mx-2 hidden md:inline text-[#bdbdb9]">/</span>
-        <span class="text-[#37352f]">User Management</span>
-      </header>
+  <div id="main-area" class="lg:ml-[264px] h-[100dvh] overflow-y-auto relative scroll-smooth">
+    <header id="topbar" class="h-[52px] sticky top-0 bg-white/95 backdrop-blur-md z-30 flex items-center justify-between gap-2 border-b border-[#f1f1ef] px-4 md:px-7">
+      <div class="flex items-center min-w-0 gap-2 text-[13px]">
+        <button id="mobile-menu" class="p-2 -ml-2 mr-1 rounded-md hover:bg-[#f3f3f1] lg:hidden" aria-label="Buka navigasi"><i data-lucide="panel-left" class="icon"></i></button>
+        <span class="text-[#aaa9a5] hidden sm:inline">Dagantara</span>
+        <i data-lucide="chevron-right" class="small-icon text-[#c8c8c4] hidden sm:inline"></i>
+        <span class="font-medium truncate">Developer Documentation</span>
+        <span class="hidden md:inline text-[11px] text-[#969591] rounded bg-[#f4f4f2] px-2 py-0.5 ml-1">README.md</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-[#777670] shrink-0">
+        <button id="top-search" class="p-[7px] rounded hover:bg-[#f4f4f2]" aria-label="Cari"><i data-lucide="search" class="icon"></i></button>
+        <button id="refresh-button" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Muat ulang README.md" aria-label="Refresh README.md"><i data-lucide="refresh-cw" class="icon"></i></button>
+        <button id="top-share" class="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-[#f4f4f2] text-[12px]" title="Salin link dokumentasi"><i data-lucide="link-2" class="small-icon"></i><span class="hidden sm:inline">Copy link</span></button>
+        <div class="h-5 border-l border-[#eaeae7] mx-1"></div>
+        <button id="more-menu" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Cetak / simpan sebagai PDF" aria-label="Print"><i data-lucide="ellipsis" class="icon"></i></button>
+      </div>
+    </header>
 
-      <section class="mx-auto w-full max-w-7xl px-5 pb-16 pt-12 md:px-10 md:pt-16">
-        <div class="mb-8 flex h-12 w-12 items-center justify-center rounded-lg bg-[#f4f4f2] text-3xl">▦</div>
-        <h1 id="doc-title" class="text-3xl font-bold tracking-tight md:text-[40px]">User Management</h1>
-        <div class="mt-10 overflow-hidden rounded-lg border border-[#e9e9e7] bg-white">
-          <div class="flex items-center justify-between border-b border-[#f0f0ee] px-4 py-3 text-xs text-[#9b9a97]">
-            <span>Entity Relationship Diagram</span>
+    <div id="source-note" class="hidden border-b border-[#eee1c6] bg-[#fff9e9] text-[#7e6b40] text-[12px] px-5 md:px-10 py-2.5 items-center justify-center gap-2 flex-wrap">
+      <i data-lucide="info" class="small-icon shrink-0"></i>
+      <span id="source-note-text">Pratinjau offline menggunakan salinan README.md yang tertanam.</span>
+      <button id="choose-markdown" class="font-semibold underline underline-offset-2 hover:text-[#51421b]">Pilih README.md</button>
+      <button id="dismiss-note" class="ml-1 p-1 hover:bg-black/5 rounded" aria-label="Tutup pemberitahuan"><i data-lucide="x" class="small-icon"></i></button>
+    </div>
+    <input id="markdown-file-input" type="file" accept=".md,.markdown,text/markdown,text/plain" class="hidden" />
+
+    <div id="reading-shell" class="mx-auto max-w-[1320px] px-6 md:px-12 xl:px-[65px] pt-[50px] md:pt-[72px] pb-28 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_190px] gap-x-14">
+      <main id="page" class="min-w-0 max-w-[780px] w-full mx-auto xl:mx-0" aria-label="Konten dokumentasi">
+        <div id="page-top" class="mb-[25px]">
+          <div class="w-[61px] h-[61px] rounded-[12px] bg-[#f1f1ee] flex items-center justify-center mb-5 border border-[#ededea]" aria-hidden="true">
+            <i data-lucide="notebook-tabs" class="w-[32px] h-[32px] text-[#514e48] stroke-[1.45]"></i>
           </div>
-          <div id="diagram" class="diagram min-h-[360px] p-4 md:p-8" aria-label="Diagram tabel User Management" role="img">
-            <div class="py-12 text-center text-sm text-[#9b9a97]">Memuat diagram...</div>
+          <div class="flex items-center flex-wrap gap-2.5 mb-[5px] text-[11.5px] text-[#9b9a97]">
+            <span class="font-semibold tracking-[.085em] uppercase text-[#959490]">Engineering / Documentation</span>
+            <span class="w-[3px] h-[3px] bg-[#c7c7c3] rounded-full"></span>
+            <span>Last updated 18 Nov 2026</span>
           </div>
         </div>
-        <div id="read-error" class="mt-5 hidden rounded-md bg-[#f7f7f5] p-4 text-sm text-[#787774]">
-          Tidak dapat membaca README.md. Jalankan kedua file melalui web server, atau pilih README.md di bawah.
-          <input type="file" id="read-local" accept=".md,text/markdown,text/plain" class="mt-3 block w-full text-sm" />
+
+        <div id="loading-state" class="space-y-5" aria-live="polite">
+          <div class="doc-loading w-[61%] h-10"></div>
+          <div class="doc-loading w-[88%] mt-9"></div>
+          <div class="doc-loading w-[95%]"></div>
+          <div class="doc-loading w-[71%]"></div>
+          <div class="doc-loading w-[90%] mt-9"></div>
         </div>
-      </section>
-    </main>
+        <article id="document" class="doc-content hidden" aria-label="Markdown README.md"></article>
+
+        <div id="readme-error" class="hidden py-7">
+          <div class="flex items-center gap-3 mb-4"><i data-lucide="file-warning" class="w-7 h-7 text-[#d9730d]"></i><h1 class="text-[23px] font-semibold">README.md belum tersedia</h1></div>
+          <p class="text-[#787774] text-[14px] mb-6">Pastikan file <code>README.md</code> berada di folder yang sama dengan <code>index.html</code>. Untuk membukanya secara lokal, gunakan server HTTP atau pilih file Markdown secara manual.</p>
+          <button id="error-choose" class="bg-[#37352f] text-white px-4 py-2 rounded-md hover:bg-[#55534f]">Pilih file Markdown</button>
+        </div>
+
+        <footer id="page-footer" class="hidden mt-16 pt-6 border-t border-[#eee] text-[12px] text-[#aaa9a5] flex flex-wrap justify-between gap-3">
+          <span>Dagantara · Developer Documentation</span>
+          <span>Rendered from <code class="font-mono text-[#81807b]">README.md</code></span>
+        </footer>
+      </main>
+
+      <aside id="right-toc" class="hidden xl:block min-w-0" aria-label="On this page">
+        <div class="sticky top-[88px] max-h-[calc(100dvh-110px)] overflow-auto toc-scroll pr-2">
+          <div class="text-[12px] font-semibold text-[#37352f] mb-3">On this page</div>
+          <nav id="toc-list" class="border-l border-[#e9e9e7]"></nav>
+          <div class="mt-8 pl-3 border-l border-[#e9e9e7] text-[11px] leading-relaxed text-[#aaa9a5]">
+            Dokumentasi mengikuti pembaruan <span class="font-mono text-[#777670]">README.md</span>.
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
-  <script>
-    mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict',
-      themeVariables: { fontFamily: 'ui-sans-serif, system-ui, sans-serif', primaryColor: '#f7f7f5', primaryTextColor: '#37352f', primaryBorderColor: '#d8d8d5', lineColor: '#9b9a97' }
-    });
 
-    async function displayMarkdown(markdown) {
-      const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim();
-      if (title) {
-        document.getElementById('doc-title').textContent = title;
-        document.title = title + ' — Database Diagram';
-      }
-      const diagram = markdown.match(/```mermaid\s*\n([\s\S]*?)\n```/i)?.[1];
-      if (!diagram) throw new Error('README.md tidak berisi diagram Mermaid.');
-      const target = document.getElementById('diagram');
-      try {
-        const result = await mermaid.render('database-erd', diagram);
-        target.innerHTML = result.svg;
-        document.getElementById('read-error').classList.add('hidden');
-      } catch (error) {
-        target.innerHTML = '<p class="py-10 text-center text-sm text-red-700">Diagram tidak dapat ditampilkan: ' + escapeHTML(error.message) + '</p>';
-      }
+  <dialog id="search-dialog" aria-label="Pencarian dokumentasi">
+    <div class="flex items-center gap-3 px-5 h-[59px] border-b border-[#ebebe9]">
+      <i data-lucide="search" class="icon text-[#a5a5a0] shrink-0"></i>
+      <input id="search-input" class="flex-1 min-w-0 outline-none border-0 bg-transparent text-[15px] placeholder-[#b0afaa]" type="search" placeholder="Search documentation…" autocomplete="off" />
+      <span class="text-[11px] text-[#a5a5a0] border border-[#e2e2df] rounded px-[6px] py-[2px]">ESC</span>
+    </div>
+    <div id="search-results" class="p-2 max-h-[50vh] overflow-auto"></div>
+    <div class="px-4 py-3 border-t border-[#efefed] text-[11px] text-[#aaa9a5] flex items-center justify-between">
+      <span>↑ ↓ navigate · Enter open</span><span>Dagantara docs</span>
+    </div>
+  </dialog>
+
+  <dialog id="diagram-dialog" aria-label="Diagram diperbesar">
+    <div class="h-[60px] border-b border-[#ecece9] px-5 flex items-center gap-3 justify-between">
+      <div class="flex items-center gap-2 text-[13px] font-semibold"><i data-lucide="network" class="icon"></i><span>Diagram preview</span></div>
+      <div class="flex items-center gap-2">
+        <button id="zoom-out" class="px-3 py-1.5 rounded bg-[#f5f5f3] hover:bg-[#ebebe8]" aria-label="Zoom out">−</button>
+        <span id="zoom-level" class="text-[12px] text-[#888782] w-12 text-center">100%</span>
+        <button id="zoom-in" class="px-3 py-1.5 rounded bg-[#f5f5f3] hover:bg-[#ebebe8]" aria-label="Zoom in">+</button>
+        <button id="close-diagram" class="ml-3 p-2 hover:bg-[#f5f5f3] rounded" aria-label="Tutup"><i data-lucide="x" class="icon"></i></button>
+      </div>
+    </div>
+    <div class="diagram-view" id="diagram-view"></div>
+  </dialog>
+
+  <!-- Fallback snapshot is generated from README.md at build time. The external README.md wins whenever fetch is supported. -->
+  <script id="offline-readme" type="text/plain"># Dagantara
+
+> **Developer Documentation** · E-commerce multi-tenant platform · Living specification
+
+Dokumentasi ini menjadi **sumber acuan pengembangan (source of truth)** Dagantara. Setiap modul ditambahkan setelah aturan bisnis, struktur data, dan batasan aksesnya selesai didiskusikan.
+
+| Informasi | Detail |
+| --- | --- |
+| Produk | Dagantara |
+| Arsitektur | Multi-tenant e-commerce |
+| Fokus saat ini | User Management & RBAC |
+| Status desain | **User Management: finalized** |
+| Status implementasi | Belum dinyatakan selesai |
+| Pembaruan dokumen | 18 November 2026 |
+
+## 01 · Gambaran umum
+
+Dagantara adalah fondasi e-commerce **multi-tenant**. Satu platform mengelola banyak tenant (bisnis/toko), tetapi setiap tenant hanya mengakses data yang berada dalam ruang lingkupnya sendiri.
+
+Ada dua lapisan operasional utama:
+
+- **Platform** — mengelola ekosistem tenant dan administrator tingkat platform.
+- **Tenant** — mengelola pengguna dan operasional bisnis di dalam tenant masing-masing.
+
+Satu akun pengguna mengikuti pendekatan **Simple User–Tenant**: satu user terhubung ke paling banyak satu tenant, dan memiliki **satu role aktif** pada tabel `users`. Akun platform tidak terikat tenant (`tenant_id = NULL`).
+
+> [!IMPORTANT]
+> Perancangan **User Management** telah selesai pada level konsep dan tabel. Bagian API, migrasi database, seed, serta implementasi backend/frontend masih memerlukan tahap engineering terpisah.
+
+## 02 · Keputusan arsitektur yang final
+
+| Area | Keputusan |
+| --- | --- |
+| Model identitas | **Simple User–Tenant** |
+| Akun platform | `users.tenant_id` boleh `NULL` khusus akun platform |
+| Akun tenant | `users.tenant_id` wajib berisi tenant pemilik akun |
+| Relasi user–role | Setiap user memiliki **satu `role_id`** |
+| Otorisasi | **Role-Based Access Control (RBAC)** murni |
+| Permissions | Permission diberikan kepada **role**, bukan langsung ke user |
+| Kebutuhan akses khusus | Buat role baru dengan kombinasi permission yang sesuai, lalu assign user |
+| Pembuatan user | Langsung oleh user login yang memiliki permission membuat user |
+| Ownership | Data tenant dibatasi menggunakan `tenant_id`, diverifikasi backend |
+| Identitas saat login | Tenant diperoleh dari user terautentikasi, bukan dipilih bebas oleh client |
+| System role | Role bawaan sistem memiliki `tenant_id = NULL` |
+| Custom role tenant | Role yang dibuat tenant memiliki `tenant_id` tenant terkait |
+
+### Hal yang sengaja tidak digunakan
+
+Sesuai keputusan MVP, **tidak ada** tabel berikut:
+
+- `user_invitations` — user dibuat langsung, tanpa invitation workflow.
+- `user_audit_logs` — belum menjadi bagian skema User Management ini.
+- `user_permission_denials` — tidak ada override atau penolakan permission per user.
+- `user_permissions` — tidak ada grant permission langsung ke user.
+
+Artinya, untuk membedakan akses dua pengguna, ubah **role yang di-assign**, bukan menyisipkan exception permission di level user.
+
+## 03 · Tenant, scope, dan kepemilikan data
+
+| Jenis akun | `account_type` | `tenant_id` | Role yang valid | Batas akses |
+| --- | --- | --- | --- | --- |
+| Admin / staf platform | `PLATFORM` | `NULL` | Role scope platform | Sesuai permission platform |
+| Admin tenant | `TENANT` | ID tenant | Role scope tenant | Tenant miliknya |
+| Staf tenant | `TENANT` | ID tenant | Role scope tenant | Tenant miliknya |
+
+**Invarian keamanan:**
+
+1. Client tidak boleh menentukan tenant yang akan diakses hanya melalui `tenant_id` dalam body, query string, atau header.
+2. Backend mengambil identitas dan tenant user dari principal/JWT yang sudah terverifikasi, lalu menerapkan pemeriksaan pada query serta service.
+3. Akun tenant tidak dapat membaca, mengubah, atau menghapus data tenant lain, meskipun menebak UUID atau mengganti parameter request.
+4. Tenant tidak dapat membuat atau memberikan role dengan scope platform.
+5. User hanya boleh meng-assign role yang valid untuk scope dan tenant target, serta tidak melewati batas kewenangan pembuatnya.
+6. Tidak adanya permission berarti **ditolak** (*default deny*).
+
+> [!NOTE]
+> Detail hak lintas-tenant untuk operator platform ditentukan per permission dan endpoint. `PLATFORM` tidak berarti seluruh operasi otomatis boleh diakses tanpa otorisasi.
+
+## 04 · Database — Entity Relationship Diagram
+
+Skema final pada level tabel terdiri dari **6 tabel**: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, dan `role_permissions`.
+
+```mermaid
+erDiagram
+    TENANTS {
+        uuid id PK
+        varchar code UK
+        varchar name
+        varchar status
+        timestamp created_at
+        timestamp updated_at
     }
 
-    function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    TENANT_DOMAINS {
+        uuid id PK
+        uuid tenant_id FK
+        varchar hostname UK
+        varchar domain_kind
+        varchar status
+    }
 
-    fetch('./README.md', { cache: 'no-store' })
-      .then(response => { if (!response.ok) throw new Error('Gagal membaca README.md'); return response.text(); })
-      .then(displayMarkdown)
-      .catch(() => {
-        document.getElementById('diagram').innerHTML = '';
-        document.getElementById('read-error').classList.remove('hidden');
+    USERS {
+        uuid id PK
+        uuid tenant_id FK "nullable for platform"
+        uuid role_id FK
+        varchar username
+        varchar email
+        varchar full_name
+        varchar password_hash
+        varchar account_type
+        varchar status
+        uuid created_by FK "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ROLES {
+        uuid id PK
+        uuid tenant_id FK "nullable for system"
+        varchar code
+        varchar name
+        varchar scope
+        boolean is_system
+        timestamp created_at
+    }
+
+    PERMISSIONS {
+        uuid id PK
+        varchar code UK
+        varchar module
+        text description
+    }
+
+    ROLE_PERMISSIONS {
+        uuid role_id PK,FK
+        uuid permission_id PK,FK
+    }
+
+    TENANTS ||--o{ TENANT_DOMAINS : owns
+    TENANTS |o--o{ USERS : contains
+    TENANTS |o--o{ ROLES : defines
+    ROLES ||--o{ USERS : assigned_to
+    ROLES ||--o{ ROLE_PERMISSIONS : grants
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : used_by
+    USERS |o--o{ USERS : created_by
+```
+
+**Keterangan:** relasi `TENANTS → USERS` dan `TENANTS → ROLES` bersifat opsional di sisi user/role karena akun platform dan role sistem dapat memiliki `tenant_id = NULL`.
+
+## 05 · Kamus data (data dictionary)
+
+Tipe SQL di bawah merupakan **rekomendasi implementasi PostgreSQL**, sedangkan **nama tabel dan kolom** mengikuti keputusan skema User Management. Aturan indeks, panjang string, enum/check constraint dan kebijakan delete masih dapat ditetapkan saat migrasi.
+
+### 5.1 `tenants`
+
+Mewakili organisasi, bisnis, atau toko yang menggunakan platform.
+
+| Kolom | Tipe disarankan | Keterangan |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `code` | `VARCHAR(60)` | Kode tenant, unik |
+| `name` | `VARCHAR(160)` | Nama tenant |
+| `status` | `VARCHAR(24)` | Status tenant |
+| `created_at` | `TIMESTAMPTZ` | Waktu pembuatan |
+| `updated_at` | `TIMESTAMPTZ` | Waktu perubahan |
+
+### 5.2 `tenant_domains`
+
+Menyimpan hostname/domain yang diarahkan ke satu tenant.
+
+| Kolom | Tipe disarankan | Keterangan |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `tenant_id` | `UUID` | Foreign key ke `tenants.id` |
+| `hostname` | `VARCHAR(253)` | Hostname unik |
+| `domain_kind` | `VARCHAR(24)` | Jenis domain/subdomain |
+| `status` | `VARCHAR(24)` | Status domain |
+
+> Nilai final untuk `domain_kind` dan `status` belum ditetapkan. Contoh nilai tidak dianggap kontrak database sampai disepakati.
+
+### 5.3 `users`
+
+Identitas login dan keanggotaan pengguna pada platform atau tenant.
+
+| Kolom | Tipe disarankan | Keterangan |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `tenant_id` | `UUID NULL` | FK `tenants.id`; `NULL` hanya untuk akun platform |
+| `role_id` | `UUID` | FK `roles.id`; satu role per user |
+| `username` | `VARCHAR(80)` | Nama login |
+| `email` | `VARCHAR(254)` | Alamat email |
+| `full_name` | `VARCHAR(160)` | Nama lengkap |
+| `password_hash` | `VARCHAR(255)` | Password hash, tidak pernah password plaintext |
+| `account_type` | `VARCHAR(16)` | `PLATFORM` atau `TENANT` |
+| `status` | `VARCHAR(24)` | Status akun |
+| `created_by` | `UUID NULL` | FK ke `users.id` pembuat akun |
+| `created_at` | `TIMESTAMPTZ` | Waktu pembuatan |
+| `updated_at` | `TIMESTAMPTZ` | Waktu perubahan |
+
+**Constraint penting:** `account_type = 'PLATFORM'` mewajibkan `tenant_id IS NULL`; `account_type = 'TENANT'` mewajibkan `tenant_id IS NOT NULL`. Validitas `role_id` terhadap scope dan tenant harus dipastikan dalam service layer/transaksi (dan bila perlu trigger database).
+
+### 5.4 `roles`
+
+Kumpulan permission yang dapat di-assign kepada seorang user.
+
+| Kolom | Tipe disarankan | Keterangan |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `tenant_id` | `UUID NULL` | `NULL` untuk system role; terisi untuk custom role tenant |
+| `code` | `VARCHAR(80)` | Kode role |
+| `name` | `VARCHAR(120)` | Nama role |
+| `scope` | `VARCHAR(16)` | `PLATFORM` atau `TENANT` |
+| `is_system` | `BOOLEAN` | Menandakan role bawaan sistem |
+| `created_at` | `TIMESTAMPTZ` | Waktu pembuatan |
+
+**Batasan:** role tenant tidak boleh memuat permission level platform; perubahan `role_permissions` harus divalidasi sesuai scope aktor dan role target.
+
+### 5.5 `permissions`
+
+Katalog permission yang tersedia. Permission bukan milik user, melainkan direferensikan oleh role.
+
+| Kolom | Tipe disarankan | Keterangan |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `code` | `VARCHAR(120)` | Identifier permission unik |
+| `module` | `VARCHAR(80)` | Kelompok modul |
+| `description` | `TEXT` | Fungsi permission |
+
+### 5.6 `role_permissions`
+
+Tabel penghubung *many-to-many* dari role ke permission.
+
+| Kolom | Tipe disarankan | Keterangan |
+| --- | --- | --- |
+| `role_id` | `UUID` | FK `roles.id`, composite PK |
+| `permission_id` | `UUID` | FK `permissions.id`, composite PK |
+
+Gunakan **primary key gabungan** `(role_id, permission_id)` supaya kombinasi tidak terduplikasi.
+
+## 06 · Role-Based Access Control (RBAC)
+
+### Cara permission dihitung
+
+```text
+Authenticated User
+    └── users.role_id
+          └── roles.id
+                └── role_permissions
+                      └── permissions.code
+```
+
+Contoh penamaan permission (masih dapat disesuaikan ketika kontrak API disusun):
+
+| Permission | Kegunaan |
+| --- | --- |
+| `users.read` | Melihat daftar/detail pengguna dalam scope yang diizinkan |
+| `users.create` | Membuat akun secara langsung |
+| `users.update` | Mengubah data pengguna |
+| `roles.read` | Melihat role dalam scope |
+| `roles.create` | Membuat role baru |
+| `roles.update` | Mengubah permission suatu role |
+| `roles.assign` | Menetapkan role pada pengguna |
+
+**Contoh role, bukan daftar role wajib:** `Platform Admin`, `Tenant Admin`, `Staff`, `Cashier`. Aplikasi tidak bergantung pada nama role saat memeriksa akses; gunakan **permission code**.
+
+### Contoh kebutuhan akses khusus
+
+Misalnya dua staf memiliki akses produk yang sama, tetapi hanya salah satunya boleh membuat user:
+
+1. Buat role baru, misalnya `Staff + User Creator`.
+2. Tambahkan permission pembuatan user pada role baru itu.
+3. Assign `role_id` user terkait ke role baru.
+4. Tidak perlu menambah kolom pengecualian permission pada `users`.
+
+## 07 · Alur bisnis User Management
+
+### 7.1 Login dan identifikasi tenant
+
+```mermaid
+flowchart TD
+    A[User memasukkan kredensial] --> B[Autentikasi backend]
+    B --> C{Kredensial valid?}
+    C -- Tidak --> X[Tolak login]
+    C -- Ya --> D[Ambil user, role, dan tenant]
+    D --> E{account_type}
+    E -- PLATFORM --> F[Context platform]
+    E -- TENANT --> G[Context tenant milik user]
+    F --> H[Bangun principal / JWT]
+    G --> H
+    H --> I[Otorisasi endpoint berdasarkan permission]
+```
+
+### 7.2 Membuat pengguna (tanpa invitation)
+
+```mermaid
+flowchart TD
+    A[Aktor login membuka Create User] --> B{Memiliki permission users.create?}
+    B -- Tidak --> X[403 Forbidden]
+    B -- Ya --> C[Tentukan target tenant dari scope aktor]
+    C --> D[Validasi data akun dan role target]
+    D --> E{Role dan tenant valid?}
+    E -- Tidak --> Y[400 / 403]
+    E -- Ya --> F[Hash password / set kredensial aman]
+    F --> G[Simpan users dengan role_id dan created_by]
+    G --> H[User siap digunakan sesuai status akun]
+```
+
+Akun dibuat **langsung oleh user berizin**. Tidak ada proses kirim undangan, penerimaan invitation, maupun user permission override.
+
+### 7.3 Membuat role baru dan assign user
+
+```mermaid
+flowchart LR
+    A[Pengelola berizin] --> B[Buat custom role tenant]
+    B --> C[Pilih permissions sesuai scope]
+    C --> D[Simpan role_permissions]
+    D --> E[Assign roles.id ke users.role_id]
+    E --> F[Akses user mengikuti permission role]
+```
+
+## 08 · Kontrak implementasi — rancangan awal
+
+Bagian ini adalah **rekomendasi teknis**, bukan endpoint yang telah difinalisasi atau diimplementasikan.
+
+### Backend
+
+- **Stack tujuan:** Spring Boot, PostgreSQL, JWT, JPA/Hibernate.
+- Gunakan service otorisasi berbasis permission, contoh `hasAuthority('users.create')` setelah authorities diturunkan dari role.
+- Validasi tenant dari principal di service/repository; jangan percaya tenant ID yang dikirim client.
+- Simpan password menggunakan algoritme hash adaptif yang cocok untuk password (misalnya Argon2id/bcrypt), bukan enkripsi reversible.
+- Transaksi pembuatan role dan relasi permissions harus atomik.
+- Pertimbangkan invalidasi/refresh authority ketika permission role berubah agar token lama tidak terus membawa hak yang sudah dicabut.
+
+### Kandidat endpoint API
+
+```http
+GET    /api/users
+POST   /api/users
+GET    /api/users/{id}
+PATCH  /api/users/{id}
+GET    /api/roles
+POST   /api/roles
+PATCH  /api/roles/{id}
+PUT    /api/users/{id}/role
+GET    /api/permissions
+```
+
+### Contoh body pembuatan user
+
+```json
+{
+  "username": "staff.kasir",
+  "email": "staff@example.test",
+  "fullName": "Staff Kasir",
+  "roleId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+**Catatan keamanan:** `tenantId` tidak dipakai sebagai otoritas dari request user tenant. Mekanisme aktivasi akun dan pengaturan password awal belum difinalisasi.
+
+## 09 · Checklist validasi & pengujian
+
+- [ ] Akun platform hanya valid jika `tenant_id IS NULL`.
+- [ ] Akun tenant hanya valid jika `tenant_id IS NOT NULL`.
+- [ ] `users.role_id` mengarah ke role yang boleh dipakai sesuai account type/scope.
+- [ ] User tenant A tidak dapat membaca user tenant B.
+- [ ] User tenant A tidak dapat membuat user tenant B.
+- [ ] Request tanpa permission pembuatan user mendapatkan `403`.
+- [ ] Role tenant tidak bisa memberikan permission platform.
+- [ ] Role baru dapat dibuat dan di-assign tanpa permission override per user.
+- [ ] Duplikasi pasangan `role_id` + `permission_id` dicegah constraint database.
+- [ ] Email/username uniqueness ditentukan eksplisit sebelum migration.
+- [ ] Ketika role permission diubah, perilaku otorisasi mengikuti kebijakan refresh yang dipilih.
+- [ ] Endpoint tidak mengandalkan `tenantId` dari client sebagai sumber kebenaran.
+
+> Checklist ini adalah **acceptance criteria implementasi**, bukan klaim bahwa fiturnya telah selesai dikodekan.
+
+## 10 · Status dokumen & pembahasan selanjutnya
+
+| Modul | Status pembahasan | Catatan |
+| --- | --- | --- |
+| User Management | **Final — skema & aturan inti** | 6 tabel, Simple User–Tenant, RBAC |
+| Authentication API | Belum difinalisasi | Login, refresh token, account activation |
+| Tenant Management | Belum dibahas detail | Lifecycle, domain binding, subscription |
+| Product / Catalog | Belum dibahas | Dirancang setelah prioritas ditentukan |
+| Inventory | Belum dibahas | — |
+| Order Management | Belum dibahas untuk Dagantara | — |
+| Payment & Checkout | Belum dibahas | — |
+| Reporting | Belum dibahas | — |
+
+### Prinsip pemeliharaan dokumentasi
+
+1. Tambahkan kesepakatan baru ke `README.md`, bukan menulis konten langsung di `index.html`.
+2. Bedakan **Final** (keputusan), **Rancangan** (usulan), dan **Implemented** (sudah dibuat dan diverifikasi).
+3. Update diagram Mermaid setiap kali relasi tabel berubah.
+4. Jangan menganggap contoh endpoint, nilai enum, maupun tipe data rekomendasi sebagai keputusan final sebelum dikonfirmasi.
+5. Jaga agar dokumentasi tidak mendahului cakupan implementasi.
+</script>
+
+  <script>
+    (() => {
+      'use strict';
+      const byId = (id) => document.getElementById(id);
+      const root = byId('document');
+      const contentScroll = byId('main-area');
+      const searchDialog = byId('search-dialog');
+      const diagramDialog = byId('diagram-dialog');
+      let sections = [];
+      let visibleResults = [];
+      let resultPosition = 0;
+      let observer = null;
+      let diagramZoom = 1;
+      let loadedMarkdown = '';
+      const DOC_FILE = 'README.md';
+
+      function icons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+      }
+      function iconMarkup(name, classes = 'small-icon') {
+        // All icon names are static trusted values from this file.
+        return `<i data-lucide="${name}" class="${classes}"></i>`;
+      }
+      function escapeHtml(raw) {
+        return String(raw).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+      function headingSlug(value) {
+        return String(value).normalize('NFKD').toLowerCase()
+          .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-') || 'section';
+      }
+      function niceTitle(text) { return text.replace(/^\d+\s*[·.\-:]\s*/, '').trim(); }
+      function closeSidebar() {
+        byId('sidebar').classList.remove('show');
+        byId('sidebar-scrim').classList.remove('show');
+      }
+      function navigateTo(id) {
+        const el = byId(id);
+        if (!el) return;
+        closeSidebar();
+        if (searchDialog.open) searchDialog.close();
+        const top = el.getBoundingClientRect().top - contentScroll.getBoundingClientRect().top + contentScroll.scrollTop - 82;
+        contentScroll.scrollTo({top: Math.max(0, top), behavior:'smooth'});
+        if (id !== 'doc-start') history.replaceState(null, '', '#' + encodeURIComponent(id));
+      }
+      function getSectionIcon(text) {
+        const s = text.toLowerCase();
+        if (s.includes('gambaran')) return 'layout-dashboard';
+        if (s.includes('keputusan')) return 'check-check';
+        if (s.includes('tenant')) return 'blocks';
+        if (s.includes('database')) return 'database';
+        if (s.includes('kamus')) return 'table-2';
+        if (s.includes('access') || s.includes('role-based')) return 'shield-check';
+        if (s.includes('alur')) return 'workflow';
+        if (s.includes('kontrak')) return 'code-2';
+        if (s.includes('checklist')) return 'list-checks';
+        return 'file-text';
+      }
+      function updateSidebar() {
+        const side = byId('sidebar-sections');
+        const toc = byId('toc-list');
+        side.textContent = '';
+        toc.textContent = '';
+        for (const section of sections) {
+          const link = document.createElement('button');
+          link.className = 'side-link text-[12px]';
+          link.type = 'button';
+          link.dataset.target = section.id;
+          link.innerHTML = iconMarkup(getSectionIcon(section.title), 'w-[14px] h-[14px] shrink-0 text-[#999893]') + `<span>${escapeHtml(niceTitle(section.title))}</span>`;
+          link.onclick = () => navigateTo(section.id);
+          side.append(link);
+          const tocLink = document.createElement('a');
+          tocLink.className = 'toc-link depth-2';
+          tocLink.href = '#' + section.id;
+          tocLink.dataset.target = section.id;
+          tocLink.textContent = niceTitle(section.title);
+          tocLink.onclick = e => {e.preventDefault();navigateTo(section.id);};
+          toc.append(tocLink);
+          for (const child of section.children) {
+            const a = document.createElement('a');
+            a.className = 'toc-link depth-3';
+            a.dataset.target = child.id;
+            a.href = '#' + child.id;
+            a.textContent = child.title;
+            a.onclick = e => {e.preventDefault();navigateTo(child.id);};
+            toc.append(a);
+          }
+        }
+        icons();
+        setupScrollSpy();
+      }
+      function setupScrollSpy() {
+        if (observer) observer.disconnect();
+        const headers = sections.flatMap(s => [s, ...s.children]);
+        const setActive = () => {
+          const pos = contentScroll.scrollTop + 140;
+          let target = sections[0]?.id;
+          for (const h of headers) {
+            const node = byId(h.id);
+            if (node && node.offsetTop <= pos) target = h.id;
+          }
+          const topSection = sections.find(s => s.id === target || s.children.some(c => c.id === target));
+          document.querySelectorAll('[data-target]').forEach(el => el.classList.toggle('active', el.dataset.target === target || (el.closest('#sidebar-sections') && el.dataset.target === topSection?.id)));
+        };
+        contentScroll.removeEventListener('scroll', contentScroll._spyHandler);
+        contentScroll._spyHandler = setActive;
+        contentScroll.addEventListener('scroll', setActive, {passive:true});
+        setActive();
+      }
+      function renderCallouts() {
+        root.querySelectorAll('blockquote').forEach(b => {
+          const p = b.querySelector(':scope > p');
+          const match = p?.textContent?.match(/^\[!(IMPORTANT|NOTE|TIP|WARNING)\]\s*/);
+          if (!match) return;
+          const kind = match[1].toLowerCase();
+          const full = p.innerHTML;
+          p.innerHTML = full.replace(/^\[!(IMPORTANT|NOTE|TIP|WARNING)\](\s|<br\s*\/?>)*/i, '');
+          b.classList.add('callout',kind);
+          const badge = document.createElement('span');
+          badge.className = 'callout-icon';
+          badge.textContent = kind === 'important' || kind === 'warning' ? '⚠' : 'ⓘ';
+          b.prepend(badge);
+        });
+      }
+      function buildHeadings() {
+        const title = root.querySelector('h1');
+        if (title) {title.id = 'doc-start';}
+        const ids = new Map();
+        sections = [];
+        for (const heading of root.querySelectorAll('h2,h3')) {
+          const text = heading.textContent.trim();
+          const seed = headingSlug(text);
+          const current = ids.get(seed) || 0;
+          ids.set(seed, current+1);
+          heading.id = current ? `${seed}-${current+1}` : seed;
+          const link = document.createElement('a');
+          link.className = 'heading-anchor';link.href = '#' + heading.id;
+          link.textContent = '#';link.title = 'Salin tautan heading';
+          link.addEventListener('click', async (e) => {
+            e.preventDefault(); navigateTo(heading.id);
+            try {await navigator.clipboard.writeText(location.href);} catch(_) {}
+            showToast('Link section disalin');
+          });
+          heading.append(link);
+          if (heading.tagName === 'H2') sections.push({id:heading.id,title:text,children:[],summary:''});
+          else if (sections.length) sections[sections.length-1].children.push({id:heading.id,title:text});
+        }
+        // Compact excerpts for search. Text comes from rendered DOM, not hard-coded content.
+        const heads = Array.from(root.querySelectorAll('h2'));
+        heads.forEach((h,i) => {
+          let text = '';
+          let sibling = h.nextElementSibling;
+          while (sibling && sibling !== heads[i+1] && text.length < 550) {
+            if (!['H2','H3'].includes(sibling.tagName)) text += ' ' + sibling.textContent;
+            sibling = sibling.nextElementSibling;
+          }
+          sections[i].summary = text.replace(/\s+/g,' ').trim().slice(0,360);
+        });
+      }
+      function renderTables() {
+        root.querySelectorAll('table').forEach(table => {
+          const wrap = document.createElement('div'); wrap.className = 'table-wrap';
+          table.parentNode.insertBefore(wrap,table); wrap.append(table);
+        });
+      }
+      function renderCode() {
+        root.querySelectorAll('pre > code').forEach(code => {
+          const pre = code.closest('pre');
+          const langMatch = code.className.match(/language-([\w-]+)/);
+          const language = langMatch ? langMatch[1] : 'text';
+          if (language === 'mermaid') {
+            const wrap = document.createElement('div');wrap.className = 'mermaid-wrap';
+            const toolbar = document.createElement('div');toolbar.className='mermaid-toolbar';
+            toolbar.innerHTML = `<span class="flex items-center gap-1.5">${iconMarkup('git-branch','small-icon')} Mermaid diagram</span>`;
+            const open = document.createElement('button');open.className='diagram-fullscreen';open.type='button';
+            open.innerHTML = iconMarkup('expand','small-icon')+' Expand';
+            toolbar.append(open);
+            const area = document.createElement('div');area.className='mermaid-canvas';
+            const graph = document.createElement('div');graph.className='mermaid';graph.textContent=code.textContent;
+            area.append(graph);wrap.append(toolbar,area);pre.replaceWith(wrap);
+            open.onclick=()=>openDiagram(area);
+          } else {
+            const wrap = document.createElement('div');wrap.className='code-wrap';
+            pre.parentNode.insertBefore(wrap,pre);wrap.append(pre);
+            const label = document.createElement('div');label.className='code-lang';label.textContent=language;
+            const copy = document.createElement('button');copy.type='button';copy.className='copy-code';
+            copy.innerHTML=iconMarkup('copy','w-[13px] h-[13px]')+'Copy';
+            copy.onclick=async()=>{
+              try {await navigator.clipboard.writeText(code.textContent);showToast('Kode disalin');}
+              catch(_){showToast('Clipboard tidak tersedia');}
+            };
+            wrap.append(label,copy);
+            if(window.hljs && language !== 'text') {
+              try {window.hljs.highlightElement(code);} catch(_){/* unrecognized language */}
+            }
+          }
+        });
+      }
+      function openDiagram(area) {
+        const svg = area.querySelector('svg');
+        if (!svg) {showToast('Diagram belum tersedia');return;}
+        const view = byId('diagram-view');
+        view.textContent='';view.append(svg.cloneNode(true));
+        diagramZoom=1;updateDiagramZoom();
+        diagramDialog.showModal();
+      }
+      function updateDiagramZoom() {
+        const svg = byId('diagram-view').querySelector('svg');
+        if(svg) svg.style.transform=`scale(${diagramZoom})`;
+        byId('zoom-level').textContent=Math.round(diagramZoom*100)+'%';
+      }
+      async function renderMermaid() {
+        const graphs = root.querySelectorAll('.mermaid');
+        if(!graphs.length) return;
+        if(!window.mermaid) {
+          graphs.forEach(e=>e.innerHTML='<div class="text-[#a0a09b] text-[12px]">Mermaid CDN tidak dimuat. Jalankan saat internet aktif untuk melihat diagram.</div>');
+          return;
+        }
+        try {
+          window.mermaid.initialize({
+            startOnLoad:false,securityLevel:'strict',theme:'base',
+            themeVariables:{primaryColor:'#f7f7f5',primaryTextColor:'#37352f',primaryBorderColor:'#cacac6',lineColor:'#888882',secondaryColor:'#fff',tertiaryColor:'#fafaf9',fontFamily:'ui-sans-serif,system-ui,sans-serif',fontSize:'12px'},
+            flowchart:{htmlLabels:true,curve:'basis',padding:14},er:{useMaxWidth:true,diagramPadding:14},
+          });
+          await window.mermaid.run({nodes:graphs});
+        }catch(err) {
+          console.error('Diagram error:',err);
+          graphs.forEach(e=>{if(!e.querySelector('svg')) e.textContent='Diagram tidak dapat dirender. Periksa sintaks Mermaid pada README.md.';});
+        }
+      }
+      function renderMarkdown(markdown, source) {
+        loadedMarkdown=markdown;
+        if(!window.marked) {
+          byId('loading-state').classList.add('hidden');
+          byId('readme-error').classList.remove('hidden');
+          byId('readme-error').querySelector('p').textContent='Pustaka Markdown tidak dapat dimuat. Periksa koneksi internet untuk menggunakan CDN.';
+          return;
+        }
+        window.marked.setOptions({gfm:true,breaks:false});
+        const rawHtml=window.marked.parse(markdown);
+        root.innerHTML=window.DOMPurify ? window.DOMPurify.sanitize(rawHtml,{USE_PROFILES:{html:true}}) : rawHtml;
+        renderCallouts();buildHeadings();renderTables();renderCode();updateSidebar();
+        byId('loading-state').classList.add('hidden');
+        byId('readme-error').classList.add('hidden');
+        root.classList.remove('hidden');
+        byId('page-footer').classList.remove('hidden');
+        byId('sidebar-source-state').title=source==='live'?'README.md loaded':'Offline embedded snapshot';
+        byId('sidebar-source-state').className='ml-auto w-1.5 h-1.5 rounded-full '+(source==='live'?'bg-[#88b394]':'bg-[#d6a45f]');
+        byId('source-note').classList.toggle('hidden',source==='live');
+        byId('source-note').classList.toggle('flex',source!=='live');
+        icons();renderMermaid();
+        const hash=decodeURIComponent(location.hash.replace(/^#/,''));
+        if(hash) setTimeout(()=>navigateTo(hash),130);
+      }
+      async function loadReadme() {
+        try {
+          // This is the true source on any HTTP(S) server, including static hosts.
+          const response=await fetch('./'+DOC_FILE,{cache:'no-store'});
+          if(!response.ok) throw new Error('HTTP '+response.status);
+          const markdown=await response.text();
+          if(!markdown.trim()) throw new Error('Empty README');
+          renderMarkdown(markdown,'live');
+        }catch(error) {
+          const fallback=byId('offline-readme').textContent.trim();
+          if(fallback && fallback!=='__README_FALLBACK__') {
+            renderMarkdown(fallback,'fallback');
+            byId('source-note-text').textContent=location.protocol==='file:'
+              ? 'Mode file lokal: menampilkan snapshot README.md. Untuk membaca perubahan terbaru, pilih file Markdown atau jalankan server lokal.'
+              : 'README.md tidak dapat dibaca: menampilkan snapshot. Pastikan README.md ada di folder yang sama.';
+          }else{
+            byId('loading-state').classList.add('hidden');byId('readme-error').classList.remove('hidden');icons();
+          }
+        }
+      }
+      function showToast(text) {
+        let el=byId('toast');
+        if(!el) {el=document.createElement('div');el.id='toast';el.className='fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-[#37352f] text-white text-[12px] px-4 py-2.5 rounded-md shadow-lg transition-opacity';document.body.append(el);}
+        el.textContent=text;el.style.opacity='1';clearTimeout(showToast.timer);
+        showToast.timer=setTimeout(()=>{el.style.opacity='0';},2200);
+      }
+      function openSearch() {closeSidebar();searchDialog.showModal();byId('search-input').value='';filterSearch('');setTimeout(()=>byId('search-input').focus(),0);}
+      function filterSearch(query) {
+        const q=query.trim().toLowerCase();
+        visibleResults=sections.filter(s=> !q || (s.title+' '+s.summary+' '+s.children.map(c=>c.title).join(' ')).toLowerCase().includes(q));
+        resultPosition=0;drawResults();
+      }
+      function drawResults() {
+        const box=byId('search-results');box.textContent='';
+        if(!visibleResults.length) {box.innerHTML='<div class="text-center text-[#999893] text-[13px] py-10">Tidak ada hasil yang cocok</div>';return;}
+        const label=document.createElement('div');label.className='px-3 py-2 uppercase tracking-[.08em] text-[10px] font-semibold text-[#aaa9a5]';label.textContent='Documentation · '+visibleResults.length+' sections';box.append(label);
+        visibleResults.forEach((section,i)=>{
+          const b=document.createElement('button');b.type='button';b.className='search-result '+(i===resultPosition?'selected':'');
+          b.innerHTML=`<div class="flex items-center gap-2 text-[13px] font-medium">${iconMarkup('file-text','small-icon text-[#aaa9a5]')}<span>${escapeHtml(section.title)}</span></div><div class="result-sub pl-[22px]">${escapeHtml(section.summary || section.children.map(c=>c.title).join(' · '))}</div>`;
+          b.onclick=()=>navigateTo(section.id);
+          b.onmousemove=()=>{if(resultPosition!==i){resultPosition=i;box.querySelectorAll('.search-result').forEach((el,idx)=>el.classList.toggle('selected',idx===i));}};
+          box.append(b);
+        });icons();
+      }
+      function pickMarkdown() {byId('markdown-file-input').click();}
+
+      byId('mobile-menu').onclick=()=>{byId('sidebar').classList.add('show');byId('sidebar-scrim').classList.add('show');};
+      byId('sidebar-scrim').onclick=closeSidebar;
+      byId('workspace-button').onclick=()=>navigateTo('doc-start');
+      byId('overview-trigger').onclick=()=>navigateTo('doc-start');
+      byId('search-trigger').onclick=openSearch;
+      byId('top-search').onclick=openSearch;
+      byId('refresh-button').onclick=()=>{byId('loading-state').classList.remove('hidden');root.classList.add('hidden');loadReadme();};
+      byId('top-share').onclick=async()=>{try {await navigator.clipboard.writeText(location.href);showToast('Link disalin');}catch(_){showToast('Clipboard tidak tersedia');}};
+      byId('more-menu').onclick=()=>window.print();
+      byId('choose-markdown').onclick=pickMarkdown;
+      byId('error-choose').onclick=pickMarkdown;
+      byId('dismiss-note').onclick=()=>{byId('source-note').classList.add('hidden');byId('source-note').classList.remove('flex');};
+      byId('markdown-file-input').onchange=async e=>{const f=e.target.files?.[0];if(f){renderMarkdown(await f.text(),'uploaded');byId('source-note-text').textContent='Menampilkan file Markdown yang dipilih. Untuk otomatis mengikuti perubahan, sajikan folder melalui server HTTP.';}};
+      byId('search-input').oninput=e=>filterSearch(e.target.value);
+      byId('search-input').onkeydown=e=>{
+        if(e.key==='ArrowDown'){e.preventDefault();resultPosition=Math.min(resultPosition+1,visibleResults.length-1);drawResults();}
+        if(e.key==='ArrowUp'){e.preventDefault();resultPosition=Math.max(0,resultPosition-1);drawResults();}
+        if(e.key==='Enter' && visibleResults[resultPosition]){e.preventDefault();navigateTo(visibleResults[resultPosition].id);}
+      };
+      byId('zoom-in').onclick=()=>{diagramZoom=Math.min(2.5,diagramZoom+.2);updateDiagramZoom();};
+      byId('zoom-out').onclick=()=>{diagramZoom=Math.max(.4,diagramZoom-.2);updateDiagramZoom();};
+      byId('close-diagram').onclick=()=>diagramDialog.close();
+      document.addEventListener('keydown',e=>{
+        if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(!searchDialog.open)openSearch();}
+        if(e.key==='Escape'){closeSidebar();}
       });
-
-    document.getElementById('read-local').addEventListener('change', async (event) => {
-      const file = event.target.files?.[0];
-      if (file) await displayMarkdown(await file.text());
-    });
+      icons();loadReadme();
+    })();
   </script>
-</body>
-</html>
