@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="description" content="Dagantara developer documentation. Dokumentasi teknis e-commerce multi-tenant yang ditulis di README.md." />
+  <meta name="description" content="Dagantara developer documentation. Dokumentasi teknis e-commerce multi-tenant dari beberapa file Markdown." />
   <title>Dagantara — Developer Docs</title>
 
   <!-- Tailwind utility layer; layout and documentation typography are customized below. -->
@@ -149,18 +149,20 @@
       <i data-lucide="more-horizontal" class="small-icon text-[#aaa9a5]"></i>
     </div>
     <div class="px-3 mb-1">
-      <div class="side-link active" id="page-sidebar-root">
+      <button type="button" class="side-link active" id="page-sidebar-root">
         <i data-lucide="file-text" class="icon text-[#676661]"></i>
         <span>Developer Documentation</span>
-      </div>
+      </button>
     </div>
     <div class="overflow-y-auto side-scroll flex-1 px-3 pb-7">
+      <div id="sidebar-pages" class="space-y-[2px] mb-4"></div>
+      <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">ON THIS PAGE</div>
       <div id="sidebar-sections" class="pl-[16px] ml-[17px] border-l border-[#e3e3df] space-y-[2px]"></div>
       <div class="mt-8 pt-4 border-t border-[#e9e9e6] mx-2">
         <div class="text-[11px] text-[#9b9a97] leading-relaxed mb-3">Documentation sources</div>
         <div class="flex gap-2 items-center text-[12px] text-[#787774]">
           <i data-lucide="file-code-2" class="small-icon"></i>
-          <span class="font-mono text-[11px]">README.md</span>
+          <span class="font-mono text-[11px]">Markdown files</span>
           <span id="sidebar-source-state" class="ml-auto w-1.5 h-1.5 bg-[#88b394] rounded-full" title="Ready"></span>
         </div>
       </div>
@@ -181,11 +183,11 @@
         <span class="text-[#aaa9a5] hidden sm:inline">Dagantara</span>
         <i data-lucide="chevron-right" class="small-icon text-[#c8c8c4] hidden sm:inline"></i>
         <span class="font-medium truncate">Developer Documentation</span>
-        <span class="hidden md:inline text-[11px] text-[#969591] rounded bg-[#f4f4f2] px-2 py-0.5 ml-1">README.md</span>
+        <span id="current-doc-name" class="hidden md:inline text-[11px] text-[#969591] rounded bg-[#f4f4f2] px-2 py-0.5 ml-1">README.md</span>
       </div>
       <div class="flex items-center gap-1.5 text-[#777670] shrink-0">
         <button id="top-search" class="p-[7px] rounded hover:bg-[#f4f4f2]" aria-label="Cari"><i data-lucide="search" class="icon"></i></button>
-        <button id="refresh-button" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Muat ulang README.md" aria-label="Refresh README.md"><i data-lucide="refresh-cw" class="icon"></i></button>
+        <button id="refresh-button" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Muat ulang dokumen" aria-label="Refresh dokumen"><i data-lucide="refresh-cw" class="icon"></i></button>
         <button id="top-share" class="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-[#f4f4f2] text-[12px]" title="Salin link dokumentasi"><i data-lucide="link-2" class="small-icon"></i><span class="hidden sm:inline">Copy link</span></button>
         <div class="h-5 border-l border-[#eaeae7] mx-1"></div>
         <button id="more-menu" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Cetak / simpan sebagai PDF" aria-label="Print"><i data-lucide="ellipsis" class="icon"></i></button>
@@ -194,8 +196,8 @@
 
     <div id="source-note" class="hidden border-b border-[#eee1c6] bg-[#fff9e9] text-[#7e6b40] text-[12px] px-5 md:px-10 py-2.5 items-center justify-center gap-2 flex-wrap">
       <i data-lucide="info" class="small-icon shrink-0"></i>
-      <span id="source-note-text">Pratinjau offline menggunakan salinan README.md yang tertanam.</span>
-      <button id="choose-markdown" class="font-semibold underline underline-offset-2 hover:text-[#51421b]">Pilih README.md</button>
+      <span id="source-note-text">Pratinjau offline menggunakan salinan Markdown yang tertanam.</span>
+      <button id="choose-markdown" class="font-semibold underline underline-offset-2 hover:text-[#51421b]">Pilih Markdown</button>
       <button id="dismiss-note" class="ml-1 p-1 hover:bg-black/5 rounded" aria-label="Tutup pemberitahuan"><i data-lucide="x" class="small-icon"></i></button>
     </div>
     <input id="markdown-file-input" type="file" accept=".md,.markdown,text/markdown,text/plain" class="hidden" />
@@ -208,8 +210,6 @@
           </div>
           <div class="flex items-center flex-wrap gap-2.5 mb-[5px] text-[11.5px] text-[#9b9a97]">
             <span class="font-semibold tracking-[.085em] uppercase text-[#959490]">Engineering / Documentation</span>
-            <span class="w-[3px] h-[3px] bg-[#c7c7c3] rounded-full"></span>
-            <span>Last updated 18 Nov 2026</span>
           </div>
         </div>
 
@@ -220,17 +220,17 @@
           <div class="doc-loading w-[71%]"></div>
           <div class="doc-loading w-[90%] mt-9"></div>
         </div>
-        <article id="document" class="doc-content hidden" aria-label="Markdown README.md"></article>
+        <article id="document" class="doc-content hidden" aria-label="Dokumentasi Markdown"></article>
 
         <div id="readme-error" class="hidden py-7">
-          <div class="flex items-center gap-3 mb-4"><i data-lucide="file-warning" class="w-7 h-7 text-[#d9730d]"></i><h1 class="text-[23px] font-semibold">README.md belum tersedia</h1></div>
-          <p class="text-[#787774] text-[14px] mb-6">Pastikan file <code>README.md</code> berada di folder yang sama dengan <code>index.html</code>. Untuk membukanya secara lokal, gunakan server HTTP atau pilih file Markdown secara manual.</p>
+          <div class="flex items-center gap-3 mb-4"><i data-lucide="file-warning" class="w-7 h-7 text-[#d9730d]"></i><h1 class="text-[23px] font-semibold">Dokumen belum tersedia</h1></div>
+          <p class="text-[#787774] text-[14px] mb-6">Pastikan file Markdown yang ditautkan dari <code>README.md</code> tersedia di folder <code>docs/</code>. Jalankan server HTTP atau pilih file Markdown secara manual.</p>
           <button id="error-choose" class="bg-[#37352f] text-white px-4 py-2 rounded-md hover:bg-[#55534f]">Pilih file Markdown</button>
         </div>
 
         <footer id="page-footer" class="hidden mt-16 pt-6 border-t border-[#eee] text-[12px] text-[#aaa9a5] flex flex-wrap justify-between gap-3">
           <span>Dagantara · Developer Documentation</span>
-          <span>Rendered from <code class="font-mono text-[#81807b]">README.md</code></span>
+          <span>Rendered from <code id="current-doc-footer" class="font-mono text-[#81807b]">README.md</code></span>
         </footer>
       </main>
 
@@ -239,7 +239,7 @@
           <div class="text-[12px] font-semibold text-[#37352f] mb-3">On this page</div>
           <nav id="toc-list" class="border-l border-[#e9e9e7]"></nav>
           <div class="mt-8 pl-3 border-l border-[#e9e9e7] text-[11px] leading-relaxed text-[#aaa9a5]">
-            Dokumentasi mengikuti pembaruan <span class="font-mono text-[#777670]">README.md</span>.
+            Dokumentasi mengikuti file <span class="font-mono text-[#777670]">Markdown</span>.
           </div>
         </div>
       </aside>
@@ -271,23 +271,14 @@
     <div class="diagram-view" id="diagram-view"></div>
   </dialog>
 
-  <!-- Fallback snapshot is generated from README.md at build time. The external README.md wins whenever fetch is supported. -->
+  <!-- Offline snapshots; live Markdown files take precedence. -->
   <script id="offline-readme" type="text/plain"># Dagantara
 
-> **Developer Documentation** · E-commerce multi-tenant platform · Living specification
+> **Developer Documentation** · E-commerce multi-tenant platform
 
-Dokumentasi ini menjadi **sumber acuan pengembangan (source of truth)** Dagantara. Setiap modul ditambahkan setelah aturan bisnis, struktur data, dan batasan aksesnya selesai didiskusikan.
+Dokumentasi teknis Dagantara.
 
-| Informasi | Detail |
-| --- | --- |
-| Produk | Dagantara |
-| Arsitektur | Multi-tenant e-commerce |
-| Fokus saat ini | User Management & RBAC |
-| Status desain | **User Management: finalized** |
-| Status implementasi | Belum dinyatakan selesai |
-| Pembaruan dokumen | 18 November 2026 |
-
-## 01 · Gambaran umum
+## Gambaran umum
 
 Dagantara adalah fondasi e-commerce **multi-tenant**. Satu platform mengelola banyak tenant (bisnis/toko), tetapi setiap tenant hanya mengakses data yang berada dalam ruang lingkupnya sendiri.
 
@@ -296,60 +287,16 @@ Ada dua lapisan operasional utama:
 - **Platform** — mengelola ekosistem tenant dan administrator tingkat platform.
 - **Tenant** — mengelola pengguna dan operasional bisnis di dalam tenant masing-masing.
 
-Satu akun pengguna mengikuti pendekatan **Simple User–Tenant**: satu user terhubung ke paling banyak satu tenant, dan memiliki **satu role aktif** pada tabel `users`. Akun platform tidak terikat tenant (`tenant_id = NULL`).
+## Dokumentasi
 
-> [!IMPORTANT]
-> Perancangan **User Management** telah selesai pada level konsep dan tabel. Bagian API, migrasi database, seed, serta implementasi backend/frontend masih memerlukan tahap engineering terpisah.
+- [User Management](user-management.md)
 
-## 02 · Keputusan arsitektur yang final
+## Kesepakatan dokumentasi
 
-| Area | Keputusan |
-| --- | --- |
-| Model identitas | **Simple User–Tenant** |
-| Akun platform | `users.tenant_id` boleh `NULL` khusus akun platform |
-| Akun tenant | `users.tenant_id` wajib berisi tenant pemilik akun |
-| Relasi user–role | Setiap user memiliki **satu `role_id`** |
-| Otorisasi | **Role-Based Access Control (RBAC)** murni |
-| Permissions | Permission diberikan kepada **role**, bukan langsung ke user |
-| Kebutuhan akses khusus | Buat role baru dengan kombinasi permission yang sesuai, lalu assign user |
-| Pembuatan user | Langsung oleh user login yang memiliki permission membuat user |
-| Ownership | Data tenant dibatasi menggunakan `tenant_id`, diverifikasi backend |
-| Identitas saat login | Tenant diperoleh dari user terautentikasi, bukan dipilih bebas oleh client |
-| System role | Role bawaan sistem memiliki `tenant_id = NULL` |
-| Custom role tenant | Role yang dibuat tenant memiliki `tenant_id` tenant terkait |
+Setiap pembahasan disimpan dalam **file Markdown terpisah sesuai modul**. `README.md` berfungsi sebagai indeks tautan dokumen; `index.html` hanya menampilkan isi file Markdown, bukan menjadi tempat menyimpan materi.</script>
+  <script id="offline-user-management" type="text/plain"># User Management
 
-### Hal yang sengaja tidak digunakan
-
-Sesuai keputusan MVP, **tidak ada** tabel berikut:
-
-- `user_invitations` — user dibuat langsung, tanpa invitation workflow.
-- `user_audit_logs` — belum menjadi bagian skema User Management ini.
-- `user_permission_denials` — tidak ada override atau penolakan permission per user.
-- `user_permissions` — tidak ada grant permission langsung ke user.
-
-Artinya, untuk membedakan akses dua pengguna, ubah **role yang di-assign**, bukan menyisipkan exception permission di level user.
-
-## 03 · Tenant, scope, dan kepemilikan data
-
-| Jenis akun | `account_type` | `tenant_id` | Role yang valid | Batas akses |
-| --- | --- | --- | --- | --- |
-| Admin / staf platform | `PLATFORM` | `NULL` | Role scope platform | Sesuai permission platform |
-| Admin tenant | `TENANT` | ID tenant | Role scope tenant | Tenant miliknya |
-| Staf tenant | `TENANT` | ID tenant | Role scope tenant | Tenant miliknya |
-
-**Invarian keamanan:**
-
-1. Client tidak boleh menentukan tenant yang akan diakses hanya melalui `tenant_id` dalam body, query string, atau header.
-2. Backend mengambil identitas dan tenant user dari principal/JWT yang sudah terverifikasi, lalu menerapkan pemeriksaan pada query serta service.
-3. Akun tenant tidak dapat membaca, mengubah, atau menghapus data tenant lain, meskipun menebak UUID atau mengganti parameter request.
-4. Tenant tidak dapat membuat atau memberikan role dengan scope platform.
-5. User hanya boleh meng-assign role yang valid untuk scope dan tenant target, serta tidak melewati batas kewenangan pembuatnya.
-6. Tidak adanya permission berarti **ditolak** (*default deny*).
-
-> [!NOTE]
-> Detail hak lintas-tenant untuk operator platform ditentukan per permission dan endpoint. `PLATFORM` tidak berarti seluruh operasi otomatis boleh diakses tanpa otorisasi.
-
-## 04 · Database — Entity Relationship Diagram
+## Database — Entity Relationship Diagram
 
 Skema final pada level tabel terdiri dari **6 tabel**: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, dan `role_permissions`.
 
@@ -420,11 +367,11 @@ erDiagram
 
 **Keterangan:** relasi `TENANTS → USERS` dan `TENANTS → ROLES` bersifat opsional di sisi user/role karena akun platform dan role sistem dapat memiliki `tenant_id = NULL`.
 
-## 05 · Kamus data (data dictionary)
+## Kamus data (data dictionary)
 
 Tipe SQL di bawah merupakan **rekomendasi implementasi PostgreSQL**, sedangkan **nama tabel dan kolom** mengikuti keputusan skema User Management. Aturan indeks, panjang string, enum/check constraint dan kebijakan delete masih dapat ditetapkan saat migrasi.
 
-### 5.1 `tenants`
+### `tenants`
 
 Mewakili organisasi, bisnis, atau toko yang menggunakan platform.
 
@@ -437,7 +384,7 @@ Mewakili organisasi, bisnis, atau toko yang menggunakan platform.
 | `created_at` | `TIMESTAMPTZ` | Waktu pembuatan |
 | `updated_at` | `TIMESTAMPTZ` | Waktu perubahan |
 
-### 5.2 `tenant_domains`
+### `tenant_domains`
 
 Menyimpan hostname/domain yang diarahkan ke satu tenant.
 
@@ -451,7 +398,7 @@ Menyimpan hostname/domain yang diarahkan ke satu tenant.
 
 > Nilai final untuk `domain_kind` dan `status` belum ditetapkan. Contoh nilai tidak dianggap kontrak database sampai disepakati.
 
-### 5.3 `users`
+### `users`
 
 Identitas login dan keanggotaan pengguna pada platform atau tenant.
 
@@ -472,7 +419,7 @@ Identitas login dan keanggotaan pengguna pada platform atau tenant.
 
 **Constraint penting:** `account_type = 'PLATFORM'` mewajibkan `tenant_id IS NULL`; `account_type = 'TENANT'` mewajibkan `tenant_id IS NOT NULL`. Validitas `role_id` terhadap scope dan tenant harus dipastikan dalam service layer/transaksi (dan bila perlu trigger database).
 
-### 5.4 `roles`
+### `roles`
 
 Kumpulan permission yang dapat di-assign kepada seorang user.
 
@@ -488,7 +435,7 @@ Kumpulan permission yang dapat di-assign kepada seorang user.
 
 **Batasan:** role tenant tidak boleh memuat permission level platform; perubahan `role_permissions` harus divalidasi sesuai scope aktor dan role target.
 
-### 5.5 `permissions`
+### `permissions`
 
 Katalog permission yang tersedia. Permission bukan milik user, melainkan direferensikan oleh role.
 
@@ -499,7 +446,7 @@ Katalog permission yang tersedia. Permission bukan milik user, melainkan direfer
 | `module` | `VARCHAR(80)` | Kelompok modul |
 | `description` | `TEXT` | Fungsi permission |
 
-### 5.6 `role_permissions`
+### `role_permissions`
 
 Tabel penghubung *many-to-many* dari role ke permission.
 
@@ -510,7 +457,7 @@ Tabel penghubung *many-to-many* dari role ke permission.
 
 Gunakan **primary key gabungan** `(role_id, permission_id)` supaya kombinasi tidak terduplikasi.
 
-## 06 · Role-Based Access Control (RBAC)
+## Role-Based Access Control (RBAC)
 
 ### Cara permission dihitung
 
@@ -545,9 +492,9 @@ Misalnya dua staf memiliki akses produk yang sama, tetapi hanya salah satunya bo
 3. Assign `role_id` user terkait ke role baru.
 4. Tidak perlu menambah kolom pengecualian permission pada `users`.
 
-## 07 · Alur bisnis User Management
+## Alur bisnis User Management
 
-### 7.1 Login dan identifikasi tenant
+### Login dan identifikasi tenant
 
 ```mermaid
 flowchart TD
@@ -563,7 +510,7 @@ flowchart TD
     H --> I[Otorisasi endpoint berdasarkan permission]
 ```
 
-### 7.2 Membuat pengguna (tanpa invitation)
+### Membuat pengguna (tanpa invitation)
 
 ```mermaid
 flowchart TD
@@ -580,7 +527,7 @@ flowchart TD
 
 Akun dibuat **langsung oleh user berizin**. Tidak ada proses kirim undangan, penerimaan invitation, maupun user permission override.
 
-### 7.3 Membuat role baru dan assign user
+### Membuat role baru dan assign user
 
 ```mermaid
 flowchart LR
@@ -591,7 +538,7 @@ flowchart LR
     E --> F[Akses user mengikuti permission role]
 ```
 
-## 08 · Kontrak implementasi — rancangan awal
+## Kontrak implementasi — rancangan awal
 
 Bagian ini adalah **rekomendasi teknis**, bukan endpoint yang telah difinalisasi atau diimplementasikan.
 
@@ -629,46 +576,7 @@ GET    /api/permissions
 }
 ```
 
-**Catatan keamanan:** `tenantId` tidak dipakai sebagai otoritas dari request user tenant. Mekanisme aktivasi akun dan pengaturan password awal belum difinalisasi.
-
-## 09 · Checklist validasi & pengujian
-
-- [ ] Akun platform hanya valid jika `tenant_id IS NULL`.
-- [ ] Akun tenant hanya valid jika `tenant_id IS NOT NULL`.
-- [ ] `users.role_id` mengarah ke role yang boleh dipakai sesuai account type/scope.
-- [ ] User tenant A tidak dapat membaca user tenant B.
-- [ ] User tenant A tidak dapat membuat user tenant B.
-- [ ] Request tanpa permission pembuatan user mendapatkan `403`.
-- [ ] Role tenant tidak bisa memberikan permission platform.
-- [ ] Role baru dapat dibuat dan di-assign tanpa permission override per user.
-- [ ] Duplikasi pasangan `role_id` + `permission_id` dicegah constraint database.
-- [ ] Email/username uniqueness ditentukan eksplisit sebelum migration.
-- [ ] Ketika role permission diubah, perilaku otorisasi mengikuti kebijakan refresh yang dipilih.
-- [ ] Endpoint tidak mengandalkan `tenantId` dari client sebagai sumber kebenaran.
-
-> Checklist ini adalah **acceptance criteria implementasi**, bukan klaim bahwa fiturnya telah selesai dikodekan.
-
-## 10 · Status dokumen & pembahasan selanjutnya
-
-| Modul | Status pembahasan | Catatan |
-| --- | --- | --- |
-| User Management | **Final — skema & aturan inti** | 6 tabel, Simple User–Tenant, RBAC |
-| Authentication API | Belum difinalisasi | Login, refresh token, account activation |
-| Tenant Management | Belum dibahas detail | Lifecycle, domain binding, subscription |
-| Product / Catalog | Belum dibahas | Dirancang setelah prioritas ditentukan |
-| Inventory | Belum dibahas | — |
-| Order Management | Belum dibahas untuk Dagantara | — |
-| Payment & Checkout | Belum dibahas | — |
-| Reporting | Belum dibahas | — |
-
-### Prinsip pemeliharaan dokumentasi
-
-1. Tambahkan kesepakatan baru ke `README.md`, bukan menulis konten langsung di `index.html`.
-2. Bedakan **Final** (keputusan), **Rancangan** (usulan), dan **Implemented** (sudah dibuat dan diverifikasi).
-3. Update diagram Mermaid setiap kali relasi tabel berubah.
-4. Jangan menganggap contoh endpoint, nilai enum, maupun tipe data rekomendasi sebagai keputusan final sebelum dikonfirmasi.
-5. Jaga agar dokumentasi tidak mendahului cakupan implementasi.
-</script>
+**Catatan keamanan:** `tenantId` tidak dipakai sebagai otoritas dari request user tenant. Mekanisme aktivasi akun dan pengaturan password awal belum difinalisasi.</script>
 
   <script>
     (() => {
@@ -684,7 +592,49 @@ GET    /api/permissions
       let observer = null;
       let diagramZoom = 1;
       let loadedMarkdown = '';
-      const DOC_FILE = 'README.md';
+      let currentFile = 'README.md';
+      let docPages = [];
+      let requestSeq = 0;
+      const offlineFiles = {
+        'README.md': byId('offline-readme').textContent.trim(),
+        'user-management.md': byId('offline-user-management').textContent.trim(),
+      };
+      function parseDocPages(readme) {
+        const result = [];
+        const re = /\[([^\]]+)\]\(([^)]+\.md)\)/gi;
+        for (const match of readme.matchAll(re)) {
+          const path = match[2].trim().replace(/^\.\//, '');
+          if (!/^[\w-]+(?:\/[\w-]+)*\.md$/.test(path) || path === 'README.md') continue;
+          if (!result.some(p => p.path === path)) result.push({title:match[1].trim(),path});
+        }
+        return result;
+      }
+      function drawPageList() {
+        const target=byId('sidebar-pages');
+        target.replaceChildren();
+        byId('page-sidebar-root').classList.toggle('active',currentFile==='README.md');
+        for(const page of docPages) {
+          const button=document.createElement('button');
+          button.type='button';
+          button.className='side-link text-[12px]'+(currentFile===page.path?' active':'');
+          button.innerHTML=iconMarkup('file-text','w-[14px] h-[14px] text-[#999893]')+'<span>'+escapeHtml(page.title)+'</span>';
+          button.onclick=()=>loadDocument(page.path);
+          target.append(button);
+        }
+        icons();
+      }
+      async function readMarkdownFile(path) {
+        try {
+          const response=await fetch('./'+path,{cache:'no-store'});
+          if (!response.ok) throw new Error('HTTP '+response.status);
+          const markdown=await response.text();
+          if (!markdown.trim()) throw new Error('Empty Markdown');
+          return {markdown,source:'live'};
+        } catch(error) {
+          if (offlineFiles[path]) return {markdown:offlineFiles[path],source:'fallback'};
+          throw error;
+        }
+      }
 
       function icons() {
         if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
@@ -910,39 +860,66 @@ GET    /api/permissions
         window.marked.setOptions({gfm:true,breaks:false});
         const rawHtml=window.marked.parse(markdown);
         root.innerHTML=window.DOMPurify ? window.DOMPurify.sanitize(rawHtml,{USE_PROFILES:{html:true}}) : rawHtml;
-        renderCallouts();buildHeadings();renderTables();renderCode();updateSidebar();
+        renderCallouts();buildHeadings();renderTables();renderCode();updateSidebar();drawPageList();
         byId('loading-state').classList.add('hidden');
         byId('readme-error').classList.add('hidden');
         root.classList.remove('hidden');
         byId('page-footer').classList.remove('hidden');
-        byId('sidebar-source-state').title=source==='live'?'README.md loaded':'Offline embedded snapshot';
+        byId('sidebar-source-state').title=source==='live'?currentFile+' loaded':'Offline snapshot: '+currentFile;
         byId('sidebar-source-state').className='ml-auto w-1.5 h-1.5 rounded-full '+(source==='live'?'bg-[#88b394]':'bg-[#d6a45f]');
         byId('source-note').classList.toggle('hidden',source==='live');
         byId('source-note').classList.toggle('flex',source!=='live');
+        byId('current-doc-name').textContent=currentFile;
+        byId('current-doc-footer').textContent=currentFile;
         icons();renderMermaid();
         const hash=decodeURIComponent(location.hash.replace(/^#/,''));
         if(hash) setTimeout(()=>navigateTo(hash),130);
       }
-      async function loadReadme() {
+      async function loadDocument(path, keepUrl=false) {
+        if (path !== 'README.md' && !docPages.some(p=>p.path===path)) return;
+        const seq=++requestSeq;
+        byId('loading-state').classList.remove('hidden');
+        root.classList.add('hidden');
+        if (!keepUrl) {
+          const url=new URL(location.href);
+          if (path==='README.md') url.searchParams.delete('doc');
+          else url.searchParams.set('doc',path);
+          url.hash='';
+          history.replaceState(null,'',url);
+        }
         try {
-          // This is the true source on any HTTP(S) server, including static hosts.
-          const response=await fetch('./'+DOC_FILE,{cache:'no-store'});
-          if(!response.ok) throw new Error('HTTP '+response.status);
-          const markdown=await response.text();
-          if(!markdown.trim()) throw new Error('Empty README');
-          renderMarkdown(markdown,'live');
-        }catch(error) {
-          const fallback=byId('offline-readme').textContent.trim();
-          if(fallback && fallback!=='__README_FALLBACK__') {
-            renderMarkdown(fallback,'fallback');
-            byId('source-note-text').textContent=location.protocol==='file:'
-              ? 'Mode file lokal: menampilkan snapshot README.md. Untuk membaca perubahan terbaru, pilih file Markdown atau jalankan server lokal.'
-              : 'README.md tidak dapat dibaca: menampilkan snapshot. Pastikan README.md ada di folder yang sama.';
-          }else{
-            byId('loading-state').classList.add('hidden');byId('readme-error').classList.remove('hidden');icons();
+          const {markdown,source}=await readMarkdownFile(path);
+          if (seq!==requestSeq) return;
+          currentFile=path;
+          if(path==='README.md') docPages=parseDocPages(markdown);
+          renderMarkdown(markdown,source);
+          if(source!=='live') {
+            byId('source-note-text').textContent='Pratinjau offline '+path+'. Untuk membaca perubahan terbaru, jalankan server HTTP atau pilih file Markdown.';
           }
+          closeSidebar();
+          contentScroll.scrollTop=0;
+        }catch(error) {
+          if (seq!==requestSeq) return;
+          byId('loading-state').classList.add('hidden');
+          byId('readme-error').classList.remove('hidden');
+          byId('readme-error').querySelector('p').textContent='Tidak dapat memuat '+path+'. Pastikan file tersebut tersedia dan jalankan melalui web server.';
+          drawPageList();icons();
         }
       }
+      async function loadReadme() {
+        const initial=new URLSearchParams(location.search).get('doc');
+        await loadDocument('README.md',true);
+        if (initial && docPages.some(p=>p.path===initial)) await loadDocument(initial,true);
+      }
+      root.addEventListener('click',event=>{
+        const link=event.target.closest('a[href]');
+        if(!link||!root.contains(link))return;
+        const path=link.getAttribute('href')?.split('#')[0]?.replace(/^\.\//,'');
+        if(path==='README.md'||docPages.some(p=>p.path===path)) {
+          event.preventDefault();
+          loadDocument(path);
+        }
+      });
       function showToast(text) {
         let el=byId('toast');
         if(!el) {el=document.createElement('div');el.id='toast';el.className='fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-[#37352f] text-white text-[12px] px-4 py-2.5 rounded-md shadow-lg transition-opacity';document.body.append(el);}
@@ -971,17 +948,18 @@ GET    /api/permissions
 
       byId('mobile-menu').onclick=()=>{byId('sidebar').classList.add('show');byId('sidebar-scrim').classList.add('show');};
       byId('sidebar-scrim').onclick=closeSidebar;
-      byId('workspace-button').onclick=()=>navigateTo('doc-start');
-      byId('overview-trigger').onclick=()=>navigateTo('doc-start');
+      byId('workspace-button').onclick=()=>loadDocument('README.md');
+      byId('overview-trigger').onclick=()=>loadDocument('README.md');
+      byId('page-sidebar-root').onclick=()=>loadDocument('README.md');
       byId('search-trigger').onclick=openSearch;
       byId('top-search').onclick=openSearch;
-      byId('refresh-button').onclick=()=>{byId('loading-state').classList.remove('hidden');root.classList.add('hidden');loadReadme();};
+      byId('refresh-button').onclick=()=>loadDocument(currentFile,true);
       byId('top-share').onclick=async()=>{try {await navigator.clipboard.writeText(location.href);showToast('Link disalin');}catch(_){showToast('Clipboard tidak tersedia');}};
       byId('more-menu').onclick=()=>window.print();
       byId('choose-markdown').onclick=pickMarkdown;
       byId('error-choose').onclick=pickMarkdown;
       byId('dismiss-note').onclick=()=>{byId('source-note').classList.add('hidden');byId('source-note').classList.remove('flex');};
-      byId('markdown-file-input').onchange=async e=>{const f=e.target.files?.[0];if(f){renderMarkdown(await f.text(),'uploaded');byId('source-note-text').textContent='Menampilkan file Markdown yang dipilih. Untuk otomatis mengikuti perubahan, sajikan folder melalui server HTTP.';}};
+      byId('markdown-file-input').onchange=async e=>{const f=e.target.files?.[0];if(f){currentFile=f.name;renderMarkdown(await f.text(),'uploaded');byId('source-note-text').textContent='Menampilkan file Markdown yang dipilih. Untuk otomatis mengikuti perubahan, sajikan folder melalui server HTTP.';}};
       byId('search-input').oninput=e=>filterSearch(e.target.value);
       byId('search-input').onkeydown=e=>{
         if(e.key==='ArrowDown'){e.preventDefault();resultPosition=Math.min(resultPosition+1,visibleResults.length-1);drawResults();}
