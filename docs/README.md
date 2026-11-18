@@ -16,6 +16,7 @@ Ada dua lapisan operasional utama:
 ## Dokumentasi
 
 - [User Management](user-management.md)
+- [Product Management](product-management.md)
 
 ## Kesepakatan dokumentasi
 
