@@ -300,7 +300,8 @@ Ada dua lapisan operasional utama:
 - Tulis aturan sekali, secara singkat, jelas, dan konsisten. Gunakan judul langsung pada fungsi yang dibahas.
 - Setiap modul memiliki file Markdown sendiri. `README.md` menjadi indeks; `index.html` menampilkan file Markdown.
 - Sertakan **Database ERD**, **Business Rules & Validation**, dan **Tenant Admin — Menu & Features** sesuai keputusan modul.
-- Pada bagian **Tenant Admin — Menu & Features**, petakan menu, submenu, halaman, fitur, dan aksi **yang sudah disepakati**. Satu aksi tidak harus menjadi submenu.
+- **Database ERD** memuat diagram Mermaid, fungsi setiap tabel, serta penjelasan relasi dan constraint yang disepakati. Gunakan PK/FK yang ada pada model; jangan menambahkan kolom atau mekanisme penyimpanan yang belum diputuskan.
+- Pada bagian **Tenant Admin — Menu & Features**, gambarkan hierarki **Tenant Admin → menu → submenu** seperti struktur sidebar, lalu jelaskan halaman, fitur, dan aksi yang **sudah disepakati**. Nama menu/submenu yang tercantum pada referensi desain dapat digunakan sebagai peta navigasi; detail fungsi yang belum disepakati jangan direkayasa. Satu aksi tidak harus menjadi submenu.
 - Tambahkan **Permissions**, **Lifecycle / Workflow**, dan **Cross-Module Relationships** hanya bila aturannya relevan dan telah disepakati.
 - Gunakan Mermaid untuk memperlihatkan struktur atau alur yang memang membutuhkan diagram.
 - Jangan mengisi kolom, permission code, kontrak API, status implementasi, atau struktur menu dengan asumsi. Jangan membuat section kosong hanya demi memenuhi template.
@@ -378,6 +379,28 @@ erDiagram
 
 **Keterangan:** relasi `TENANTS → USERS` dan `TENANTS → ROLES` bersifat opsional di sisi user/role karena akun platform dan role sistem dapat memiliki `tenant_id = NULL`.
 
+### Penjelasan tabel
+
+| Tabel | Fungsi |
+| --- | --- |
+| `tenants` | Menyimpan tenant yang menggunakan Dagantara. |
+| `tenant_domains` | Menyimpan hostname/domain yang terhubung dengan tenant. |
+| `users` | Menyimpan akun pengguna, tenant pengguna, dan role aktif pengguna. |
+| `roles` | Menyimpan role yang dapat ditetapkan kepada pengguna. |
+| `permissions` | Menyimpan kode permission yang digunakan untuk otorisasi. |
+| `role_permissions` | Menghubungkan role dengan permission yang dimilikinya. |
+
+### Penjelasan relasi
+
+| Relasi | Makna |
+| --- | --- |
+| `tenants → tenant_domains` | Satu tenant dapat memiliki beberapa domain. |
+| `tenants → users` | Satu tenant dapat memiliki banyak pengguna. Akun platform tidak memiliki `tenant_id`. |
+| `tenants → roles` | Tenant dapat memiliki role tenant; role sistem dapat memiliki `tenant_id = NULL`. |
+| `roles → users` | Setiap pengguna memiliki satu role aktif melalui `users.role_id`. |
+| `roles ↔ permissions` | Many-to-many melalui `role_permissions` dengan pasangan `(role_id, permission_id)` sebagai primary key. |
+| `users → users` | `users.created_by` mereferensikan pengguna pembuat akun. |
+
 ## Business Rules & Validation
 
 - Pengguna platform memiliki `users.tenant_id = NULL`; pengguna tenant terhubung ke satu tenant.
@@ -389,10 +412,17 @@ erDiagram
 
 ## Tenant Admin — Menu & Features
 
-| Area | Fitur dan aksi |
-| --- | --- |
-| Pengguna | Membuat pengguna; menetapkan role pengguna |
-| Role | Membuat role; menetapkan permission pada role |
+```text
+Tenant Admin
+└── User Management
+    ├── Users
+    └── Roles
+```
+
+| Menu | Submenu | Fitur / aksi |
+| --- | --- | --- |
+| User Management | Users | Membuat pengguna, menetapkan role pengguna |
+| User Management | Roles | Membuat role, menetapkan permission pada role |
 
 ## Permissions
 
@@ -430,10 +460,22 @@ flowchart LR
 
 ## Tenant Admin — Menu & Features
 
-| Area | Fitur dan aksi |
-| --- | --- |
-| Produk | Menentukan kategori produk dan Primary Category |
-| Media Produk | Mengaitkan media produk dengan nilai opsi produk |
+Hierarki navigasi **Catalog** mengikuti referensi Tenant Admin:
+
+```text
+Tenant Admin
+└── Catalog
+    ├── Products
+    ├── Categories
+    ├── Brands
+    ├── Collections
+    └── Option Library
+```
+
+| Menu | Submenu / halaman | Fitur | Aksi |
+| --- | --- | --- | --- |
+| Catalog | Products | Kategori produk | Menghubungkan produk dengan beberapa kategori dan menentukan satu Primary Category |
+| Catalog | Products | Media produk | Menghubungkan media produk dengan beberapa nilai opsi produk; satu nilai opsi dapat terhubung dengan beberapa media |
 
 ## Database — Entity Relationship Diagram
 
@@ -479,7 +521,31 @@ erDiagram
     PRODUCTS ||--o{ PRODUCT_OPTION_VALUES : has
     PRODUCT_MEDIA ||--o{ MEDIA_OPTION_VALUES : links
     PRODUCT_OPTION_VALUES ||--o{ MEDIA_OPTION_VALUES : links
-```</script>
+```
+
+### Penjelasan tabel
+
+| Tabel | Fungsi |
+| --- | --- |
+| `tenants` | Tenant pemilik katalog produk. |
+| `products` | Data produk yang dimiliki tenant melalui `tenant_id`. |
+| `categories` | Data kategori produk. |
+| `product_categories` | Tabel penghubung produk dengan kategori. |
+| `product_media` | Media yang dimiliki suatu produk. |
+| `product_option_values` | Nilai opsi yang terkait dengan produk. |
+| `media_option_values` | Tabel penghubung media produk dengan nilai opsi. |
+
+### Penjelasan relasi
+
+| Relasi | Makna |
+| --- | --- |
+| `tenants → products` | Setiap tenant memiliki katalog produknya sendiri. |
+| `products ↔ categories` | Many-to-many melalui `product_categories`. Satu produk memiliki satu Primary Category dari kategori yang dipilih. |
+| `products → product_media` | Satu produk dapat memiliki beberapa media. |
+| `products → product_option_values` | Produk memiliki nilai opsi yang dapat dikaitkan dengan medianya. |
+| `product_media ↔ product_option_values` | Many-to-many melalui `media_option_values`; media dapat ditautkan ke beberapa nilai opsi dan sebaliknya. |
+
+**Catatan model:** aturan satu Primary Category telah disepakati; diagram yang ada belum menentukan lokasi kolom penandanya. Penambahan kolom/constraint menunggu keputusan skema, bukan ditetapkan oleh dokumentasi.</script>
 
   <script>
     (() => {
