@@ -1,0 +1,36 @@
+# Backend Agent Instructions — Dagantara
+
+Berlaku untuk `backend/**`. Baca juga `../AGENTS.md` dan modul relevan pada `../docs/` sebelum mengubah backend.
+
+## Scope dan pendekatan
+
+- Fokus pada Spring Boot API, domain logic, persistence, security, dan testing. Tidak mengimplementasikan fitur yang baru muncul sebagai label navigasi.
+- Pertahankan versi Java, Spring Boot, build tool, package naming, convention, dan dependency yang benar-benar ada di repository. Jangan menentukan versi/arsitektur tambahan saat backend masih berupa skeleton.
+- Saat kode belum tersedia, siapkan hanya hal yang diminta. Jangan membuat scaffold aplikasi penuh secara implisit.
+- Pisahkan tanggung jawab: controller untuk HTTP, service untuk use case/transaction, repository untuk persistence, DTO untuk kontrak I/O, entity untuk persistence.
+- Validasi input di boundary dan invariannya di service; jangan bergantung hanya pada kontrol di frontend.
+- Batasi transaksi pada unit kerja yang perlu konsistensi. Hindari N+1, lazy loading di luar transaksi, dan akses entity langsung dari response publik.
+
+## Tenant isolation dan keamanan
+
+- Tenant untuk operasi tenant-scoped harus berasal dari konteks terautentikasi/terverifikasi, bukan sekadar `tenantId` yang dikirim client.
+- Validasi kepemilikan tenant pada read, create, update, delete, relasi antar-entitas, dan query teragregasi.
+- Role/permission mengikuti `docs/user-management.md`: user memiliki satu role aktif, permission diambil lewat relasi role. Jangan mengandalkan nama role sebagai pengganti permission.
+- Akun platform dan role sistem dapat mempunyai `tenant_id = NULL`; akses lintas tenant tetap memerlukan aturan otorisasi yang eksplisit.
+- Jangan menambahkan bypass keamanan, hardcoded secret, atau logging data sensitif.
+
+## Ketergantungan keputusan domain
+
+- Produk adalah milik satu tenant (Independent Catalog).
+- Hubungan Product–Category many-to-many dengan tepat satu Primary Category, tetapi penyimpanan Primary Category **belum diputuskan** (PM-02). Jangan membuat kolom/constraint sendiri sebelum diputuskan.
+- Media harus dimiliki produk dan asosiasinya dengan nilai opsi adalah many-to-many (PM-03/PM-04).
+- Struktur tabel yang belum ditetapkan detailnya tidak boleh dianggap final hanya dari gambar referensi.
+
+## Checklist pengerjaan
+
+1. Petakan task ke ID di `../docs/user-management.md` atau `../docs/product-management.md`.
+2. Pilih skill yang sesuai di `../.agents/skills/`; security dan testing sering juga berlaku pada tugas API/database.
+3. Baca kode yang terdampak dan tes yang sudah ada.
+4. Implementasikan change set kecil dengan validasi tenant, permission, dan integritas data.
+5. Jalankan test/build yang tersedia. Jika belum ada `pom.xml` / `build.gradle` atau test suite, laporkan bahwa verifikasi belum dapat dijalankan.
+6. Sebutkan file yang berubah, acceptance scenario yang telah diverifikasi, dan keputusan yang masih blocked.
