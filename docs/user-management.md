@@ -1,6 +1,66 @@
 # User Management
 
-## Database — Entity Relationship Diagram
+## Module Overview
+
+Mengelola akun pengguna, role, dan permission pada platform Dagantara serta dalam ruang tenant. Pengguna mempunyai satu role aktif; akses didasarkan pada permission yang melekat pada role tersebut.
+
+## Admin UI Structure
+
+Struktur navigasi yang dicatat untuk Tenant Admin:
+
+```text
+Tenant Admin
+└── User Management
+    ├── Users
+    └── Roles
+```
+
+| Menu | Submenu / halaman | Fitur dan aksi |
+| --- | --- | --- |
+| User Management | Users | Membuat pengguna; menetapkan role pengguna. |
+| User Management | Roles | Membuat role; menentukan permission role. |
+
+## Functional Specification
+
+| ID | Perilaku |
+| --- | --- |
+| **UM-01** | Pengguna terautentikasi dengan permission `users.create` dapat membuat akun pengguna. |
+| **UM-02** | Pada pembuatan pengguna, sistem menentukan tenant sesuai konteks akun pembuat dan memvalidasi role yang diberikan. |
+| **UM-03** | Setiap akun mempunyai satu role aktif yang disimpan melalui `users.role_id`. |
+| **UM-04** | Pengelola berizin dapat membuat role, menghubungkan permission ke role, dan menetapkan role ke pengguna. |
+| **UM-05** | Otorisasi pengguna dihitung dari `users.role_id → roles → role_permissions → permissions`. |
+| **UM-06** | Akses data pengguna tenant mengikuti batas tenant pemilik akun; role dan tenant target harus valid. |
+
+### Membuat Pengguna
+
+```mermaid
+flowchart TD
+    A[Pengguna login] --> B{Memiliki permission users.create?}
+    B -- Ya --> C[Isi data pengguna dan pilih role]
+    C --> D[Validasi role dan tenant]
+    D --> E[Simpan pengguna]
+    B -- Tidak --> F[Akses ditolak]
+```
+
+### Mengelola Role
+
+```mermaid
+flowchart LR
+    A[Buat role] --> B[Pilih permissions]
+    B --> C[Simpan role_permissions]
+    C --> D[Tetapkan role ke pengguna]
+```
+
+## Business Rules
+
+- **UM-BR-01:** akun platform mempunyai `users.tenant_id = NULL`; akun tenant terhubung ke satu tenant.
+- **UM-BR-02:** setiap pengguna mempunyai satu `role_id` aktif.
+- **UM-BR-03:** permission diberikan kepada role melalui `role_permissions`, kemudian diperoleh pengguna melalui role-nya.
+- **UM-BR-04:** pembuatan pengguna membutuhkan permission `users.create`.
+- **UM-BR-05:** role yang ditetapkan harus sesuai dengan scope dan tenant pengguna. Data tenant hanya dapat diakses sesuai batas tenant yang diotorisasi.
+- **UM-BR-06:** pasangan `(role_id, permission_id)` pada `role_permissions` bersifat unik.
+
+## Data Model
 
 Skema final pada level tabel terdiri dari **6 tabel**: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, dan `role_permissions`.
 
@@ -93,51 +153,12 @@ erDiagram
 | `roles ↔ permissions` | Many-to-many melalui `role_permissions` dengan pasangan `(role_id, permission_id)` sebagai primary key. |
 | `users → users` | `users.created_by` mereferensikan pengguna pembuat akun. |
 
-## Business Rules & Validation
+## Acceptance Scenarios
 
-- Pengguna platform memiliki `users.tenant_id = NULL`; pengguna tenant terhubung ke satu tenant.
-- Setiap pengguna memiliki satu `users.role_id`.
-- Permission diturunkan dari role melalui `role_permissions`. Akses khusus diatur dengan membuat role dan menetapkannya kepada pengguna yang sesuai.
-- Pengguna yang sedang login dan memiliki permission `users.create` dapat membuat pengguna secara langsung.
-- Role harus sesuai dengan scope dan tenant pengguna. Data tenant diakses dalam cakupan tenant terkait.
-- Setiap pasangan `(role_id, permission_id)` pada `role_permissions` bersifat unik.
-
-## Tenant Admin — Menu & Features
-
-```text
-Tenant Admin
-└── User Management
-    ├── Users
-    └── Roles
-```
-
-| Menu | Submenu | Fitur / aksi |
-| --- | --- | --- |
-| User Management | Users | Membuat pengguna, menetapkan role pengguna |
-| User Management | Roles | Membuat role, menetapkan permission pada role |
-
-## Permissions
-
-Permission diberikan melalui role. Permission `users.create` diperlukan untuk membuat pengguna.
-
-## Workflow
-
-### Membuat Pengguna
-
-```mermaid
-flowchart TD
-    A[Pengguna login] --> B{Memiliki permission users.create?}
-    B -- Ya --> C[Isi data pengguna dan pilih role]
-    C --> D[Validasi role dan tenant]
-    D --> E[Simpan pengguna]
-    B -- Tidak --> F[Akses ditolak]
-```
-
-### Mengelola Role
-
-```mermaid
-flowchart LR
-    A[Buat role] --> B[Pilih permissions]
-    B --> C[Simpan role_permissions]
-    C --> D[Tetapkan role ke pengguna]
-```
+| ID | Kondisi | Tindakan | Hasil yang diharapkan |
+| --- | --- | --- | --- |
+| **UM-AT-01** | Pengelola login mempunyai permission `users.create` dan role target yang valid. | Membuat akun pengguna. | Pengguna tersimpan pada tenant yang sesuai dan mempunyai satu `role_id`. |
+| **UM-AT-02** | Pengguna login tidak mempunyai permission `users.create`. | Mencoba membuat pengguna. | Operasi ditolak; pengguna tidak dibuat. |
+| **UM-AT-03** | Pengelola memiliki hak mengelola role. | Membuat role dan menghubungkan beberapa permission. | Hak akses role mengikuti relasi di `role_permissions`. |
+| **UM-AT-04** | Pengguna tenant A mengakses data pengguna tenant B tanpa otorisasi yang sesuai. | Membaca atau mengubah data tenant B. | Akses ditolak sesuai tenant isolation. |
+| **UM-AT-05** | Role yang dipilih tidak sesuai scope/tenant target. | Menetapkan role kepada pengguna. | Penetapan ditolak. |
