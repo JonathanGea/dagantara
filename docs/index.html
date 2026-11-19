@@ -93,19 +93,21 @@
     .search-result .result-sub {font-size:12px;color:#a0a09b;line-height:1.5;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .doc-loading {height:11px;background:#f0f0ee;border-radius:4px;animation:pulse 1.6s ease-in-out infinite alternate}
     @keyframes pulse {to{opacity:.35}}
+    /* Smooth sidebar motion across desktop and mobile. */
+    #sidebar {transition:transform 300ms cubic-bezier(.22,1,.36,1),visibility 300ms,box-shadow 300ms ease;will-change:transform}
+    #main-area {transition:margin-left 300ms cubic-bezier(.22,1,.36,1)}
+    #sidebar-scrim {opacity:0;visibility:hidden;pointer-events:none;transition:opacity 250ms ease,visibility 250ms}
+    #sidebar-scrim.show {opacity:1;visibility:visible;pointer-events:auto}
     @media (min-width:1024px) {
-      #sidebar {transition:transform .22s ease,visibility .22s ease}
-      #main-area {transition:margin-left .22s ease}
       body.sidebar-collapsed #sidebar {transform:translateX(-100%);visibility:hidden;pointer-events:none}
       body.sidebar-collapsed #main-area {margin-left:0}
     }
     @media (max-width:1023px) {
-      #sidebar {transform:translateX(-100%);transition:transform .2s ease;z-index:60;box-shadow:none}
+      #sidebar {transform:translateX(-100%);z-index:60;box-shadow:none}
       #sidebar.show {transform:translateX(0);box-shadow:8px 0 30px #0002}
-      #sidebar-scrim.show {display:block}
     }
     @media (prefers-reduced-motion:reduce) {
-      #sidebar,#main-area {transition:none!important}
+      #sidebar,#main-area,#sidebar-scrim {transition:none!important}
     }
     @media (max-width:639px) {
       .doc-content {font-size:14.5px;line-height:1.78}
@@ -128,7 +130,7 @@
   </style>
 </head>
 <body class="overflow-hidden">
-  <div id="sidebar-scrim" class="hidden fixed inset-0 z-50 bg-black/30 lg:hidden" aria-hidden="true"></div>
+  <div id="sidebar-scrim" class="fixed inset-0 z-50 bg-black/30 lg:hidden" aria-hidden="true"></div>
 
   <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-[264px] bg-[#f7f7f5] border-r border-[#eaeae8] flex flex-col z-40" aria-label="Navigasi dokumentasi">
     <div class="px-3 pt-3 pb-2 flex items-center gap-1">
@@ -695,11 +697,14 @@ erDiagram
       function syncSidebarControls() {
         const open=sidebarIsOpen();
         const toggle=byId('sidebar-toggle');
+        const sidebar=byId('sidebar');
+        if (!open && sidebar.contains(document.activeElement)) toggle.focus();
         toggle.setAttribute('aria-expanded',String(open));
         toggle.setAttribute('aria-label',open?'Sembunyikan sidebar':'Tampilkan sidebar');
         toggle.title=open?'Sembunyikan sidebar':'Tampilkan sidebar';
         toggle.innerHTML=iconMarkup(open?'panel-left-close':'panel-left-open','icon');
-        byId('sidebar').inert=!open;
+        sidebar.inert=!open;
+        sidebar.setAttribute('aria-hidden',String(!open));
         icons();
       }
       function setSidebarOpen(open) {
@@ -1008,7 +1013,11 @@ erDiagram
       }
       function pickMarkdown() {byId('markdown-file-input').click();}
 
-      byId('sidebar-toggle').onclick=()=>setSidebarOpen(!sidebarIsOpen());
+      byId('sidebar-toggle').onclick=()=>{
+        const nextOpen=!sidebarIsOpen();
+        setSidebarOpen(nextOpen);
+        if (nextOpen && !desktopSidebar.matches) byId('sidebar-close').focus();
+      };
       byId('sidebar-close').onclick=()=>setSidebarOpen(false);
       byId('sidebar-scrim').onclick=closeSidebar;
       desktopSidebar.addEventListener('change',()=>{
