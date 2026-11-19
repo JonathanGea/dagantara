@@ -274,41 +274,105 @@
   <!-- Offline snapshots; live Markdown files take precedence. -->
   <script id="offline-readme" type="text/plain"># Dagantara
 
-> **Developer Documentation** · E-commerce multi-tenant platform
+> **AI-Ready Development Specification** · Multi-tenant e-commerce
 
-Dokumentasi teknis Dagantara.
+Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dalam ruang data miliknya sendiri.
 
-## Gambaran umum
-
-Dagantara adalah fondasi e-commerce **multi-tenant**. Satu platform mengelola banyak tenant (bisnis/toko), tetapi setiap tenant hanya mengakses data yang berada dalam ruang lingkupnya sendiri.
-
-Ada dua lapisan operasional utama:
-
-- **Platform** — mengelola ekosistem tenant dan administrator tingkat platform.
-- **Tenant** — mengelola pengguna dan operasional bisnis di dalam tenant masing-masing.
-
-## Dokumentasi
+## Dokumentasi Modul
 
 - [User Management](user-management.md)
 - [Product Management](product-management.md)
 
-## Kesepakatan dokumentasi
+## Aturan Membaca untuk AI Developer
 
-### Isi dokumentasi
+1. **Source of truth:** file Markdown modul adalah sumber spesifikasi. `README.md` adalah indeks dan pedoman; `index.html` hanya viewer.
+2. **Keputusan final:** implementasikan hanya aturan, fitur, dan relasi yang sudah disepakati di modul. Jangan menjadikan contoh, struktur referensi, atau dugaan sebagai requirement.
+3. **Batas navigasi:** entri pada Admin UI Structure menjelaskan lokasi UI. Nama submenu saja tidak otomatis menetapkan fitur, CRUD, API, atau halaman turunannya.
+4. **Keputusan yang dibutuhkan:** jika sebuah spesifikasi belum menentukan hal esensial, laporkan dependensinya dan jangan menentukan sendiri. Kerjakan bagian lain yang tidak bergantung pada keputusan tersebut.
+5. **Pengerjaan terarah:** implementasikan satu cakupan kecil dengan mengacu pada ID Functional Specification. Jangan menambah fitur di luar cakupan tugas.
+6. **Verifikasi:** cocokkan hasil dengan Business Rules, Data Model, dan Acceptance Scenarios yang relevan. Jangan menyimpulkan fitur sudah terimplementasi hanya karena dokumentasinya tersedia.
+7. **Konsistensi:** pertahankan aturan tenant isolation, role-based permissions, serta integritas relasi yang telah disepakati.
+8. **Penulisan dokumen:** simpan satu modul per file Markdown. Tulis keputusan yang berlaku, bukan alternatif atau fitur yang tidak dipilih; jangan mengulang informasi tanpa kebutuhan.
 
-- Cantumkan **hanya keputusan yang telah disepakati**. Jangan mencatat fitur atau alternatif yang tidak dipilih.
-- Tulis aturan sekali, secara singkat, jelas, dan konsisten. Gunakan judul langsung pada fungsi yang dibahas.
-- Setiap modul memiliki file Markdown sendiri. `README.md` menjadi indeks; `index.html` menampilkan file Markdown.
-- Sertakan **Database ERD**, **Business Rules & Validation**, dan **Tenant Admin — Menu & Features** sesuai keputusan modul.
-- **Database ERD** memuat diagram Mermaid, fungsi setiap tabel, serta penjelasan relasi dan constraint yang disepakati. Gunakan PK/FK yang ada pada model; jangan menambahkan kolom atau mekanisme penyimpanan yang belum diputuskan.
-- Pada bagian **Tenant Admin — Menu & Features**, gambarkan hierarki **Tenant Admin → menu → submenu** seperti struktur sidebar, lalu jelaskan halaman, fitur, dan aksi yang **sudah disepakati**. Nama menu/submenu yang tercantum pada referensi desain dapat digunakan sebagai peta navigasi; detail fungsi yang belum disepakati jangan direkayasa. Satu aksi tidak harus menjadi submenu.
-- Tambahkan **Permissions**, **Lifecycle / Workflow**, dan **Cross-Module Relationships** hanya bila aturannya relevan dan telah disepakati.
-- Gunakan Mermaid untuk memperlihatkan struktur atau alur yang memang membutuhkan diagram.
-- Jangan mengisi kolom, permission code, kontrak API, status implementasi, atau struktur menu dengan asumsi. Jangan membuat section kosong hanya demi memenuhi template.
-- Saat keputusan berubah, perbarui dokumen modul dan diagram yang terdampak; jangan mengubah modul lain tanpa kebutuhan.</script>
+## Struktur Spesifikasi Modul
+
+| Bagian | Tujuan |
+| --- | --- |
+| **Module Overview** | Tujuan dan tanggung jawab modul. |
+| **Admin UI Structure** | Menu, submenu, halaman, fitur, dan aksi yang diketahui. |
+| **Functional Specification** | Perilaku sistem yang diberi ID agar mudah dijadikan tugas AI. |
+| **Business Rules** | Invarian, validasi, dan pembatasan yang wajib dipatuhi. |
+| **Data Model** | ERD, fungsi tabel, relasi, dan constraint yang telah ditentukan. |
+| **Acceptance Scenarios** | Situasi dan hasil terukur untuk menguji implementasi. |
+
+Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahkan detail permission, lifecycle, atau hubungan antarmodul hanya bila sudah ada keputusan yang relevan.
+
+## Penggunaan dalam Pengembangan
+
+Saat meminta AI mengimplementasikan fitur, sebutkan file modul, ID spesifikasi, dan batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.</script>
   <script id="offline-user-management" type="text/plain"># User Management
 
-## Database — Entity Relationship Diagram
+## Module Overview
+
+Mengelola akun pengguna, role, dan permission pada platform Dagantara serta dalam ruang tenant. Pengguna mempunyai satu role aktif; akses didasarkan pada permission yang melekat pada role tersebut.
+
+## Admin UI Structure
+
+Struktur navigasi yang dicatat untuk Tenant Admin:
+
+```text
+Tenant Admin
+└── User Management
+    ├── Users
+    └── Roles
+```
+
+| Menu | Submenu / halaman | Fitur dan aksi |
+| --- | --- | --- |
+| User Management | Users | Membuat pengguna; menetapkan role pengguna. |
+| User Management | Roles | Membuat role; menentukan permission role. |
+
+## Functional Specification
+
+| ID | Perilaku |
+| --- | --- |
+| **UM-01** | Pengguna terautentikasi dengan permission `users.create` dapat membuat akun pengguna. |
+| **UM-02** | Pada pembuatan pengguna, sistem menentukan tenant sesuai konteks akun pembuat dan memvalidasi role yang diberikan. |
+| **UM-03** | Setiap akun mempunyai satu role aktif yang disimpan melalui `users.role_id`. |
+| **UM-04** | Pengelola berizin dapat membuat role, menghubungkan permission ke role, dan menetapkan role ke pengguna. |
+| **UM-05** | Otorisasi pengguna dihitung dari `users.role_id → roles → role_permissions → permissions`. |
+| **UM-06** | Akses data pengguna tenant mengikuti batas tenant pemilik akun; role dan tenant target harus valid. |
+
+### Membuat Pengguna
+
+```mermaid
+flowchart TD
+    A[Pengguna login] --> B{Memiliki permission users.create?}
+    B -- Ya --> C[Isi data pengguna dan pilih role]
+    C --> D[Validasi role dan tenant]
+    D --> E[Simpan pengguna]
+    B -- Tidak --> F[Akses ditolak]
+```
+
+### Mengelola Role
+
+```mermaid
+flowchart LR
+    A[Buat role] --> B[Pilih permissions]
+    B --> C[Simpan role_permissions]
+    C --> D[Tetapkan role ke pengguna]
+```
+
+## Business Rules
+
+- **UM-BR-01:** akun platform mempunyai `users.tenant_id = NULL`; akun tenant terhubung ke satu tenant.
+- **UM-BR-02:** setiap pengguna mempunyai satu `role_id` aktif.
+- **UM-BR-03:** permission diberikan kepada role melalui `role_permissions`, kemudian diperoleh pengguna melalui role-nya.
+- **UM-BR-04:** pembuatan pengguna membutuhkan permission `users.create`.
+- **UM-BR-05:** role yang ditetapkan harus sesuai dengan scope dan tenant pengguna. Data tenant hanya dapat diakses sesuai batas tenant yang diotorisasi.
+- **UM-BR-06:** pasangan `(role_id, permission_id)` pada `role_permissions` bersifat unik.
+
+## Data Model
 
 Skema final pada level tabel terdiri dari **6 tabel**: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, dan `role_permissions`.
 
@@ -401,66 +465,24 @@ erDiagram
 | `roles ↔ permissions` | Many-to-many melalui `role_permissions` dengan pasangan `(role_id, permission_id)` sebagai primary key. |
 | `users → users` | `users.created_by` mereferensikan pengguna pembuat akun. |
 
-## Business Rules & Validation
+## Acceptance Scenarios
 
-- Pengguna platform memiliki `users.tenant_id = NULL`; pengguna tenant terhubung ke satu tenant.
-- Setiap pengguna memiliki satu `users.role_id`.
-- Permission diturunkan dari role melalui `role_permissions`. Akses khusus diatur dengan membuat role dan menetapkannya kepada pengguna yang sesuai.
-- Pengguna yang sedang login dan memiliki permission `users.create` dapat membuat pengguna secara langsung.
-- Role harus sesuai dengan scope dan tenant pengguna. Data tenant diakses dalam cakupan tenant terkait.
-- Setiap pasangan `(role_id, permission_id)` pada `role_permissions` bersifat unik.
-
-## Tenant Admin — Menu & Features
-
-```text
-Tenant Admin
-└── User Management
-    ├── Users
-    └── Roles
-```
-
-| Menu | Submenu | Fitur / aksi |
-| --- | --- | --- |
-| User Management | Users | Membuat pengguna, menetapkan role pengguna |
-| User Management | Roles | Membuat role, menetapkan permission pada role |
-
-## Permissions
-
-Permission diberikan melalui role. Permission `users.create` diperlukan untuk membuat pengguna.
-
-## Workflow
-
-### Membuat Pengguna
-
-```mermaid
-flowchart TD
-    A[Pengguna login] --> B{Memiliki permission users.create?}
-    B -- Ya --> C[Isi data pengguna dan pilih role]
-    C --> D[Validasi role dan tenant]
-    D --> E[Simpan pengguna]
-    B -- Tidak --> F[Akses ditolak]
-```
-
-### Mengelola Role
-
-```mermaid
-flowchart LR
-    A[Buat role] --> B[Pilih permissions]
-    B --> C[Simpan role_permissions]
-    C --> D[Tetapkan role ke pengguna]
-```</script>
+| ID | Kondisi | Tindakan | Hasil yang diharapkan |
+| --- | --- | --- | --- |
+| **UM-AT-01** | Pengelola login mempunyai permission `users.create` dan role target yang valid. | Membuat akun pengguna. | Pengguna tersimpan pada tenant yang sesuai dan mempunyai satu `role_id`. |
+| **UM-AT-02** | Pengguna login tidak mempunyai permission `users.create`. | Mencoba membuat pengguna. | Operasi ditolak; pengguna tidak dibuat. |
+| **UM-AT-03** | Pengelola memiliki hak mengelola role. | Membuat role dan menghubungkan beberapa permission. | Hak akses role mengikuti relasi di `role_permissions`. |
+| **UM-AT-04** | Pengguna tenant A mengakses data pengguna tenant B tanpa otorisasi yang sesuai. | Membaca atau mengubah data tenant B. | Akses ditolak sesuai tenant isolation. |
+| **UM-AT-05** | Role yang dipilih tidak sesuai scope/tenant target. | Menetapkan role kepada pengguna. | Penetapan ditolak. |</script>
   <script id="offline-product-management" type="text/plain"># Product Management
 
-## Business Rules & Validation
+## Module Overview
 
-- Setiap tenant mengelola katalog produknya sendiri (**Independent Catalog**).
-- Satu produk dapat terhubung ke beberapa kategori dan memiliki satu **Primary Category**.
-- Media dimiliki oleh produk.
-- **Product Media** dan **Product Option Values** memiliki relasi many-to-many: satu media dapat terhubung ke beberapa nilai opsi dan satu nilai opsi dapat terhubung ke beberapa media.
+Mengelola katalog produk per tenant (**Independent Catalog**), hubungan produk–kategori, dan asosiasi media produk dengan nilai opsi. Produk berada dalam katalog tenant pemiliknya.
 
-## Tenant Admin — Menu & Features
+## Admin UI Structure
 
-Hierarki navigasi **Catalog** mengikuti referensi Tenant Admin:
+Referensi struktur navigasi Tenant Admin:
 
 ```text
 Tenant Admin
@@ -472,12 +494,30 @@ Tenant Admin
     └── Option Library
 ```
 
-| Menu | Submenu / halaman | Fitur | Aksi |
-| --- | --- | --- | --- |
-| Catalog | Products | Kategori produk | Menghubungkan produk dengan beberapa kategori dan menentukan satu Primary Category |
-| Catalog | Products | Media produk | Menghubungkan media produk dengan beberapa nilai opsi produk; satu nilai opsi dapat terhubung dengan beberapa media |
+Nama submenu di atas mengikuti referensi navigasi. Spesifikasi fungsi yang sudah disepakati saat ini:
 
-## Database — Entity Relationship Diagram
+| Menu | Submenu / halaman | Fitur dan aksi |
+| --- | --- | --- |
+| Catalog | Products | Menghubungkan produk dengan beberapa kategori dan memilih satu Primary Category. |
+| Catalog | Products | Menghubungkan media produk ke nilai opsi produk. |
+
+## Functional Specification
+
+| ID | Perilaku |
+| --- | --- |
+| **PM-01** | Setiap tenant memiliki katalog produknya sendiri. Produk terhubung ke tenant pemilik. |
+| **PM-02** | Produk dapat terhubung ke beberapa kategori dan memiliki tepat satu Primary Category. |
+| **PM-03** | Media produk dimiliki oleh produk terkait. |
+| **PM-04** | Satu media dapat dihubungkan dengan beberapa Product Option Values; satu Product Option Value dapat mempunyai beberapa media. |
+
+## Business Rules
+
+- **PM-BR-01:** katalog produk independen untuk setiap tenant.
+- **PM-BR-02:** kategori produk bersifat many-to-many melalui `product_categories`; satu produk memiliki satu Primary Category.
+- **PM-BR-03:** media merupakan bagian dari produk, bukan bagian dari pustaka nilai opsi.
+- **PM-BR-04:** hubungan Product Media ↔ Product Option Values bersifat many-to-many melalui `media_option_values`.
+
+## Data Model
 
 ```mermaid
 erDiagram
@@ -545,7 +585,16 @@ erDiagram
 | `products → product_option_values` | Produk memiliki nilai opsi yang dapat dikaitkan dengan medianya. |
 | `product_media ↔ product_option_values` | Many-to-many melalui `media_option_values`; media dapat ditautkan ke beberapa nilai opsi dan sebaliknya. |
 
-**Catatan model:** aturan satu Primary Category telah disepakati; diagram yang ada belum menentukan lokasi kolom penandanya. Penambahan kolom/constraint menunggu keputusan skema, bukan ditetapkan oleh dokumentasi.</script>
+**Implementation dependency — PM-02:** lokasi penyimpanan penanda Primary Category belum ditentukan dalam model yang disepakati. Jangan menetapkan kolom atau constraint baru untuk itu sebelum ada keputusan skema.
+
+## Acceptance Scenarios
+
+| ID | Kondisi | Tindakan | Hasil yang diharapkan |
+| --- | --- | --- | --- |
+| **PM-AT-01** | Terdapat tenant A dan tenant B. | Mengaitkan produk ke katalog tenant A. | Produk mempunyai kepemilikan tenant A dan tidak menjadi entri katalog bersama lintas tenant. |
+| **PM-AT-02** | Satu produk memiliki dua kategori. | Menetapkan satu kategori sebagai Primary Category. | Kedua kategori tetap terhubung dan tepat satu menjadi Primary Category. Implementasi penyimpanannya mengikuti keputusan skema PM-02. |
+| **PM-AT-03** | Satu produk memiliki media M1 dan nilai opsi V1, V2. | Mengaitkan M1 dengan V1 dan V2. | M1 mempunyai dua asosiasi nilai opsi. |
+| **PM-AT-04** | Nilai opsi V1 berkaitan dengan media M1 dan M2 milik produk yang sama. | Mengaitkan V1 dengan kedua media. | V1 mempunyai dua asosiasi media tanpa memindahkan kepemilikan media dari produk. |</script>
 
   <script>
     (() => {
