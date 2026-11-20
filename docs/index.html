@@ -169,7 +169,9 @@
       </button>
     </div>
     <div class="overflow-y-auto side-scroll flex-1 px-3 pb-7">
-      <div id="sidebar-pages" class="space-y-[2px] mb-4"></div>
+      <div id="sidebar-pages" class="space-y-[2px] mb-5"></div>
+      <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">AGENT SKILLS</div>
+      <div id="sidebar-skills" class="space-y-[2px] mb-5"></div>
       <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">ON THIS PAGE</div>
       <div id="sidebar-sections" class="pl-[16px] ml-[17px] border-l border-[#e3e3df] space-y-[2px]"></div>
       <div class="mt-8 pt-4 border-t border-[#e9e9e6] mx-2">
@@ -610,6 +612,192 @@ erDiagram
 | **PM-AT-03** | Satu produk memiliki media M1 dan nilai opsi V1, V2. | Mengaitkan M1 dengan V1 dan V2. | M1 mempunyai dua asosiasi nilai opsi. |
 | **PM-AT-04** | Nilai opsi V1 berkaitan dengan media M1 dan M2 milik produk yang sama. | Mengaitkan V1 dengan kedua media. | V1 mempunyai dua asosiasi media tanpa memindahkan kepemilikan media dari produk. |</script>
 
+  <script id="offline-skill-spring-boot-api" type="text/plain">---
+name: spring-boot-api
+description: Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara.
+---
+
+# Spring Boot API
+
+## Tujuan
+
+Membuat REST API yang konsisten, aman, dan sesuai spesifikasi modul Dagantara. Skill ini **bukan** izin untuk membuat endpoint yang belum diputuskan.
+
+## Sebelum coding
+
+1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan spesifikasi modul terkait.
+2. Catat Functional Specification ID dan Acceptance Scenario ID yang hendak dipenuhi.
+3. Periksa routing, response format, DTO, exception handler, validation, dan coding style aktual; ikuti yang sudah ada.
+4. Jika kontrak endpoint belum ada, jelaskan keputusan yang perlu dibuat. Jangan menetapkan URL, payload, atau fitur baru sebagai keputusan domain.
+
+## Aturan implementasi
+
+- Controller tipis: menerima request, validasi DTO, delegasi ke service, lalu bentuk HTTP response.
+- Jangan expose JPA entity secara langsung ke API. Gunakan request/response DTO dan mapping yang jelas.
+- Gunakan Bean Validation untuk bentuk data; validasi business rules dan tenant boundary di service.
+- Gunakan semantik HTTP yang konsisten dengan kode eksisting: 400 untuk input tidak valid, 401 bila belum terautentikasi, 403 bila tidak berizin, 404 bila resource tidak dapat ditemukan/diakses sesuai kebijakan, 409 untuk konflik state/integritas yang memang dipetakan sebagai konflik.
+- Buat error handling terpusat dan response yang stabil tanpa stack trace atau informasi internal ke client.
+- Untuk list endpoint yang diminta, saring berdasarkan tenant di sumber data; gunakan pagination, batas ukuran, serta sort field yang di-allowlist.
+- Jangan percaya `tenant_id`, `role_id`, atau permission dari body/header client sebagai bukti hak akses. Role target harus tetap divalidasi terhadap konteks dan scope.
+- Periksa update parsial, idempotensi, serta transaksi saat use case memang membutuhkannya. Jangan menambah proses asynchronous secara spekulatif.
+- Endpoint hanya mengembalikan data yang memang diizinkan; cegah mass assignment dengan DTO yang spesifik.
+
+## Domain-sensitive cases
+
+- User creation (UM-01/UM-02): cek `users.create`, konteks tenant, dan validitas role target sebelum persist.
+- Product (PM-01): request dan query harus menjaga Independent Catalog.
+- Primary Category (PM-02): jangan implementasikan detail storage yang masih menjadi dependency.
+
+## Definition of done
+
+- Kontrak request/response selaras dengan spesifikasi yang benar-benar final.
+- Ada pengujian untuk happy path, validation error, unauthorized/forbidden, dan lintas tenant (bila relevan).
+- Tidak ada endpoint atau field tambahan yang dibuat semata karena terlihat pada Admin UI Structure.
+- Laporkan path, ID spesifikasi, status test, dan unresolved dependency.</script>
+  <script id="offline-skill-spring-boot-database" type="text/plain">---
+name: spring-boot-database
+description: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara.
+---
+
+# Spring Boot Database
+
+## Source of truth
+
+- `docs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.
+- `docs/product-management.md`: ERD dan aturan PM-01 s.d. PM-04.
+- Detail yang tidak dicantumkan sebagai keputusan final **jangan** diisi dengan asumsi tanpa persetujuan.
+
+## Workflow
+
+1. Baca AGENTS root/backend dan spesifikasi yang menyebut tabel serta relasi terkait.
+2. Inspeksi schema, entity, naming, migration tool (jika ada), dan query yang saat ini dipakai.
+3. Buat rencana minimal: tabel/kolom/FK/index/constraint yang dibutuhkan **hanya** dari keputusan final.
+4. Periksa dampak perubahan pada data existing, migration/rollback, tenant isolation, dan referential integrity.
+5. Implementasikan migration melalui tool yang sudah dipakai project (Flyway/Liquibase jika tersedia). Jangan bergantung pada `ddl-auto=update` untuk perubahan production.
+6. Tambahkan integration test yang mengecek constraint dan isolasi tenant bila lingkungan test tersedia.
+
+## Model yang sudah disepakati
+
+- User management: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, `role_permissions`.
+- `users.role_id` menunjuk satu role aktif; `role_permissions` unik untuk pasangan `(role_id, permission_id)`.
+- `users.tenant_id` dapat NULL untuk akun platform; `roles.tenant_id` dapat NULL untuk role sistem. Penanganan NULL tidak sama dengan izin akses global.
+- Product management: `products` dimiliki tenant; `product_categories` menghubungkan produk dan kategori secara many-to-many.
+- Produk memiliki tepat satu Primary Category secara aturan bisnis, **namun representasi kolom/constraint penandanya belum diputuskan**. Tandai sebagai blocked; jangan mengarang skema finalnya.
+- `product_media` dan `product_option_values` terhubung many-to-many melalui `media_option_values`, dengan media tetap milik produk.
+- Jangan menyimpulkan `tenant_id` wajib ada pada tabel yang belum dirinci di ERD; identifikasi kebutuhan isolasi dan minta keputusan bila skema belum final.
+
+## Aturan query, transaction, dan constraint
+
+- Terapkan filter tenant pada query repository yang mengakses data tenant; validasi kedua sisi saat mengaitkan FK agar tidak dapat membuat relasi lintas tenant tanpa izin.
+- Jangan mengandalkan filter HTTP saja untuk tenant isolation.
+- Pertahankan FK, UNIQUE, dan NOT NULL yang sudah disepakati; beri indeks berdasar query yang nyata, bukan secara spekulatif.
+- Gunakan @Transactional di service untuk operasi atomik; tentukan locking/concurrency control dari kebutuhan terukur.
+- Cegah N+1 dan pagination tidak stabil; verifikasi query/filter dengan integration test.
+- Migration harus bisa dijalankan konsisten pada database bersih; perubahan data existing memerlukan strategi migrasi yang jelas.
+
+## Definition of done
+
+Sertakan daftar perubahan schema, alasan dari ID requirement, pengujian query/constraint/tenant, serta keputusan yang masih belum final. Jangan klaim migration berhasil tanpa eksekusi.</script>
+  <script id="offline-skill-spring-boot-security" type="text/plain">---
+name: spring-boot-security
+description: Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara.
+---
+
+# Spring Boot Security
+
+## Tujuan
+
+Menegakkan authentication, authorization, dan tenant isolation pada semua jalur akses data, sesuai `docs/user-management.md` dan kontrak modul terkait.
+
+## Sebelum implementasi
+
+1. Baca `AGENTS.md`, `backend/AGENTS.md`, dan spesifikasi terkait.
+2. Inspeksi konfigurasi keamanan aktual (JWT, session, filter chain, auth principal, exception handling). **Jangan mengasumsikan JWT sudah terpasang** ketika backend masih skeleton.
+3. Petakan akses tiap use case ke permission yang memang dinyatakan di spesifikasi. Jangan mengarang permission baru tanpa requirement.
+4. Identifikasi sumber tenant context dan aturan validasinya; jangan menerima tenant claim/header yang belum diverifikasi.
+
+## Authorization model
+
+- Setiap user memiliki satu `users.role_id` aktif.
+- Permission efektif berasal dari `users.role_id -> roles -> role_permissions -> permissions`.
+- Untuk pembuatan user, butuh `users.create` (UM-01), lalu validasi role dan tenant target (UM-02/UM-06).
+- Role scope/tenant harus kompatibel dengan user target; periksa di service, bukan hanya di anotasi controller.
+- User platform `tenant_id = NULL` dan role sistem `tenant_id = NULL` tidak otomatis memberikan akses tak terbatas.
+- Prinsip deny by default: operasi tanpa aturan akses yang pasti tidak boleh dibuka hanya untuk mempermudah development.
+- Frontend menyembunyikan menu bukan mekanisme otorisasi backend.
+
+## Implementasi aman
+
+- Simpan password memakai `PasswordEncoder` yang aman; jangan simpan plaintext atau menuliskannya ke log.
+- Jika JWT dipakai, verifikasi signature, expiry, issuer/audience sesuai konfigurasi eksisting, dan jangan percaya claim yang tidak tervalidasi.
+- Validasi tenant pada lookup dan mutasi entity, termasuk hubungan entity, listing, dan resource ID yang bisa ditebak.
+- Utamakan hasil 401 untuk unauthenticated dan 403 untuk authenticated tetapi tidak memiliki izin; cegah kebocoran detail resource tenant lain.
+- Gunakan least privilege pada konfigurasi route dan service; cegah privilege escalation saat create/update role atau assign role.
+- Jangan commit key/secret; gunakan konfigurasi lingkungan dan jangan memaparkan token dalam response/log.
+
+## Test wajib saat fitur tersedia
+
+- Unauthenticated request ditolak.
+- Authenticated tanpa `users.create` tidak dapat membuat user (UM-AT-02).
+- Role yang salah scope/tenant ditolak (UM-AT-05).
+- Tenant A tidak dapat mengakses atau mengubah data tenant B (UM-AT-04).
+- Jalur sukses berizin diverifikasi (UM-AT-01/UM-AT-03).
+
+## Definition of done
+
+Laporkan aturan permission yang ditegakkan, tenant boundary, hasil security tests, dan keputusan autentikasi/otorisasi yang belum dinyatakan dalam spesifikasi.</script>
+  <script id="offline-skill-spring-boot-testing" type="text/plain">---
+name: spring-boot-testing
+description: Gunakan saat membuat atau menjalankan unit, MVC, integration, repository, security, dan acceptance tests untuk backend Spring Boot Dagantara.
+---
+
+# Spring Boot Testing
+
+## Prinsip
+
+Pengujian harus membuktikan business rules dan acceptance scenarios yang telah diputuskan, bukan mengunci asumsi fitur yang belum disepakati.
+
+## Persiapan
+
+1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan modul relevan.
+2. Catat ID Acceptance Scenario (mis. UM-AT-01, PM-AT-04) pada nama test atau deskripsi test agar traceable.
+3. Inspeksi framework, build tool, test profile, fixture, dan infrastruktur yang tersedia. Jangan menambahkan dependency besar tanpa alasan tugas.
+4. Pilih level uji paling rendah yang memberi bukti memadai; tambahkan integration test untuk perilaku persistence/security yang tidak dapat dibuktikan oleh mock.
+
+## Strategi per lapisan
+
+- **Unit/service:** business rules, validation, role assignment, domain edge cases.
+- **Web/MVC:** serialization, request validation, HTTP status, error contract, dan endpoint authorization.
+- **Repository/integration:** FK/UNIQUE, transaction, query/filter tenant, relasi JPA, dan migration.
+- **Security integration:** authenticated vs unauthenticated, permission denied, role scope, tenant cross-access.
+- **Database:** gunakan PostgreSQL yang terisolasi (mis. Testcontainers) bila tersedia dan relevan; jangan menyamakan perilaku in-memory DB dengan PostgreSQL production.
+
+## Skenario minimum berdasarkan dokumentasi
+
+| ID | Hal yang harus dibuktikan |
+| --- | --- |
+| UM-AT-01 | Pengguna berizin dapat membuat user dengan tenant dan role valid. |
+| UM-AT-02 | Tanpa `users.create` operasi ditolak tanpa perubahan data. |
+| UM-AT-03 | Permission efektif mengikuti role dan `role_permissions`. |
+| UM-AT-04 | Tenant A tidak dapat membaca/mengubah user tenant B. |
+| UM-AT-05 | Assignment role salah scope/tenant ditolak. |
+| PM-AT-01 | Produk dimiliki tenant yang benar dan tidak dibagikan lintas tenant. |
+| PM-AT-02 | Multi-category dengan tepat satu primary; implementasi test schema menunggu keputusan storage PM-02. |
+| PM-AT-03 | Satu media bisa terkait beberapa option value. |
+| PM-AT-04 | Satu option value bisa terkait beberapa media tanpa memindahkan ownership media. |
+
+## Praktik test
+
+- Gunakan data deterministik, isolated fixture, dan cleanup; jangan bergantung pada urutan test.
+- Sertakan negative cases: invalid input, duplicate relation, missing FK, unauthorized, forbidden, dan cross-tenant association.
+- Hindari mengganti semua dependency dengan mock pada test yang mengklaim menguji constraint database.
+- Pastikan test dapat dijalankan lewat command build yang dipakai repository (`./mvnw test`, `mvn test`, atau Gradle sesuai yang tersedia).
+- Bila environment test, migration, atau server belum tersedia, tandai **not run** beserta sebabnya; jangan membuat laporan hijau palsu.
+
+## Definition of done
+
+Laporkan test yang ditambah, scenario ID yang dicakup, perintah aktual, hasil test, dan gap pengujian/keputusan yang masih terbuka.</script>
+
   <script>
     (() => {
       'use strict';
@@ -627,10 +815,34 @@ erDiagram
       let currentFile = 'README.md';
       let docPages = [];
       let requestSeq = 0;
+
+      const skillPages = [
+        {title:"Spring Boot API",path:"../.agents/skills/spring-boot-api/SKILL.md",icon:"braces"},
+        {title:"Spring Boot Database",path:"../.agents/skills/spring-boot-database/SKILL.md",icon:"database"},
+        {title:"Spring Boot Security",path:"../.agents/skills/spring-boot-security/SKILL.md",icon:"shield-check"},
+        {title:"Spring Boot Testing",path:"../.agents/skills/spring-boot-testing/SKILL.md",icon:"flask-conical"},
+      ];
+      function isSkillPage(path) { return skillPages.some(skill => skill.path === path); }
+      function displayFileName(path) {
+        return isSkillPage(path) ? path.replace('../.agents/skills/','skills/') : path;
+      }
+      function formatSkillMarkdown(markdown,path) {
+        if (!isSkillPage(path)) return markdown;
+        const metadata=markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
+        if (!metadata) return markdown;
+        const description=metadata[1].match(/^description:\s*(.+)$/m)?.[1]?.trim();
+        const body=markdown.slice(metadata[0].length).trimStart();
+        if (!description) return body;
+        return body.replace(/^(# [^\n]+\r?\n)/, heading => heading+'\n> '+description+'\n');
+      }
       const offlineFiles = {
         'README.md': byId('offline-readme').textContent.trim(),
         'user-management.md': byId('offline-user-management').textContent.trim(),
         'product-management.md': byId('offline-product-management').textContent.trim(),
+        '../.agents/skills/spring-boot-api/SKILL.md': byId('offline-skill-spring-boot-api').textContent.trim(),
+        '../.agents/skills/spring-boot-database/SKILL.md': byId('offline-skill-spring-boot-database').textContent.trim(),
+        '../.agents/skills/spring-boot-security/SKILL.md': byId('offline-skill-spring-boot-security').textContent.trim(),
+        '../.agents/skills/spring-boot-testing/SKILL.md': byId('offline-skill-spring-boot-testing').textContent.trim(),
       };
       function parseDocPages(readme) {
         const result = [];
@@ -654,19 +866,38 @@ erDiagram
           button.onclick=()=>loadDocument(page.path);
           target.append(button);
         }
+        const skillNav=byId('sidebar-skills');
+        skillNav.replaceChildren();
+        for(const skill of skillPages) {
+          const button=document.createElement('button');
+          button.type='button';
+          button.className='side-link text-[12px]'+(currentFile===skill.path?' active':'');
+          button.innerHTML=iconMarkup(skill.icon,'w-[14px] h-[14px] shrink-0 text-[#999893]')+'<span>'+escapeHtml(skill.title)+'</span>';
+          button.title=displayFileName(skill.path);
+          button.onclick=()=>loadDocument(skill.path);
+          skillNav.append(button);
+        }
         icons();
       }
       async function readMarkdownFile(path) {
-        try {
-          const response=await fetch('./'+path,{cache:'no-store'});
-          if (!response.ok) throw new Error('HTTP '+response.status);
-          const markdown=await response.text();
-          if (!markdown.trim()) throw new Error('Empty Markdown');
-          return {markdown,source:'live'};
-        } catch(error) {
-          if (offlineFiles[path]) return {markdown:offlineFiles[path],source:'fallback'};
-          throw error;
+        // Read SKILL.md from the repository first. When /docs is published alone,
+        // fall back to the canonical GitHub source, then the embedded snapshot.
+        const urls=['./'+path];
+        if (isSkillPage(path)) {
+          urls.push('https://raw.githubusercontent.com/JonathanGea/dagantara/main/'+path.slice(3));
         }
+        for (let i=0; i<urls.length; i++) {
+          try {
+            const response=await fetch(urls[i],{cache:'no-store'});
+            if (!response.ok) continue;
+            const markdown=await response.text();
+            if (markdown.trim() && !/^\s*<!doctype html/i.test(markdown)) {
+              return {markdown,source:i===0?'live':'github'};
+            }
+          } catch (_) { /* Next verified source. */ }
+        }
+        if (offlineFiles[path]) return {markdown:offlineFiles[path],source:'fallback'};
+        throw new Error('File not available: '+path);
       }
 
       function icons() {
@@ -917,6 +1148,7 @@ erDiagram
         }
       }
       function renderMarkdown(markdown, source) {
+        markdown=formatSkillMarkdown(markdown,currentFile);
         loadedMarkdown=markdown;
         if(!window.marked) {
           byId('loading-state').classList.add('hidden');
@@ -932,18 +1164,19 @@ erDiagram
         byId('readme-error').classList.add('hidden');
         root.classList.remove('hidden');
         byId('page-footer').classList.remove('hidden');
-        byId('sidebar-source-state').title=source==='live'?currentFile+' loaded':'Offline snapshot: '+currentFile;
-        byId('sidebar-source-state').className='ml-auto w-1.5 h-1.5 rounded-full '+(source==='live'?'bg-[#88b394]':'bg-[#d6a45f]');
-        byId('source-note').classList.toggle('hidden',source==='live');
-        byId('source-note').classList.toggle('flex',source!=='live');
-        byId('current-doc-name').textContent=currentFile;
-        byId('current-doc-footer').textContent=currentFile;
+        const isLive=source==='live'||source==='github';
+        byId('sidebar-source-state').title=isLive?displayFileName(currentFile)+' loaded':'Offline snapshot: '+displayFileName(currentFile);
+        byId('sidebar-source-state').className='ml-auto w-1.5 h-1.5 rounded-full '+(isLive?'bg-[#88b394]':'bg-[#d6a45f]');
+        byId('source-note').classList.toggle('hidden',isLive);
+        byId('source-note').classList.toggle('flex',!isLive);
+        byId('current-doc-name').textContent=displayFileName(currentFile);
+        byId('current-doc-footer').textContent=displayFileName(currentFile);
         icons();renderMermaid();
         const hash=decodeURIComponent(location.hash.replace(/^#/,''));
         if(hash) setTimeout(()=>navigateTo(hash),130);
       }
       async function loadDocument(path, keepUrl=false) {
-        if (path !== 'README.md' && !docPages.some(p=>p.path===path)) return;
+        if (path !== 'README.md' && !docPages.some(p=>p.path===path) && !isSkillPage(path)) return;
         const seq=++requestSeq;
         byId('loading-state').classList.remove('hidden');
         root.classList.add('hidden');
@@ -961,7 +1194,7 @@ erDiagram
           if(path==='README.md') docPages=parseDocPages(markdown);
           renderMarkdown(markdown,source);
           if(source!=='live') {
-            byId('source-note-text').textContent='Pratinjau offline '+path+'. Untuk membaca perubahan terbaru, jalankan server HTTP atau pilih file Markdown.';
+            byId('source-note-text').textContent='Pratinjau offline '+displayFileName(path)+'. Untuk membaca perubahan terbaru, jalankan server HTTP atau pilih file Markdown.';
           }
           closeSidebar();
           contentScroll.scrollTop=0;
@@ -976,13 +1209,13 @@ erDiagram
       async function loadReadme() {
         const initial=new URLSearchParams(location.search).get('doc');
         await loadDocument('README.md',true);
-        if (initial && docPages.some(p=>p.path===initial)) await loadDocument(initial,true);
+        if (initial && (docPages.some(p=>p.path===initial)||isSkillPage(initial))) await loadDocument(initial,true);
       }
       root.addEventListener('click',event=>{
         const link=event.target.closest('a[href]');
         if(!link||!root.contains(link))return;
         const path=link.getAttribute('href')?.split('#')[0]?.replace(/^\.\//,'');
-        if(path==='README.md'||docPages.some(p=>p.path===path)) {
+        if(path==='README.md'||docPages.some(p=>p.path===path)||isSkillPage(path)) {
           event.preventDefault();
           loadDocument(path);
         }
