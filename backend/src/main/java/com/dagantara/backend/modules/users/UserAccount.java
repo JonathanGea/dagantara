@@ -23,16 +23,17 @@ public class UserAccount extends AuditableEntity {
     protected UserAccount() {
     }
 
-    UserAccount(UserAccount creator, CreateUserRequest request, String passwordHash) {
-        tenantId = creator.tenantId;
-        roleId = request.roleId();
-        username = request.username();
-        email = request.email();
-        fullName = request.fullName();
+    UserAccount(UUID creatorId, UUID tenantId, UUID roleId, String username,
+                String email, String fullName, String passwordHash) {
+        this.tenantId = tenantId;
+        this.roleId = roleId;
+        this.username = username;
+        this.email = email;
+        this.fullName = fullName;
         this.passwordHash = passwordHash;
-        accountType = creator.accountType;
+        accountType = tenantId == null ? "PLATFORM" : "TENANT";
         status = ACTIVE;
-        createdBy = creator.getId();
+        createdBy = creatorId;
     }
 
     public UUID getTenantId() {
@@ -57,5 +58,17 @@ public class UserAccount extends AuditableEntity {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    String getEmail() {
+        return email;
+    }
+
+    String getFullName() {
+        return fullName;
+    }
+
+    void assignRole(UUID roleId) {
+        this.roleId = roleId;
     }
 }

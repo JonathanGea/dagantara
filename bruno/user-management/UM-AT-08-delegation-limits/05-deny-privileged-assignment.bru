@@ -1,0 +1,29 @@
+meta {
+  name: Assign role returns 403
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000302/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "roleId": "00000000-0000-0000-0000-000000000106"
+  }
+}
+
+tests {
+  test("Assign role returns 403", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

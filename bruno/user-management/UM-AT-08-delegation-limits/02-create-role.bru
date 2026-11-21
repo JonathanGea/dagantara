@@ -1,0 +1,35 @@
+meta {
+  name: Limited manager creates an empty role
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "AT08_LIMITED",
+    "name": "Limited Role"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody().data;
+    bru.setVar("limitedRoleId", data.id);
+  }
+}
+
+tests {
+  test("Limited manager creates an empty role", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

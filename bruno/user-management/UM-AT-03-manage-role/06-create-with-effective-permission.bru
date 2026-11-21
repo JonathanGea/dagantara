@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-03 assigned user can create an account
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "at03-created",
+    "email": "at03-created@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "00000000-0000-0000-0000-000000000102"
+  }
+}
+
+tests {
+  test("UM-AT-03 assigned user can create an account", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().data.tenantId).to.equal("00000000-0000-0000-0000-000000000001");
+  });
+}

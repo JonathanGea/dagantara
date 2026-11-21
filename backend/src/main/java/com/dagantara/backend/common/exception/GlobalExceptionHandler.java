@@ -14,6 +14,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
@@ -55,6 +56,11 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleInvalidJson(HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",
                 "Malformed or missing JSON request body", request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleInvalidParameter(HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Invalid request parameter", request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

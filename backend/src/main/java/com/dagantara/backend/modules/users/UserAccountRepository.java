@@ -15,23 +15,5 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
             """, nativeQuery = true)
     Optional<UserAccount> findForTenantLogin(String username, String tenantCode);
 
-    @Query(value = """
-            SELECT u.* FROM users u
-            JOIN roles r ON r.id = u.role_id
-            JOIN role_permissions rp ON rp.role_id = r.id
-            JOIN permissions p ON p.id = rp.permission_id
-            WHERE u.id = :userId AND u.status = 'ACTIVE' AND p.code = 'users.create'
-              AND r.tenant_id IS NOT DISTINCT FROM u.tenant_id AND r.scope = u.account_type
-            """, nativeQuery = true)
-    Optional<UserAccount> findCreator(UUID userId);
-
-    @Query(value = """
-            SELECT EXISTS (
-                SELECT 1 FROM roles r
-                WHERE r.id = :roleId
-                  AND r.tenant_id IS NOT DISTINCT FROM CAST(:tenantId AS uuid)
-                  AND r.scope = :accountType
-            )
-            """, nativeQuery = true)
-    boolean isAssignableOnCreate(UUID roleId, UUID tenantId, String accountType);
+    Optional<UserAccount> findByIdAndTenantId(UUID id, UUID tenantId);
 }

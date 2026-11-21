@@ -51,6 +51,7 @@ tersimpan. Gunakan kredensial PostgreSQL dari lingkungan:
 
 ```powershell
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/user-management.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/user-management-roles.sql
 ```
 
 - `POST /api/v1/auth/login` menerima `username` dan `password`. Sertakan
@@ -65,8 +66,35 @@ psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/user-management.sql
 - Kredensial bootstrap teknis tetap dapat digunakan untuk login. Permission
   pembuatan pengguna diberikan melalui role akun yang tersimpan.
 
-Provisioning tenant dan akun pengelola pertama serta kebijakan pengelolaan role
-masih menunggu keputusan dalam [spesifikasi User Management](../docs/user-management.md).
+### Superadmin dan provisioning
+
+Terapkan `user-management-roles.sql` satu kali setelah skema dasar. Untuk
+database yang sudah memakai skema dasar, cukup terapkan skrip role. Kode role
+tenant yang duplikat atau penggunaan kode `SUPERADMIN` dan `TENANT_ADMIN` yang
+bertabrakan harus dibereskan sebelum menerapkan skrip pada data lama.
+
+Siapkan `DAGANTARA_SUPERADMIN_USERNAME`, `DAGANTARA_SUPERADMIN_EMAIL`,
+`DAGANTARA_SUPERADMIN_FULL_NAME`, dan `DAGANTARA_SUPERADMIN_PASSWORD_HASH` di
+lingkungan operator. Gunakan hash BCrypt cost 12 dan username yang berbeda dari
+bootstrap teknis, lalu jalankan dari folder `backend`.
+
+```powershell
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/bootstrap-superadmin.sql
+```
+
+Skrip bisa diulang. Akun superadmin pertama yang sudah ada tetap digunakan.
+Login sebagai superadmin tanpa `tenantCode`, lalu gunakan `POST /api/v1/tenants`
+dengan `code`, `name`, dan `admin` berisi `username`, `email`, `fullName`,
+serta `password`. Setelah respons `201`, pengelola pertama login dengan
+`tenantCode` baru. Sistem menetapkan role `TENANT_ADMIN` dan permission awalnya
+sesuai [spesifikasi User Management](../docs/user-management.md).
+
+| Endpoint tenant | Permission | Payload |
+| --- | --- | --- |
+| `POST /api/v1/roles` | `roles.create` | `code`, `name` |
+| `PUT /api/v1/roles/{roleId}/permissions` | `roles.permissions.update` | `permissionCodes`, daftar pengganti |
+| `PUT /api/v1/users/{userId}/role` | `users.role.assign` | `roleId` |
+| `GET /api/v1/users/{userId}` | `users.read` | — |
 
 Untuk memverifikasi alur yang tersedia, gunakan database PostgreSQL uji kosong
 dan set `UM_TEST_PASSWORD` ke password sementara alfanumerik di proses lokal.
@@ -76,6 +104,7 @@ database uji yang sama. Fixture hanya untuk pengujian.
 
 ```powershell
 psql -X -v ON_ERROR_STOP=1 -f backend/src/main/resources/db/user-management.sql
+psql -X -v ON_ERROR_STOP=1 -f backend/src/main/resources/db/user-management-roles.sql
 psql -X -v ON_ERROR_STOP=1 -f bruno/user-management/fixtures.sql
 cd bruno
 bru run smoke --env Local

@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-07 initial admin can create a tenant user
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "at07-created",
+    "email": "at07-created@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "{{tenantAdminRoleId}}"
+  }
+}
+
+tests {
+  test("UM-AT-07 initial admin can create a tenant user", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().data.tenantId).to.equal(bru.getVar("provisionedTenantId"));
+  });
+}

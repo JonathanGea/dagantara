@@ -1,5 +1,5 @@
 meta {
-  name: Login as creator
+  name: Login as manager
   type: http
   seq: 1
 }
@@ -12,7 +12,7 @@ post {
 
 body:json {
   {
-    "username": "creator",
+    "username": "manager",
     "tenantCode": "tenant-a",
     "password": "{{testPassword}}"
   }

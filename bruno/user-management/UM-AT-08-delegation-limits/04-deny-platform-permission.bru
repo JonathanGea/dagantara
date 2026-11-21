@@ -1,0 +1,31 @@
+meta {
+  name: UM-AT-08 cannot grant platform provisioning
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/roles/{{limitedRoleId}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "permissionCodes": [
+      "tenants.provision"
+    ]
+  }
+}
+
+tests {
+  test("UM-AT-08 cannot grant platform provisioning", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

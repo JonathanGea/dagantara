@@ -1,0 +1,29 @@
+meta {
+  name: Assign role returns 404
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000305/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "roleId": "00000000-0000-0000-0000-000000000104"
+  }
+}
+
+tests {
+  test("Assign role returns 404", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}
