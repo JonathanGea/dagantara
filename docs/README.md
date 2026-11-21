@@ -40,3 +40,7 @@ Untuk menulis spesifikasi modul, gunakan `$write-module-spec` dengan nama modul 
 Bahas keputusan yang menghalangi suatu alur saat menulis spesifikasi. Kaitkan setiap keputusan yang masih terbuka dengan ID dan skenario yang tertahan sebelum menyatakan modul siap diimplementasikan.
 
 Untuk mengimplementasikan seluruh modul, cukup panggil skill dengan file modul, misalnya `$implement-from-spec @docs/user-management.md`. Untuk cakupan yang lebih kecil, tambahkan aksi, ID spesifikasi, atau batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.
+
+### Daftar skill pada viewer
+
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, perbarui manifest yang dipakai viewer dengan menjalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui `docs/skills.json`, lalu skill akan muncul saat viewer dimuat ulang melalui server HTTP.

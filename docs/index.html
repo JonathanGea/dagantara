@@ -142,9 +142,6 @@
         </span>
         <i data-lucide="chevrons-up-down" class="small-icon text-[#a5a5a0]"></i>
       </button>
-      <button id="sidebar-close" type="button" class="p-2 rounded-md hover:bg-[#e9e9e7] text-[#787774] shrink-0" title="Sembunyikan sidebar" aria-label="Sembunyikan sidebar">
-        <i data-lucide="panel-left-close" class="icon"></i>
-      </button>
     </div>
 
     <div class="px-3 mt-2">
@@ -170,20 +167,12 @@
     </div>
     <div class="overflow-y-auto side-scroll flex-1 px-3 pb-7">
       <div id="sidebar-pages" class="space-y-[2px] mb-4"></div>
-      <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">SKILLS</div>
-      <a class="side-link text-[12px] mb-4" href="../.agents/skills/spring-boot-run/SKILL.md">
-        <i data-lucide="terminal" class="w-[14px] h-[14px] text-[#999893]"></i><span>Jalankan Backend</span>
-      </a>
+      <div id="skills-section" class="mb-4">
+        <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">SKILLS</div>
+        <div id="sidebar-skills" class="space-y-[2px]"></div>
+      </div>
       <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">ON THIS PAGE</div>
       <div id="sidebar-sections" class="pl-[16px] ml-[17px] border-l border-[#e3e3df] space-y-[2px]"></div>
-      <div class="mt-8 pt-4 border-t border-[#e9e9e6] mx-2">
-        <div class="text-[11px] text-[#9b9a97] leading-relaxed mb-3">Documentation sources</div>
-        <div class="flex gap-2 items-center text-[12px] text-[#787774]">
-          <i data-lucide="file-code-2" class="small-icon"></i>
-          <span class="font-mono text-[11px]">Markdown files</span>
-          <span id="sidebar-source-state" class="ml-auto w-1.5 h-1.5 bg-[#88b394] rounded-full" title="Ready"></span>
-        </div>
-      </div>
     </div>
     <div class="border-t border-[#e9e9e7] p-3">
       <div class="flex items-center gap-2 px-2 py-2 text-[12px] text-[#969591]">
@@ -195,20 +184,12 @@
   </aside>
 
   <div id="main-area" class="lg:ml-[264px] h-[100dvh] overflow-y-auto relative scroll-smooth">
-    <header id="topbar" class="h-[52px] sticky top-0 bg-white/95 backdrop-blur-md z-30 flex items-center justify-between gap-2 border-b border-[#f1f1ef] px-4 md:px-7">
+    <header id="topbar" class="h-[52px] sticky top-0 bg-white/95 backdrop-blur-md z-30 flex items-center gap-2 border-b border-[#f1f1ef] px-4 md:px-7">
       <div class="flex items-center min-w-0 gap-2 text-[13px]">
         <button id="sidebar-toggle" type="button" class="p-2 -ml-2 mr-1 rounded-md hover:bg-[#f3f3f1] text-[#787774] shrink-0" title="Sembunyikan sidebar" aria-label="Sembunyikan sidebar" aria-controls="sidebar" aria-expanded="true"><i data-lucide="panel-left-close" class="icon"></i></button>
         <span class="text-[#aaa9a5] hidden sm:inline">Dagantara</span>
         <i data-lucide="chevron-right" class="small-icon text-[#c8c8c4] hidden sm:inline"></i>
         <span class="font-medium truncate">Developer Documentation</span>
-        <span id="current-doc-name" class="hidden md:inline text-[11px] text-[#969591] rounded bg-[#f4f4f2] px-2 py-0.5 ml-1">README.md</span>
-      </div>
-      <div class="flex items-center gap-1.5 text-[#777670] shrink-0">
-        <button id="top-search" class="p-[7px] rounded hover:bg-[#f4f4f2]" aria-label="Cari"><i data-lucide="search" class="icon"></i></button>
-        <button id="refresh-button" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Muat ulang dokumen" aria-label="Refresh dokumen"><i data-lucide="refresh-cw" class="icon"></i></button>
-        <button id="top-share" class="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-[#f4f4f2] text-[12px]" title="Salin link dokumentasi"><i data-lucide="link-2" class="small-icon"></i><span class="hidden sm:inline">Copy link</span></button>
-        <div class="h-5 border-l border-[#eaeae7] mx-1"></div>
-        <button id="more-menu" class="p-[7px] rounded hover:bg-[#f4f4f2]" title="Cetak / simpan sebagai PDF" aria-label="Print"><i data-lucide="ellipsis" class="icon"></i></button>
       </div>
     </header>
 
@@ -660,6 +641,32 @@ erDiagram
         }
         icons();
       }
+      async function drawSkillList() {
+        const section=byId('skills-section');
+        const target=byId('sidebar-skills');
+        try {
+          const response=await fetch('./skills.json',{cache:'no-store'});
+          if(!response.ok) throw new Error('HTTP '+response.status);
+          const skills=await response.json();
+          if(!Array.isArray(skills)) throw new Error('Invalid skill manifest');
+          target.replaceChildren();
+          for(const skill of skills) {
+            if(!skill || typeof skill.id!=='string' || typeof skill.title!=='string') continue;
+            const link=document.createElement('a');
+            link.className='side-link text-[12px]';
+            link.href='../.agents/skills/'+encodeURIComponent(skill.id)+'/SKILL.md';
+            link.title=typeof skill.description==='string' ? skill.description : skill.title;
+            link.target='_blank';
+            link.rel='noopener';
+            link.innerHTML=iconMarkup('sparkles','w-[14px] h-[14px] text-[#999893]')+'<span>'+escapeHtml(skill.title)+'</span>';
+            target.append(link);
+          }
+          section.hidden=target.childElementCount===0;
+          icons();
+        } catch (_) {
+          section.hidden=true;
+        }
+      }
       async function readMarkdownFile(path) {
         try {
           const response=await fetch('./'+path,{cache:'no-store'});
@@ -936,11 +943,8 @@ erDiagram
         byId('readme-error').classList.add('hidden');
         root.classList.remove('hidden');
         byId('page-footer').classList.remove('hidden');
-        byId('sidebar-source-state').title=source==='live'?currentFile+' loaded':'Offline snapshot: '+currentFile;
-        byId('sidebar-source-state').className='ml-auto w-1.5 h-1.5 rounded-full '+(source==='live'?'bg-[#88b394]':'bg-[#d6a45f]');
         byId('source-note').classList.toggle('hidden',source==='live');
         byId('source-note').classList.toggle('flex',source!=='live');
-        byId('current-doc-name').textContent=currentFile;
         byId('current-doc-footer').textContent=currentFile;
         icons();renderMermaid();
         const hash=decodeURIComponent(location.hash.replace(/^#/,''));
@@ -1020,9 +1024,7 @@ erDiagram
       byId('sidebar-toggle').onclick=()=>{
         const nextOpen=!sidebarIsOpen();
         setSidebarOpen(nextOpen);
-        if (nextOpen && !desktopSidebar.matches) byId('sidebar-close').focus();
       };
-      byId('sidebar-close').onclick=()=>setSidebarOpen(false);
       byId('sidebar-scrim').onclick=closeSidebar;
       desktopSidebar.addEventListener('change',()=>{
         byId('sidebar').classList.remove('show');
@@ -1033,10 +1035,6 @@ erDiagram
       byId('overview-trigger').onclick=()=>loadDocument('README.md');
       byId('page-sidebar-root').onclick=()=>loadDocument('README.md');
       byId('search-trigger').onclick=openSearch;
-      byId('top-search').onclick=openSearch;
-      byId('refresh-button').onclick=()=>loadDocument(currentFile,true);
-      byId('top-share').onclick=async()=>{try {await navigator.clipboard.writeText(location.href);showToast('Link disalin');}catch(_){showToast('Clipboard tidak tersedia');}};
-      byId('more-menu').onclick=()=>window.print();
       byId('choose-markdown').onclick=pickMarkdown;
       byId('error-choose').onclick=pickMarkdown;
       byId('dismiss-note').onclick=()=>{byId('source-note').classList.add('hidden');byId('source-note').classList.remove('flex');};
@@ -1054,6 +1052,6 @@ erDiagram
         if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(!searchDialog.open)openSearch();}
         if(e.key==='Escape'){closeSidebar();}
       });
-      syncSidebarControls();loadReadme();
+      syncSidebarControls();drawSkillList();loadReadme();
     })();
   </script>

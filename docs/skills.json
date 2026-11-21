@@ -1,0 +1,42 @@
+[
+    {
+        "id":  "create-postgres-database",
+        "title":  "Membuat database PostgreSQL Dagantara",
+        "description":  "Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi."
+    },
+    {
+        "id":  "implement-from-spec",
+        "title":  "Implementasi dari Spesifikasi Modul",
+        "description":  "Gunakan untuk mengimplementasikan seluruh modul, fitur, atau acceptance scenario dari spesifikasi modul Markdown yang memuat Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios, seperti dokumentasi modul Dagantara."
+    },
+    {
+        "id":  "spring-boot-api",
+        "title":  "Spring Boot API",
+        "description":  "Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara."
+    },
+    {
+        "id":  "spring-boot-database",
+        "title":  "Spring Boot Database",
+        "description":  "Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara."
+    },
+    {
+        "id":  "spring-boot-run",
+        "title":  "Menjalankan Backend Dagantara",
+        "description":  "Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur."
+    },
+    {
+        "id":  "spring-boot-security",
+        "title":  "Spring Boot Security",
+        "description":  "Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara."
+    },
+    {
+        "id":  "spring-boot-testing",
+        "title":  "Spring Boot Testing",
+        "description":  "Gunakan saat membuat atau menjalankan unit, MVC, integration, repository, security, dan acceptance tests untuk backend Spring Boot Dagantara, termasuk pengujian API HTTP dengan Bruno."
+    },
+    {
+        "id":  "write-module-spec",
+        "title":  "Menulis Spesifikasi Modul Dagantara",
+        "description":  "Gunakan untuk membuat atau memperbarui spesifikasi modul Markdown Dagantara di docs/ dari kebutuhan, catatan, atau keputusan pengguna. Hasilnya siap dirujuk oleh implement-from-spec."
+    }
+]
