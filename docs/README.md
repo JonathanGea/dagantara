@@ -43,4 +43,4 @@ Untuk mengimplementasikan seluruh modul, cukup panggil skill dengan file modul, 
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, perbarui manifest yang dipakai viewer dengan menjalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui `docs/skills.json`, lalu skill akan muncul saat viewer dimuat ulang melalui server HTTP.
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan daftar offline di `index.html`, sehingga tautan skill bekerja melalui server HTTP maupun saat file dibuka langsung.
