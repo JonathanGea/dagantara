@@ -62,6 +62,8 @@ Master checklist for Dagantara modules, their surfaces and proposed implementati
 - Subscription & Billing remains conditional on a future SaaS pricing decision.
 - Guest checkout, tax handling, delivery rate calculation, promotion rules and several lifecycle details remain open for dedicated module discussions.
 
+For technical sequencing and safe parallel work, see [Development Dependencies & Parallel Workstreams](development-dependencies.md).
+
 ## Suggested Discussion Order
 
 Tenant Management → Store Settings → Inventory Management → Product Catalog / Discovery → Customer → Cart → Checkout → Order → Payment → Shipping. Reorder implementation based on dependencies once module specifications are finalized.
