@@ -24,6 +24,8 @@ Dagantara adalah platform e-commerce multi-tenant. Backend direncanakan memakai 
 6. Jalankan verifikasi yang tersedia dan laporkan perintah, hasil, serta keterbatasannya. Jangan mengklaim pengujian lulus jika tidak dijalankan.
 7. Ringkas perubahan berdasarkan file dan ID requirement. Berikan catatan jika ada keputusan domain yang masih diperlukan.
 
+Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal, jalankan `bru run --env Local` dari folder `bruno/`.
+
 ## Invarian domain yang wajib dijaga
 
 - Data operasional tenant A tidak boleh terbaca/berubah oleh tenant B tanpa otorisasi yang terdokumentasi.

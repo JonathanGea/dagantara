@@ -1,0 +1,21 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/actuator/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("API mengembalikan HTTP 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Status backend UP", function () {
+    expect(res.getBody()).to.have.property("status", "UP");
+  });
+}
