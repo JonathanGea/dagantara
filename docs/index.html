@@ -547,6 +547,237 @@
     }
 ]
 </script>
+  <script id="offline-development-dependencies" type="text/plain">
+# Development Dependencies & Parallel Workstreams
+
+> **Status: proposed execution plan.** This is an orchestration guide, not approval to implement unspecified features. Refer to each module specification for binding requirements. **P0** denotes MVP priority, not a strict sequential implementation order.
+
+## Module Overview
+
+Define dependency types, safe parallel development, interface contracts, and integration gates for Dagantara's multi-tenant commerce MVP.
+
+## Dependency Semantics
+
+- **Hard:** integration or correctness requires a stable upstream behavior/contract. Downstream implementation may start with mocks, but cannot pass integration gate until upstream is ready.
+- **Soft:** improves the feature but can be deferred or replaced by an explicit MVP fallback.
+- **Contract-first:** teams agree on tenant context, IDs, payloads, status transitions and ownership before editing independently.
+- **Parallel:** implementation can proceed concurrently if file ownership, contracts, and database boundaries are separated.
+- **Not a dependency:** documentation priority or menu ordering does not imply a technical prerequisite.
+
+## Dependency Matrix (P0)
+
+| Module | Hard dependencies for integration | Soft / optional dependencies | Parallel start conditions |
+| --- | --- | --- | --- |
+| Tenant Management | Platform identity/authorization contract | Domain verification automation | Define tenant ID, domain resolution and lifecycle first |
+| User Management | Tenant identity and authorization boundaries for tenant users | Tenant Admin UI | Existing spec may advance against stable tenant contract |
+| Product Management | Tenant isolation and product/variant identity contract | Categories/collections UI polish | Can advance alongside tenant setup using agreed tenant ID |
+| Store Settings | Tenant identity | Storefront advanced theme editor | Contract for tenant settings and publication |
+| Storefront Management (basic) | Tenant resolution, public settings contract | Advanced customization | Static UI and mock data can begin immediately |
+| Inventory Management | Tenant, product/variant IDs | Warehouse/multi-location | Variant identity and reservation contract agreed |
+| Product Catalog / Discovery | Tenant resolution, published product/variant read contract | Live inventory badge, advanced filtering | Mock public catalog contract; final gate requires real product data |
+| Customer Management | Tenant context, customer identity/guest policy | Loyalty | Customer identity and guest-order decision |
+| Address & Location | Tenant/customer ownership contract | External geocoding | Shipping address and origin schema agreed |
+| Cart Management | Tenant, product/variant selection and pricing snapshot contract | Customer login | Cart item contract; guest cart decision |
+| Checkout Management | Cart contract, order creation contract, payment/shipping selection contracts | Promotion engine | Shared checkout request/response and validation agreed |
+| Order Management | Tenant, customer/guest identity, item/price snapshot, inventory reservation contract | Notification | State machine and idempotent order creation agreed |
+| Payment Management | Order identity/amount/state contract | Gateway integrations | Manual transfer proof and verification contract agreed |
+| Shipping Management | Order fulfillment/address contract | Courier API | Manual fee/fulfillment contract agreed |
+
+**Important:** Catalog and Inventory are parallel workstreams, but product/variant identity must be stable. Payment and Shipping can be implemented in parallel after the Order contract is agreed, not after Order is fully coded. Checkout and Order may likewise be built in parallel contract-first.
+
+## Dependency Diagram
+
+```mermaid
+flowchart TD
+  T[Tenant context + auth contract] --> P[Product / variant contract]
+  T --> S[Store settings + storefront shell]
+  T --> C[Customer / guest contract]
+  P --> I[Inventory + reservations]
+  P --> D[Public catalog / discovery]
+  P --> K[Cart]
+  C --> K
+  K --> X[Checkout]
+  I --> O[Order + reservation integration]
+  C --> O
+  X --> O
+  O --> M[Manual payment verification]
+  O --> H[Shipping / fulfillment]
+  M --> G[End-to-end release gate]
+  H --> G
+  D --> G
+  S --> G
+```
+
+Arrows show **integration prerequisites**, not a ban on parallel coding. A node may be built against mocks while its upstream dependency is unfinished.
+
+## Parallel Development Plan
+
+| Wave | Workstream / agent | Scope | Start gate | Integration gate |
+| --- | --- | --- | --- | --- |
+| 0 | Architecture / contracts | Tenant context, IDs, shared status model, API conventions, ownership | Existing decisions reviewed | Contract baseline accepted |
+| 1 | A — Platform & identity | Tenant Management + User integration | Wave 0 | Tenant isolation and domain routing verified |
+| 1 | B — Catalog data | Product Management + variant contract | Wave 0 | Published product/variant contract verified |
+| 1 | C — Store experience | Store Settings + Storefront shell | Wave 0 | Correct tenant branding and route resolution |
+| 1 | D — Customer | Customer identity, address model | Wave 0 | Customer/guest flow contract verified |
+| 2 | E — Stock | Inventory, stock reservations | Variant contract | Reserve/release/commit semantics verified |
+| 2 | F — Discovery | Public catalog, search/detail | Public product contract | Only correct tenant's published products visible |
+| 2 | G — Cart | Cart and price snapshots | Variant + customer/guest contract | Valid cart items and tenant isolation |
+| 2 | H — Transaction core | Order state machine + checkout contract | Order/checkout contract baseline | Idempotent order creation and reservation coordination |
+| 3 | I — Payment | Manual transfer proof + admin verification | Order contract | Payment verification transitions safely |
+| 3 | J — Fulfillment | Shipping rates, address, tracking | Order/address contract | Fulfillment state and shipping fees consistent |
+| 4 | Integration | End-to-end storefront → order → payment → fulfillment | Waves 1–3 integration gates | Release acceptance scenarios pass |
+
+**Parallelism:** Waves overlap where contracts permit. Wave 2 agents E/F/G/H need not wait for each other's implementation, only the agreed contracts. Wave 3 agents I/J can work in parallel against Order mocks.
+
+## Contract Ownership & Conflict Avoidance
+
+| Contract / shared resource | Primary owner | Consumers | Freeze before |
+| --- | --- | --- | --- |
+| Tenant ID, resolution, security context | Platform/Identity | All tenant modules | Parallel feature integration |
+| Product/variant ID and publication | Catalog data | Inventory, Discovery, Cart, Order | Wave 2 |
+| Stock reservation API and expiry | Inventory | Checkout, Order | Transaction integration |
+| Customer/guest ID and address snapshot | Customer | Cart, Checkout, Order, Shipping | Wave 2 |
+| Money, currency, pricing snapshot | Transaction core + Product | Cart, Checkout, Order, Payment | Wave 2 |
+| Order ID, state transitions, idempotency | Order | Checkout, Payment, Shipping | Wave 3 |
+| Manual payment proof and verification | Payment | Order, Tenant Admin | Wave 3 |
+| Shipping fee and fulfillment contract | Shipping | Checkout, Order | Wave 3 |
+
+Each agent owns its module files and tests. Shared DTOs, migrations, auth middleware and cross-module enums require a designated owner or a separately reviewed contract PR. Avoid simultaneous edits to the same files. Use isolated branches/worktrees and integrate small PRs into `dev` in dependency order; rebase or update from `dev` before merge.
+
+## Integration Gates & Acceptance Scenarios
+
+1. **IG-01 Tenant isolation:** Domain/tenant resolution is deterministic; no cross-tenant reads or writes, including public catalog and carts.
+2. **IG-02 Catalog:** Only published and eligible products/variants are exposed to the correct storefront.
+3. **IG-03 Inventory:** Concurrent order attempts do not oversell; reservations expire/release/commit according to an agreed lifecycle.
+4. **IG-04 Cart and checkout:** Totals are validated server-side; price and address snapshots are persisted correctly.
+5. **IG-05 Order:** Repeated checkout submission cannot create duplicate orders; state transitions are validated.
+6. **IG-06 Payment:** Tenant admin verifies manual transfers only for own tenant; rejected/unpaid cases preserve correct order and stock states.
+7. **IG-07 Shipping:** Fees and fulfillment state match the order; tenant isolation holds.
+8. **IG-08 End-to-end:** Storefront catalog → cart → checkout → order → manual payment → fulfillment works on a tenant domain.
+
+## Open Decisions / Blockers
+
+| ID | Decision needed | Blocks |
+| --- | --- | --- |
+| DEP-01 | Tenant/domain lifecycle and inactive-tenant behavior | Tenant routing and public storefront gate |
+| DEP-02 | Product publication and variant availability rules | Discovery/Cart integration |
+| DEP-03 | Reservation duration, expiration and payment verification timing | Inventory/Order/Payment integration |
+| DEP-04 | Guest checkout and customer identity policy | Customer/Cart/Checkout |
+| DEP-05 | Shipping fee calculation, origin and delivery methods for MVP | Checkout/Shipping |
+| DEP-06 | Order/payment/shipping state machine and cancellation rules | Order/Payment/Shipping |
+| DEP-07 | Money, price snapshots, discount/tax treatment | Cart/Checkout/Order |
+
+Do not infer decisions from this plan. Resolve blockers in their module specifications and link stable requirement IDs before implementation.
+
+## Admin UI Structure
+
+Workstream labels are engineering ownership only, **not** Admin menus or submenu requirements.
+
+## Functional Specification
+
+This plan coordinates implementation; it does not add business features beyond dedicated module specifications.
+
+## Business Rules
+
+Tenant isolation and server-side validation remain cross-cutting requirements. Hard dependencies are integration requirements; mocks are acceptable only during isolated development.
+
+## Data Model
+
+No new database tables or columns are authorized by this document. Data contracts are conceptual until module ERDs are finalized.
+
+  </script>
+  <script id="offline-module-roadmap" type="text/markdown">
+# Module Roadmap & Ownership
+
+> **Status:** planning / discussion. This roadmap is not an implementation specification. **Discussed** means previously discussed, not implemented or fully finalized.
+
+## Module Overview
+
+Master checklist for Dagantara modules, their surfaces and proposed implementation priorities. A module is not necessarily a backend service or a navigation menu.
+
+## Priority Definitions
+
+- **Discussed:** previous design discussions exist; refer to the dedicated module specification for binding decisions.
+- **P0:** proposed MVP scope required to operate a tenant storefront and process an online order.
+- **P1:** post-MVP improvements.
+- **P2:** later-stage or conditional capabilities.
+
+## Module Matrix
+
+| No. | Module | Surface | Priority | Scope / notes |
+| --- | --- | --- | --- | --- |
+| 1 | User Management | Platform Admin / Tenant Admin | Discussed | Identity, role, permission; tenant-scoped access |
+| 2 | Product Management | Tenant Admin | Discussed | Independent catalog, variants, categories, media |
+| 3 | Tenant Management | Platform Admin | P0 | Tenant lifecycle, domain mapping, isolation |
+| 4 | Store Settings | Tenant Admin | P0 | Store identity, contact, basic operational settings |
+| 5 | Storefront Management | Tenant Admin | P0/P1 | P0 basic layout/navigation; P1 advanced customization |
+| 6 | Inventory Management | Tenant Admin | P0 | Variant stock, adjustments, reservations |
+| 7 | Product Catalog / Discovery | Storefront | P0 | Public listing, detail, search, filter, collection |
+| 8 | Customer Management | Tenant Admin / Storefront | P0 | Customer identity, guest/registered decisions |
+| 9 | Cart Management | Storefront | P0 | Cart items and quantity |
+| 10 | Checkout Management | Storefront | P0 | Checkout validation and order submission |
+| 11 | Order Management | Tenant Admin / Storefront | P0 | Order lifecycle and history |
+| 12 | Payment Management | Tenant Admin / Storefront | P0 | Manual transfer and admin verification |
+| 13 | Shipping Management | Tenant Admin / Storefront | P0 | Shipping fees, fulfillment, tracking |
+| 14 | Address & Location Management | Tenant Admin / Storefront | P0 | Customer addresses and shipping origins; may be subfeatures |
+| 15 | Pricing & Promotion | Tenant Admin | P1 | Discounts, vouchers, campaign rules |
+| 16 | Notification Management | Tenant Admin / Storefront | P1 | Transaction notifications |
+| 17 | Reporting & Analytics | Platform Admin / Tenant Admin | P1 | Tenant-scoped and platform-wide metrics |
+| 18 | Tax Management | Tenant Admin | P1 | Tax configuration and calculations |
+| 19 | Platform Configuration | Platform Admin | P1 | Global configuration |
+| 20 | Return & Refund | Tenant Admin / Storefront | P2 | Returns and refunds |
+| 21 | POS Management | Tenant Admin | P2 | Offline sales, shared inventory |
+| 22 | Review & Rating | Tenant Admin / Storefront | P2 | Product reviews |
+| 23 | Audit & Activity Log | Platform Admin / Tenant Admin | P2 | Activity traceability |
+| 24 | Subscription & Billing | Platform Admin / Tenant Admin | P2 conditional | Only if SaaS monetization is adopted |
+
+## Ownership & Boundaries
+
+- **Platform Admin:** manages cross-tenant platform operations. Cross-tenant access requires explicit authorization.
+- **Tenant Admin:** manages only the resolved tenant's resources.
+- **Storefront:** customer-facing public and authenticated flows, resolved from the tenant's domain/context.
+- Cart and Checkout are primarily storefront flows, not automatically Tenant Admin menus.
+- Address & Location may be organized under Customer and Shipping; do not create a standalone service/table merely because it appears in this roadmap.
+- Storefront Management is **one module** with basic (P0) and advanced (P1) phases, not two technical modules.
+- Product Catalog reads the tenant's published product data; it does not create a second independent product catalog.
+- Product/variant stock reservations belong to Inventory, and payment proof/verification belongs to Payment.
+
+## Known Decisions & Dependencies
+
+- Each tenant has an independent catalog; tenant isolation is mandatory.
+- Initial payment uses manual bank transfer with tenant bank account and admin verification; payment gateway is not an MVP requirement.
+- Online commerce comes before POS.
+- Tenant-specific storefront domains are supported in the architecture; the exact tenant/domain lifecycle needs a dedicated specification.
+- Subscription & Billing remains conditional on a future SaaS pricing decision.
+- Guest checkout, tax handling, delivery rate calculation, promotion rules and several lifecycle details remain open for dedicated module discussions.
+
+## Suggested Discussion Order
+
+Tenant Management → Store Settings → Inventory Management → Product Catalog / Discovery → Customer → Cart → Checkout → Order → Payment → Shipping. Reorder implementation based on dependencies once module specifications are finalized.
+
+## Admin UI Structure
+
+This matrix records **surfaces**, not finalized menus or actions. Define actual navigation, submenu and actions in each module's own specification before implementation.
+
+## Functional Specification
+
+No new functional requirements are approved by this roadmap. Use dedicated module specifications with stable requirement IDs.
+
+## Business Rules
+
+Tenant isolation applies across all tenant-owned data. No feature is considered approved solely because it is listed here.
+
+## Data Model
+
+No tables or columns are introduced by this roadmap. ERDs and constraints belong to dedicated module documents.
+
+## Acceptance Scenarios
+
+- The documentation index exposes this roadmap as a navigable page.
+- The roadmap distinguishes surface, priority, discussed status and unresolved decisions.
+- No implementation task should infer a new database table or Admin menu solely from a roadmap row.
+
+  </script>
   <script id="offline-readme" type="text/plain"># Dagantara
 
 > **AI-Ready Development Specification** · Multi-tenant e-commerce
@@ -557,6 +788,8 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 
 - [User Management](user-management.md)
 - [Product Management](product-management.md)
+- [Module Roadmap & Ownership](module-roadmap.md)
+- [Development Dependencies & Parallel Workstreams](development-dependencies.md)
 
 ## Aturan Membaca untuk AI Developer
 
@@ -578,13 +811,22 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 | **Functional Specification** | Perilaku sistem yang diberi ID agar mudah dijadikan tugas AI. |
 | **Business Rules** | Invarian, validasi, dan pembatasan yang wajib dipatuhi. |
 | **Data Model** | ERD, fungsi tabel, relasi, dan constraint yang telah ditentukan. |
-| **Acceptance Scenarios** | Situasi dan hasil terukur untuk menguji implementasi. |
+| **Acceptance Scenarios** | Kondisi, tindakan, dan hasil terukur yang ditautkan ke ID requirement. |
 
 Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahkan detail permission, lifecycle, atau hubungan antarmodul hanya bila sudah ada keputusan yang relevan.
 
 ## Penggunaan dalam Pengembangan
 
-Saat meminta AI mengimplementasikan fitur, sebutkan file modul, ID spesifikasi, dan batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.</script>
+Untuk menulis spesifikasi modul, gunakan `$write-module-spec` dengan nama modul dan catatan kebutuhan. Untuk memperbarui spesifikasi, sertakan file dan perubahan yang diminta, misalnya `$write-module-spec @docs/user-management.md` diikuti keputusan yang ingin dicatat.
+
+Bahas keputusan yang menghalangi suatu alur saat menulis spesifikasi. Kaitkan setiap keputusan yang masih terbuka dengan ID dan skenario yang tertahan sebelum menyatakan modul siap diimplementasikan.
+
+Untuk mengimplementasikan seluruh modul, cukup panggil skill dengan file modul, misalnya `$implement-from-spec @docs/user-management.md`. Untuk cakupan yang lebih kecil, tambahkan aksi, ID spesifikasi, atau batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.
+
+### Daftar skill pada viewer
+
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan daftar offline di `index.html`, sehingga tautan skill bekerja melalui server HTTP maupun saat file dibuka langsung.
+</script>
   <script id="offline-user-management" type="text/plain"># User Management
 
 ## Module Overview
@@ -893,6 +1135,8 @@ erDiagram
         'README.md': byId('offline-readme').textContent.trim(),
         'user-management.md': byId('offline-user-management').textContent.trim(),
         'product-management.md': byId('offline-product-management').textContent.trim(),
+        'module-roadmap.md': byId('offline-module-roadmap').textContent.trim(),
+        'development-dependencies.md': byId('offline-development-dependencies').textContent.trim(),
       };
       function parseDocPages(readme) {
         const result = [];

@@ -8,6 +8,8 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 
 - [User Management](user-management.md)
 - [Product Management](product-management.md)
+- [Module Roadmap & Ownership](module-roadmap.md)
+- [Development Dependencies & Parallel Workstreams](development-dependencies.md)
 
 ## Aturan Membaca untuk AI Developer
 
