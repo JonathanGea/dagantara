@@ -1,9 +1,16 @@
 ---
 name: implement-from-spec
-description: Gunakan untuk mengimplementasikan fitur atau acceptance scenario dari spesifikasi modul Markdown yang memuat Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios, seperti dokumentasi modul Dagantara.
+description: Gunakan untuk mengimplementasikan seluruh modul, fitur, atau acceptance scenario dari spesifikasi modul Markdown yang memuat Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios, seperti dokumentasi modul Dagantara.
 ---
 
 # Implementasi dari Spesifikasi Modul
+
+## Tetapkan cakupan
+
+1. Jika pengguna memanggil skill dengan hanya satu file modul, seperti `$implement-from-spec @docs/user-management.md`, implementasikan seluruh modul tersebut. Jika pengguna menyebutkan aksi, ID, atau batas pekerjaan, ikuti cakupan yang diberikan. Untuk permintaan analisis atau review, ikuti tujuan tersebut.
+2. Baca `AGENTS.md`, `docs/README.md`, dan file modul yang dirujuk. Untuk perubahan backend, baca juga `backend/AGENTS.md`. Gunakan `docs/user-management.md` untuk ID `UM-*` dan `docs/product-management.md` untuk ID `PM-*`. Baca spesifikasi modul lain jika ada dependensi lintas modul.
+3. Petakan Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios yang relevan. Untuk satu modul penuh, petakan seluruh cakupan yang sudah disepakati sebelum coding. Urutkan pengerjaan per alur berdasarkan dependensi dan lacak tiap ID hingga verifikasi akhir. Untuk aksi tanpa ID, temukan ID dari tindakan yang diminta.
+4. Gunakan Admin UI Structure untuk menemukan lokasi aksi yang sudah dispesifikasikan. Perlakukan nama menu, contoh, dan diagram yang ditandai sebagai referensi sebagai konteks. Ambil perilaku, relasi, dan constraint yang mengikat dari keputusan yang tercatat di Markdown modul. Jika permintaan eksplisit mengubah keputusan terdokumentasi, sebutkan perubahan tersebut dan tandai konflik yang masih perlu diselesaikan.
 
 ## Siapkan branch kerja di Dagantara
 
@@ -11,21 +18,17 @@ description: Gunakan untuk mengimplementasikan fitur atau acceptance scenario da
 2. Sinkronkan `dev` lokal dengan `origin/dev` secara fast-forward. Jika keduanya sudah sama atau dapat disamakan dengan aman, jalankan `git switch dev`, `git merge --ff-only origin/dev`, lalu `git switch -c <branch-kerja>`. Gunakan nama branch yang mencerminkan ID atau fitur yang dikerjakan.
 3. Jika perubahan lokal harus dipertahankan, `dev` sedang digunakan di worktree lain, atau `dev` berisi commit lokal yang belum ada di remote, buat branch kerja baru di worktree terpisah langsung dari `origin/dev` yang sudah diperbarui. Pertahankan perubahan dan riwayat lokal yang ada.
 
-## Tetapkan cakupan
-
-1. Baca instruksi repo yang berlaku, indeks dokumentasi jika tersedia, dan file modul yang dirujuk. Di Dagantara, baca `AGENTS.md` dan `docs/README.md`, lalu gunakan `docs/user-management.md` untuk ID `UM-*` dan `docs/product-management.md` untuk ID `PM-*`. Buka spesifikasi modul lain jika ada dependensi lintas modul.
-2. Petakan permintaan ke ID Functional Specification, Business Rules, bagian Data Model, dan ID Acceptance Scenarios yang relevan. Jika pengguna menyebutkan aksi tanpa ID, cari ID dari aksi itu. Jika pengguna meminta satu modul penuh, bagi implementasi menjadi cakupan kecil per perilaku yang disepakati dan verifikasi tiap bagian.
-3. Gunakan Admin UI Structure untuk menemukan lokasi aksi yang sudah dispesifikasikan. Perlakukan nama menu, contoh, dan diagram yang ditandai sebagai referensi sebagai konteks. Ambil perilaku, relasi, dan constraint yang mengikat dari keputusan yang tercatat di Markdown modul. Jika permintaan eksplisit mengubah keputusan terdokumentasi, sebutkan perubahan tersebut dan tandai konflik yang masih perlu diselesaikan.
-
 ## Implementasikan cakupan yang disepakati
 
-1. Periksa kode, skema, kontrak API, dan tes yang relevan. Tentukan bagian yang sudah tersedia dan perubahan yang diperlukan agar aksi bekerja melalui jalur yang biasa dipakai. Untuk backend Dagantara, gunakan skill Spring Boot yang relevan sesuai tabel routing di `AGENTS.md`.
+1. Periksa kode, skema, kontrak API, dan tes yang terkait dengan ID dalam cakupan. Temukan jalur yang sudah ada dan perubahan yang dibutuhkan. Pilih skill dari tabel routing di `AGENTS.md` sesuai pekerjaan. Baca skill saat pertama kali diperlukan, lalu gunakan kembali instruksi dan dokumen yang sudah tersedia dalam konteks tugas.
 2. Bedakan keputusan teknis yang dapat mengikuti pola repo dari keputusan domain yang belum disepakati. Untuk bagian yang bergantung pada keputusan domain, sebutkan ID, informasi yang kurang, dan bagian yang tertahan. Lanjutkan bagian lain dalam cakupan yang dapat dikerjakan secara mandiri. Hindari menambah kontrak, permission, atau skema yang mengunci keputusan terbuka.
 3. Ikuti batas akses dari aturan bisnis. Saat menyentuh data tenant, telusuri konteks tenant pelaku, kepemilikan target, dan kepemilikan entitas yang ditautkan. Saat mengubah beberapa relasi, pertahankan invarian model pada akhir transaksi dan pastikan operasi yang ditolak tidak meninggalkan perubahan parsial.
 
 ## Verifikasi terhadap spesifikasi
 
 - Gunakan kondisi, tindakan, dan hasil masing-masing Acceptance Scenario untuk memilih tes yang relevan. Cek hasil sukses dan penolakan jika tercakup, termasuk keadaan data setelah penolakan. Jalankan tes dan build yang tersedia untuk perubahan tersebut.
+- Untuk pengujian API HTTP, ikuti `spring-boot-testing`. Gunakan `spring-boot-run` jika perlu menjalankan backend lokal, lalu jalankan smoke test Bruno. Setelah smoke test lulus, jalankan semua skenario HTTP dalam cakupan tugas.
+- Laporkan hasil verifikasi per ID Acceptance Scenario beserta perintah dan keputusan yang masih diperlukan. Nyatakan modul selesai setelah seluruh requirement yang disepakati tercakup dan semua skenario wajib lulus.
 
 ## Buka PR ke `dev` di Dagantara
 

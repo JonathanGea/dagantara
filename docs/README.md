@@ -29,10 +29,14 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 | **Functional Specification** | Perilaku sistem yang diberi ID agar mudah dijadikan tugas AI. |
 | **Business Rules** | Invarian, validasi, dan pembatasan yang wajib dipatuhi. |
 | **Data Model** | ERD, fungsi tabel, relasi, dan constraint yang telah ditentukan. |
-| **Acceptance Scenarios** | Situasi dan hasil terukur untuk menguji implementasi. |
+| **Acceptance Scenarios** | Kondisi, tindakan, dan hasil terukur yang ditautkan ke ID requirement. |
 
 Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahkan detail permission, lifecycle, atau hubungan antarmodul hanya bila sudah ada keputusan yang relevan.
 
 ## Penggunaan dalam Pengembangan
 
-Saat meminta AI mengimplementasikan fitur, sebutkan file modul, ID spesifikasi, dan batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.
+Untuk menulis spesifikasi modul, gunakan `$write-module-spec` dengan nama modul dan catatan kebutuhan. Untuk memperbarui spesifikasi, sertakan file dan perubahan yang diminta, misalnya `$write-module-spec @docs/user-management.md` diikuti keputusan yang ingin dicatat.
+
+Bahas keputusan yang menghalangi suatu alur saat menulis spesifikasi. Kaitkan setiap keputusan yang masih terbuka dengan ID dan skenario yang tertahan sebelum menyatakan modul siap diimplementasikan.
+
+Untuk mengimplementasikan seluruh modul, cukup panggil skill dengan file modul, misalnya `$implement-from-spec @docs/user-management.md`. Untuk cakupan yang lebih kecil, tambahkan aksi, ID spesifikasi, atau batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.

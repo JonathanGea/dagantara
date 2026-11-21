@@ -20,10 +20,10 @@ Tenant Admin
 
 Nama submenu di atas mengikuti referensi navigasi. Spesifikasi fungsi yang sudah disepakati saat ini:
 
-| Menu | Submenu / halaman | Fitur dan aksi |
-| --- | --- | --- |
-| Catalog | Products | Menghubungkan produk dengan beberapa kategori dan memilih satu Primary Category. |
-| Catalog | Products | Menghubungkan media produk ke nilai opsi produk. |
+| Menu | Submenu / halaman | Fitur dan aksi | Requirement |
+| --- | --- | --- | --- |
+| Catalog | Products | Menghubungkan produk dengan beberapa kategori dan memilih satu Primary Category. | `PM-02` |
+| Catalog | Products | Menghubungkan media produk ke nilai opsi produk. | `PM-03`, `PM-04` |
 
 ## Functional Specification
 
@@ -109,13 +109,15 @@ erDiagram
 | `products → product_option_values` | Produk memiliki nilai opsi yang dapat dikaitkan dengan medianya. |
 | `product_media ↔ product_option_values` | Many-to-many melalui `media_option_values`; media dapat ditautkan ke beberapa nilai opsi dan sebaliknya. |
 
-**Implementation dependency — PM-02:** lokasi penyimpanan penanda Primary Category belum ditentukan dalam model yang disepakati. Jangan menetapkan kolom atau constraint baru untuk itu sebelum ada keputusan skema.
+**Implementation dependency (`PM-02`).** Tentukan lokasi penyimpanan penanda Primary Category sebelum menetapkan kolom atau constraint untuk aturan tepat satu Primary Category.
+
+**Implementation dependency (`PM-02`).** Tentukan cakupan kepemilikan kategori dan kategori mana yang boleh dipilih oleh setiap tenant. Keputusan ini diperlukan untuk menetapkan relasi kategori dan validasi penautan produk ke kategori.
 
 ## Acceptance Scenarios
 
-| ID | Kondisi | Tindakan | Hasil yang diharapkan |
-| --- | --- | --- | --- |
-| **PM-AT-01** | Terdapat tenant A dan tenant B. | Mengaitkan produk ke katalog tenant A. | Produk mempunyai kepemilikan tenant A dan tidak menjadi entri katalog bersama lintas tenant. |
-| **PM-AT-02** | Satu produk memiliki dua kategori. | Menetapkan satu kategori sebagai Primary Category. | Kedua kategori tetap terhubung dan tepat satu menjadi Primary Category. Implementasi penyimpanannya mengikuti keputusan skema PM-02. |
-| **PM-AT-03** | Satu produk memiliki media M1 dan nilai opsi V1, V2. | Mengaitkan M1 dengan V1 dan V2. | M1 mempunyai dua asosiasi nilai opsi. |
-| **PM-AT-04** | Nilai opsi V1 berkaitan dengan media M1 dan M2 milik produk yang sama. | Mengaitkan V1 dengan kedua media. | V1 mempunyai dua asosiasi media tanpa memindahkan kepemilikan media dari produk. |
+| ID | Requirement | Kondisi | Tindakan | Hasil yang diharapkan |
+| --- | --- | --- | --- | --- |
+| **PM-AT-01** | `PM-01`, `PM-04` | Ada tenant A dan tenant B. Media dan nilai opsi yang valid tersedia pada produk yang diuji. Pelaku tenant B berwenang mengelola asosiasi media pada produknya sendiri. | Kaitkan produk ke katalog tenant A. Sebagai pelaku tenant B, coba tautkan media ke nilai opsi pada produk tersebut. | Produk tercatat sebagai milik tenant A. Penautan oleh pelaku tenant B ditolak dan asosiasi media produk tenant A tetap sama. |
+| **PM-AT-02** | `PM-02` | Ada dua kategori yang valid untuk satu produk. | Kaitkan kedua kategori dengan produk dan pilih salah satunya sebagai Primary Category. | Kedua kategori terhubung dan hanya kategori yang dipilih berstatus Primary Category. |
+| **PM-AT-03** | `PM-03`, `PM-04` | Satu produk memiliki media M1 dan nilai opsi V1 serta V2. Belum ada tautan dari M1 ke V1 maupun V2. | Tautkan M1 ke V1 dan V2. | M1 terhubung ke V1 dan V2. Pemilik M1 tetap produk semula. |
+| **PM-AT-04** | `PM-03`, `PM-04` | Media M1 dan M2 serta nilai opsi V1 dimiliki produk yang sama. Belum ada tautan dari V1 ke M1 maupun M2. | Tautkan V1 ke M1 dan M2. | V1 terhubung ke M1 dan M2. Kedua media tetap dimiliki produk semula. |

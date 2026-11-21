@@ -15,10 +15,10 @@ Tenant Admin
     └── Roles
 ```
 
-| Menu | Submenu / halaman | Fitur dan aksi |
-| --- | --- | --- |
-| User Management | Users | Membuat pengguna; menetapkan role pengguna. |
-| User Management | Roles | Membuat role; menentukan permission role. |
+| Menu | Submenu / halaman | Fitur dan aksi | Requirement |
+| --- | --- | --- | --- |
+| User Management | Users | Membuat pengguna dan menetapkan role pengguna. | `UM-01`, `UM-02`, `UM-04` |
+| User Management | Roles | Membuat role dan menentukan permission role. | `UM-04` |
 
 ## Functional Specification
 
@@ -30,6 +30,10 @@ Tenant Admin
 | **UM-04** | Pengelola berizin dapat membuat role, menghubungkan permission ke role, dan menetapkan role ke pengguna. |
 | **UM-05** | Otorisasi pengguna dihitung dari `users.role_id → roles → role_permissions → permissions`. |
 | **UM-06** | Akses data pengguna tenant mengikuti batas tenant pemilik akun; role dan tenant target harus valid. |
+
+**Implementation dependency (`UM-04`).** Tetapkan aktor yang boleh membuat role, memberi permission ke role, dan menetapkan role ke pengguna. Untuk tiap aksi, tentukan cakupan tenant, scope role, dan batas permission yang boleh diberikan. Aturan ini diperlukan untuk mengimplementasikan alur pengelolaan role dan menyiapkan pelaku uji `UM-AT-03` hingga `UM-AT-05`.
+
+**Implementation dependency (`UM-01`, `UM-02`, `UM-04`).** Tentukan siapa yang menyiapkan tenant dan akun pengelola pertamanya, serta bagaimana akun itu memperoleh tenant context, role, dan permission awal. Keputusan ini diperlukan untuk memulai alur buat pengguna dan kelola role serta menyiapkan kondisi awal pengujian yang memerlukan akun pengelola tenant.
 
 ### Membuat Pengguna
 
@@ -155,10 +159,10 @@ erDiagram
 
 ## Acceptance Scenarios
 
-| ID | Kondisi | Tindakan | Hasil yang diharapkan |
-| --- | --- | --- | --- |
-| **UM-AT-01** | Pengelola login mempunyai permission `users.create` dan role target yang valid. | Membuat akun pengguna. | Pengguna tersimpan pada tenant yang sesuai dan mempunyai satu `role_id`. |
-| **UM-AT-02** | Pengguna login tidak mempunyai permission `users.create`. | Mencoba membuat pengguna. | Operasi ditolak; pengguna tidak dibuat. |
-| **UM-AT-03** | Pengelola memiliki hak mengelola role. | Membuat role dan menghubungkan beberapa permission. | Hak akses role mengikuti relasi di `role_permissions`. |
-| **UM-AT-04** | Pengguna tenant A mengakses data pengguna tenant B tanpa otorisasi yang sesuai. | Membaca atau mengubah data tenant B. | Akses ditolak sesuai tenant isolation. |
-| **UM-AT-05** | Role yang dipilih tidak sesuai scope/tenant target. | Menetapkan role kepada pengguna. | Penetapan ditolak. |
+| ID | Requirement | Kondisi | Tindakan | Hasil yang diharapkan |
+| --- | --- | --- | --- | --- |
+| **UM-AT-01** | `UM-01`, `UM-02`, `UM-03` | Pengelola tenant login dengan permission `users.create` dan memilih role yang valid untuk tenant tersebut. | Membuat akun pengguna. | Pengguna tersimpan pada tenant pelaku dan `role_id` menunjuk ke satu role yang dipilih. |
+| **UM-AT-02** | `UM-01`, `UM-05` | Pengguna login tidak mempunyai permission `users.create`. Data calon pengguna dan role target valid. | Mencoba membuat pengguna. | Operasi ditolak dan calon pengguna tidak tersimpan. |
+| **UM-AT-03** | `UM-04`, `UM-05` | Pengelola berizin mengelola role dalam tenant. Pengguna target berada di tenant yang sama dan belum memiliki `users.create`. | Pengelola membuat role, menghubungkan beberapa permission termasuk `users.create`, lalu menetapkan role itu ke pengguna target. Pengguna target login dan membuat akun dengan role yang valid. | Relasi permission tersimpan, `role_id` pengguna target menunjuk ke role baru, dan pembuatan akun berhasil melalui permission efektif dari role tersebut. |
+| **UM-AT-04** | `UM-06` | Pengelola tenant A dapat menetapkan role di tenant A. Pengguna target berada di tenant B dan pengelola tidak berwenang di sana. | Mencoba menetapkan role yang valid untuk pengguna tenant B. Uji juga percobaan baca terhadap pengguna tersebut pada jalur baca yang sudah ditentukan. | Penetapan ditolak dan `role_id` pengguna tenant B tetap sama. Percobaan baca ditolak tanpa mengembalikan data pengguna target. |
+| **UM-AT-05** | `UM-02`, `UM-04`, `UM-06` | Pengelola berwenang membuat pengguna dan menetapkan role dalam tenant. Role yang dipilih tidak sesuai scope atau tenant pengguna target. | Uji pemilihan role tersebut saat membuat pengguna baru dan saat mengubah role pengguna yang sudah ada. | Kedua tindakan ditolak. Akun baru tidak tersimpan dan `role_id` pengguna yang sudah ada tetap sama. |

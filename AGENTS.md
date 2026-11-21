@@ -40,6 +40,8 @@ Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal,
 
 | Ketika tugas menyangkut | Baca |
 | --- | --- |
+| Menulis atau memperbarui spesifikasi modul Markdown | `.agents/skills/write-module-spec/SKILL.md` |
+| Mengimplementasikan modul, fitur, atau skenario dari spesifikasi | `.agents/skills/implement-from-spec/SKILL.md` |
 | Endpoint REST, DTO, validasi request, response/error contract | `.agents/skills/spring-boot-api/SKILL.md` |
 | Membuat atau menyiapkan database PostgreSQL lokal Dagantara di Windows | `.agents/skills/create-postgres-database/SKILL.md` |
 | JPA, PostgreSQL, relasi, schema/migration, query | `.agents/skills/spring-boot-database/SKILL.md` |
@@ -48,6 +50,8 @@ Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal,
 | Menjalankan atau memeriksa backend lokal | `.agents/skills/spring-boot-run/SKILL.md` |
 
 Gunakan beberapa skill sekaligus jika cakupannya saling bersinggungan. Jangan menganggap skill sebagai requirement fitur baru.
+
+Gunakan kembali isi file yang sudah tersedia dalam konteks tugas. Buka bagian yang relevan jika file berubah atau pekerjaan membutuhkan informasi yang belum tersedia di konteks.
 
 ## Quality gate
 
