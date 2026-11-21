@@ -19,7 +19,7 @@ Excluded by decision: database migration tooling, test harness, Redis/cache, rat
 
 1. Install JDK 21, Maven 3.6.3+, and PostgreSQL.
 2. Create an empty PostgreSQL database named dagantara and grant your local database user access.
-3. Copy `.env.example` to `.env`. Set `DB_*`, `APP_JWT_SECRET_BASE64`, and optionally the bootstrap username and BCrypt hash. Spring does **not** load `.env` automatically.
+3. Copy `.env.example` to `.env`. Set `DB_PASSWORD` and `APP_JWT_SECRET_BASE64`. The `dev` profile defaults to PostgreSQL at `127.0.0.1:5433` with user `dagantara_app`. Set `DB_URL` and `DB_USERNAME` if your local instance differs. You can also set the bootstrap username and BCrypt hash. Export the values before launching Spring Boot.
 4. Generate a signing secret: `openssl rand -base64 48`. Do not reuse one secret across environments.
 5. To generate a BCrypt hash on a machine with Apache htpasswd installed: `htpasswd -nBC 12 bootstrap`. Enter the password interactively, and copy only the hash portion following `bootstrap:`. Put the hash in single quotes in the shell/.env so dollar signs remain literal.
 6. From `backend/`, export environment values and run:

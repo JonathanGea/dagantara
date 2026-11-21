@@ -39,6 +39,7 @@ Dagantara adalah platform e-commerce multi-tenant. Backend direncanakan memakai 
 | Ketika tugas menyangkut | Baca |
 | --- | --- |
 | Endpoint REST, DTO, validasi request, response/error contract | `.agents/skills/spring-boot-api/SKILL.md` |
+| Membuat atau menyiapkan database PostgreSQL lokal Dagantara di Windows | `.agents/skills/create-postgres-database/SKILL.md` |
 | JPA, PostgreSQL, relasi, schema/migration, query | `.agents/skills/spring-boot-database/SKILL.md` |
 | Autentikasi, JWT, role/permission, tenant access | `.agents/skills/spring-boot-security/SKILL.md` |
 | Unit/integration/security testing, acceptance criteria | `.agents/skills/spring-boot-testing/SKILL.md` |
