@@ -11,6 +11,21 @@ Berlaku untuk `backend/**`. Baca juga `../AGENTS.md` dan modul relevan pada `../
 - Validasi input di boundary dan invariannya di service; jangan bergantung hanya pada kontrol di frontend.
 - Batasi transaksi pada unit kerja yang perlu konsistensi. Hindari N+1, lazy loading di luar transaksi, dan akses entity langsung dari response publik.
 
+## Struktur package modul
+
+Kelompokkan kode berdasarkan modul, lalu tanggung jawab di dalam modul. Contoh struktur di bawah `backend/src/main/java/com/dagantara/backend`.
+
+```text
+modules/<nama_module>/
+├── controller/   # endpoint HTTP
+├── service/      # use case, transaksi, dan aturan modul
+├── dto/          # request dan response
+├── repository/   # akses data
+└── entity/       # entity persistence
+```
+
+Buat subpackage yang dibutuhkan modul. Tempatkan tipe request dan response di `dto` agar service dapat menggunakannya tanpa bergantung pada controller. Letakkan infrastruktur lintas modul di `common` sesuai tanggung jawabnya. Saat memindahkan kelas, sesuaikan deklarasi package dan import.
+
 ## Tenant isolation dan keamanan
 
 - Tenant untuk operasi tenant-scoped harus berasal dari konteks terautentikasi/terverifikasi, bukan sekadar `tenantId` yang dikirim client.

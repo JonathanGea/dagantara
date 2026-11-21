@@ -1,9 +1,14 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.controller;
 
 import com.dagantara.backend.common.api.ApiResponse;
 import com.dagantara.backend.common.api.ApiRoutes;
+import com.dagantara.backend.modules.users.dto.AssignRoleRequest;
+import com.dagantara.backend.modules.users.dto.CreateUserRequest;
+import com.dagantara.backend.modules.users.dto.CreateUserResponse;
+import com.dagantara.backend.modules.users.dto.RoleAssignmentResponse;
+import com.dagantara.backend.modules.users.dto.UserDetailsResponse;
+import com.dagantara.backend.modules.users.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,11 +51,5 @@ public class UserController {
                                                           @Valid @RequestBody AssignRoleRequest request) {
         users.assignRole(jwt, userId, request.roleId());
         return ApiResponse.success("Role assigned", new RoleAssignmentResponse(userId, request.roleId()));
-    }
-
-    public record AssignRoleRequest(@NotNull UUID roleId) {
-    }
-
-    public record RoleAssignmentResponse(UUID userId, UUID roleId) {
     }
 }

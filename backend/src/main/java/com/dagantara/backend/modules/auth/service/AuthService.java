@@ -1,10 +1,12 @@
-package com.dagantara.backend.modules.auth;
+package com.dagantara.backend.modules.auth.service;
 
 import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.common.security.BootstrapCredentials;
 import com.dagantara.backend.common.security.UserIdentity;
-import com.dagantara.backend.modules.users.UserAccount;
-import com.dagantara.backend.modules.users.UserAccountRepository;
+import com.dagantara.backend.modules.auth.dto.LoginRequest;
+import com.dagantara.backend.modules.auth.dto.LoginResponse;
+import com.dagantara.backend.modules.users.entity.UserAccount;
+import com.dagantara.backend.modules.users.repository.UserAccountRepository;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -15,10 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.stereotype.Service;
 
 @Service

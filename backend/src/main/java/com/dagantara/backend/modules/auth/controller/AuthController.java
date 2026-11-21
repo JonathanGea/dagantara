@@ -1,7 +1,10 @@
-package com.dagantara.backend.modules.auth;
+package com.dagantara.backend.modules.auth.controller;
 
 import com.dagantara.backend.common.api.ApiResponse;
 import com.dagantara.backend.common.api.ApiRoutes;
+import com.dagantara.backend.modules.auth.dto.LoginRequest;
+import com.dagantara.backend.modules.auth.dto.LoginResponse;
+import com.dagantara.backend.modules.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;

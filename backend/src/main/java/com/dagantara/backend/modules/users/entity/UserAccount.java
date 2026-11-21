@@ -1,4 +1,4 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.entity;
 
 import com.dagantara.backend.common.audit.AuditableEntity;
 import jakarta.persistence.Entity;
@@ -23,8 +23,8 @@ public class UserAccount extends AuditableEntity {
     protected UserAccount() {
     }
 
-    UserAccount(UUID creatorId, UUID tenantId, UUID roleId, String username,
-                String email, String fullName, String passwordHash) {
+    public UserAccount(UUID creatorId, UUID tenantId, UUID roleId, String username,
+                       String email, String fullName, String passwordHash) {
         this.tenantId = tenantId;
         this.roleId = roleId;
         this.username = username;
@@ -52,7 +52,7 @@ public class UserAccount extends AuditableEntity {
         return status;
     }
 
-    String getAccountType() {
+    public String getAccountType() {
         return accountType;
     }
 
@@ -60,15 +60,15 @@ public class UserAccount extends AuditableEntity {
         return passwordHash;
     }
 
-    String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    String getFullName() {
+    public String getFullName() {
         return fullName;
     }
 
-    void assignRole(UUID roleId) {
+    public void assignRole(UUID roleId) {
         this.roleId = roleId;
     }
 }

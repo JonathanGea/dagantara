@@ -21,6 +21,7 @@ description: Gunakan untuk mengimplementasikan seluruh modul, fitur, atau accept
 ## Implementasikan cakupan yang disepakati
 
 1. Periksa kode, skema, kontrak API, dan tes yang terkait dengan ID dalam cakupan. Temukan jalur yang sudah ada dan perubahan yang dibutuhkan. Pilih skill dari tabel routing di `AGENTS.md` sesuai pekerjaan. Baca skill saat pertama kali diperlukan, lalu gunakan kembali instruksi dan dokumen yang sudah tersedia dalam konteks tugas.
+   Untuk backend, tempatkan kode di subpackage sesuai tanggung jawab dalam `modules/<nama_module>` mengikuti struktur di `backend/AGENTS.md`.
 2. Bedakan keputusan teknis yang dapat mengikuti pola repo dari keputusan domain yang belum disepakati. Untuk bagian yang bergantung pada keputusan domain, sebutkan ID, informasi yang kurang, dan bagian yang tertahan. Lanjutkan bagian lain dalam cakupan yang dapat dikerjakan secara mandiri. Hindari menambah kontrak, permission, atau skema yang mengunci keputusan terbuka.
 3. Ikuti batas akses dari aturan bisnis. Saat menyentuh data tenant, telusuri konteks tenant pelaku, kepemilikan target, dan kepemilikan entitas yang ditautkan. Saat mengubah beberapa relasi, pertahankan invarian model pada akhir transaksi dan pastikan operasi yang ditolak tidak meninggalkan perubahan parsial.
 

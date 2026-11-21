@@ -1,6 +1,8 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.service;
 
 import com.dagantara.backend.common.exception.ApiException;
+import com.dagantara.backend.modules.users.dto.RoleResponse;
+import com.dagantara.backend.modules.users.repository.UserManagementRepository;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -9,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-class RoleService {
+public class RoleService {
     private final UserAccess access;
     private final UserManagementRepository management;
 
@@ -19,13 +21,14 @@ class RoleService {
     }
 
     @Transactional
-    public UserManagementRepository.Role create(Jwt jwt, String code, String name) {
+    public RoleResponse create(Jwt jwt, String code, String name) {
         UserAccess.Actor actor = access.require(jwt, UserAccess.ROLES_CREATE, true);
         UUID tenantId = actor.requireTenant();
         if ("TENANT_ADMIN".equals(code) || "SUPERADMIN".equals(code)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "RESERVED_ROLE_CODE", "The role code is reserved");
         }
-        return management.createTenantRole(tenantId, code, name, false);
+        UserManagementRepository.Role role = management.createTenantRole(tenantId, code, name, false);
+        return new RoleResponse(role.id(), role.code(), role.name());
     }
 
     @Transactional

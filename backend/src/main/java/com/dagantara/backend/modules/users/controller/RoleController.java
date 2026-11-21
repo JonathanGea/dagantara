@@ -1,12 +1,13 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.controller;
 
 import com.dagantara.backend.common.api.ApiResponse;
 import com.dagantara.backend.common.api.ApiRoutes;
+import com.dagantara.backend.modules.users.dto.CreateRoleRequest;
+import com.dagantara.backend.modules.users.dto.PermissionsRequest;
+import com.dagantara.backend.modules.users.dto.PermissionsResponse;
+import com.dagantara.backend.modules.users.dto.RoleResponse;
+import com.dagantara.backend.modules.users.service.RoleService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,8 +34,7 @@ public class RoleController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<RoleResponse> create(@AuthenticationPrincipal Jwt jwt,
                                              @Valid @RequestBody CreateRoleRequest request) {
-        UserManagementRepository.Role role = roles.create(jwt, request.code(), request.name());
-        return ApiResponse.success("Role created", new RoleResponse(role.id(), role.code(), role.name()));
+        return ApiResponse.success("Role created", roles.create(jwt, request.code(), request.name()));
     }
 
     @PutMapping(path = "/{roleId}/permissions", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -43,18 +43,5 @@ public class RoleController {
                                                                @Valid @RequestBody PermissionsRequest request) {
         return ApiResponse.success("Permissions updated",
                 new PermissionsResponse(roleId, roles.replacePermissions(jwt, roleId, request.permissionCodes())));
-    }
-
-    public record CreateRoleRequest(@NotBlank @Size(max = 128) String code,
-                                    @NotBlank @Size(max = 255) String name) {
-    }
-
-    public record PermissionsRequest(@NotNull @Size(max = 100) Set<@NotBlank @Size(max = 128) String> permissionCodes) {
-    }
-
-    public record RoleResponse(UUID id, String code, String name) {
-    }
-
-    public record PermissionsResponse(UUID roleId, Set<String> permissionCodes) {
     }
 }

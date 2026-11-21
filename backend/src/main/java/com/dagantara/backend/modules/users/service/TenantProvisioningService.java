@@ -1,12 +1,17 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.service;
 
+import com.dagantara.backend.modules.users.dto.CreateTenantRequest;
+import com.dagantara.backend.modules.users.dto.CreateUserResponse;
+import com.dagantara.backend.modules.users.dto.TenantResponse;
+import com.dagantara.backend.modules.users.entity.UserAccount;
+import com.dagantara.backend.modules.users.repository.UserManagementRepository;
 import java.util.UUID;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-class TenantProvisioningService {
+public class TenantProvisioningService {
     private final UserAccess access;
     private final UserManagementRepository management;
     private final UserService users;
@@ -18,7 +23,7 @@ class TenantProvisioningService {
     }
 
     @Transactional
-    public TenantController.TenantResponse provision(Jwt jwt, TenantController.CreateTenantRequest request) {
+    public TenantResponse provision(Jwt jwt, CreateTenantRequest request) {
         UserAccess.Actor creator = access.require(jwt, UserAccess.TENANTS_PROVISION, true);
         if (creator.tenantId() != null) {
             throw UserAccess.forbidden();
@@ -26,9 +31,9 @@ class TenantProvisioningService {
         UUID tenantId = management.createTenant(request.code(), request.name());
         UUID roleId = management.createTenantRole(tenantId, "TENANT_ADMIN", "Tenant Admin", true).id();
         management.replaceRolePermissions(roleId, UserAccess.TENANT_PERMISSIONS);
-        TenantController.InitialAdmin admin = request.admin();
+        CreateTenantRequest.InitialAdmin admin = request.admin();
         UserAccount account = users.insertAccount(creator.account().getId(), tenantId, roleId,
                 admin.username(), admin.email(), admin.fullName(), admin.password());
-        return new TenantController.TenantResponse(tenantId, request.code(), CreateUserResponse.from(account));
+        return new TenantResponse(tenantId, request.code(), CreateUserResponse.from(account));
     }
 }

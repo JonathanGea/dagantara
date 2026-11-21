@@ -18,6 +18,7 @@ Membuat REST API yang konsisten, aman, dan sesuai spesifikasi modul Dagantara. S
 
 ## Aturan implementasi
 
+- Tempatkan controller di `modules/<nama_module>/controller`, request dan response di `dto`, serta use case di `service` pada modul yang sama. Service dapat memakai DTO modul tanpa mengimpor tipe dari controller.
 - Controller tipis: menerima request, validasi DTO, delegasi ke service, lalu bentuk HTTP response.
 - Jangan expose JPA entity secara langsung ke API. Gunakan request/response DTO dan mapping yang jelas.
 - Gunakan Bean Validation untuk bentuk data; validasi business rules dan tenant boundary di service.

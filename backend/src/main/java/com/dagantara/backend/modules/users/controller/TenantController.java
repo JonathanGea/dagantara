@@ -1,14 +1,11 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.controller;
 
 import com.dagantara.backend.common.api.ApiResponse;
 import com.dagantara.backend.common.api.ApiRoutes;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.dagantara.backend.modules.users.dto.CreateTenantRequest;
+import com.dagantara.backend.modules.users.dto.TenantResponse;
+import com.dagantara.backend.modules.users.service.TenantProvisioningService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,26 +30,5 @@ public class TenantController {
     public ApiResponse<TenantResponse> provision(@AuthenticationPrincipal Jwt jwt,
                                                 @Valid @RequestBody CreateTenantRequest request) {
         return ApiResponse.success("Tenant provisioned", tenants.provision(jwt, request));
-    }
-
-    public record CreateTenantRequest(@NotBlank @Size(max = 128) String code,
-                                      @NotBlank @Size(max = 255) String name,
-                                      @NotNull @Valid InitialAdmin admin) {
-    }
-
-    public record InitialAdmin(
-            @NotBlank @Size(max = 128) String username,
-            @NotBlank @Email @Size(max = 254) String email,
-            @NotBlank @Size(max = 255) String fullName,
-            @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-            @NotBlank @Size(max = 72) String password
-    ) {
-        @Override
-        public String toString() {
-            return "InitialAdmin";
-        }
-    }
-
-    public record TenantResponse(UUID id, String code, CreateUserResponse admin) {
     }
 }

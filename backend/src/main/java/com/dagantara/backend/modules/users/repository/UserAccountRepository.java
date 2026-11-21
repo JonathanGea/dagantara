@@ -1,5 +1,6 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.repository;
 
+import com.dagantara.backend.modules.users.entity.UserAccount;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

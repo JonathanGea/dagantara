@@ -1,4 +1,4 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;

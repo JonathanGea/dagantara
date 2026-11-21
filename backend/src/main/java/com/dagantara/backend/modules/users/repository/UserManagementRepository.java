@@ -1,4 +1,4 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.repository;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -8,21 +8,21 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 @Repository
-class UserManagementRepository {
+public class UserManagementRepository {
     private final JdbcClient jdbc;
 
     UserManagementRepository(JdbcClient jdbc) {
         this.jdbc = jdbc;
     }
 
-    void lockActorTenant(UUID actorId) {
+    public void lockActorTenant(UUID actorId) {
         jdbc.sql("""
                 SELECT t.id FROM tenants t JOIN users u ON u.tenant_id = t.id
                 WHERE u.id = :actorId FOR UPDATE OF t
                 """).param("actorId", actorId).query(UUID.class).optional();
     }
 
-    Set<String> effectivePermissions(UUID actorId) {
+    public Set<String> effectivePermissions(UUID actorId) {
         return new HashSet<>(jdbc.sql("""
                 SELECT p.code FROM users u
                 JOIN roles r ON r.id = u.role_id
@@ -33,7 +33,7 @@ class UserManagementRepository {
                 """).param("actorId", actorId).query(String.class).list());
     }
 
-    Optional<Role> findRole(UUID roleId, UUID tenantId, String scope) {
+    public Optional<Role> findRole(UUID roleId, UUID tenantId, String scope) {
         return jdbc.sql("""
                 SELECT id, code, name, is_system FROM roles
                 WHERE id = :roleId AND tenant_id IS NOT DISTINCT FROM CAST(:tenantId AS uuid)
@@ -43,14 +43,14 @@ class UserManagementRepository {
                         rs.getString("name"), rs.getBoolean("is_system"))).optional();
     }
 
-    Set<String> rolePermissions(UUID roleId) {
+    public Set<String> rolePermissions(UUID roleId) {
         return new HashSet<>(jdbc.sql("""
                 SELECT p.code FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id
                 WHERE rp.role_id = :roleId
                 """).param("roleId", roleId).query(String.class).list());
     }
 
-    Role createTenantRole(UUID tenantId, String code, String name, boolean system) {
+    public Role createTenantRole(UUID tenantId, String code, String name, boolean system) {
         UUID id = UUID.randomUUID();
         jdbc.sql("""
                 INSERT INTO roles (id, tenant_id, code, name, scope, is_system, created_at)
@@ -60,7 +60,7 @@ class UserManagementRepository {
         return new Role(id, code, name, system);
     }
 
-    void replaceRolePermissions(UUID roleId, Set<String> codes) {
+    public void replaceRolePermissions(UUID roleId, Set<String> codes) {
         jdbc.sql("DELETE FROM role_permissions WHERE role_id = :roleId").param("roleId", roleId).update();
         if (!codes.isEmpty()) {
             int inserted = jdbc.sql("""
@@ -73,7 +73,7 @@ class UserManagementRepository {
         }
     }
 
-    UUID createTenant(String code, String name) {
+    public UUID createTenant(String code, String name) {
         UUID id = UUID.randomUUID();
         jdbc.sql("""
                 INSERT INTO tenants (id, code, name, status, created_at, updated_at)
@@ -82,6 +82,6 @@ class UserManagementRepository {
         return id;
     }
 
-    record Role(UUID id, String code, String name, boolean system) {
+    public record Role(UUID id, String code, String name, boolean system) {
     }
 }

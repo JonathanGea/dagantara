@@ -1,4 +1,4 @@
-package com.dagantara.backend.modules.auth;
+package com.dagantara.backend.modules.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

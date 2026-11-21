@@ -1,7 +1,10 @@
-package com.dagantara.backend.modules.users;
+package com.dagantara.backend.modules.users.service;
 
 import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.common.security.UserIdentity;
+import com.dagantara.backend.modules.users.entity.UserAccount;
+import com.dagantara.backend.modules.users.repository.UserAccountRepository;
+import com.dagantara.backend.modules.users.repository.UserManagementRepository;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
