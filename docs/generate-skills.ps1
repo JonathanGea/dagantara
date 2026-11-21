@@ -30,6 +30,7 @@ foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
         id = $directory.Name
         title = $title
         description = $description
+        markdown = $content
     }
 
     Copy-Item -LiteralPath $skillPath -Destination (Join-Path $publicSkillsPath ($directory.Name + '.md')) -Force

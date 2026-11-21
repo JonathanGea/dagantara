@@ -2,41 +2,273 @@
     {
         "id":  "create-postgres-database",
         "title":  "Membuat database PostgreSQL Dagantara",
-        "description":  "Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi."
+        "description":  "Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.",
+        "markdown":  {
+                         "value":  "---\nname: create-postgres-database\ndescription: Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.\n---\n\n# Membuat database PostgreSQL Dagantara\n\nJalankan skrip dari root repo untuk menyiapkan instance lokal dengan PostgreSQL 16 yang sudah terpasang. Skrip menggunakan kredensial Windows terenkripsi di luar repo dan memeriksa koneksi sebagai `dagantara_app`.\n\n```powershell\n$result = \u0026 .\\.agents\\skills\\create-postgres-database\\scripts\\create-database.ps1\n$result\n```\n\nDefault-nya adalah `127.0.0.1:5433` dengan data di `%LOCALAPPDATA%\\Dagantara\\postgresql-16`. Skrip memakai ulang instance tersebut, menyalakannya bila berhenti, dan mengisi role atau database yang masih belum ada. Gunakan `-PgBin` jika lokasi binary PostgreSQL 16 berbeda. Untuk instance tambahan yang memang diminta, gunakan nama direktori lokal dan port yang berbeda, misalnya `-StateName Dagantara-Test -Port 15433`. Periksa konflik port sebelum memilih instance tambahan.\n\nJika pengguna memilih instance PostgreSQL yang sudah ada, gunakan kredensial admin yang sah pada instance tersebut dan ikuti langkah SQL di [README backend](../../../backend/README.md#postgresql-lokal). Verifikasi koneksi dengan akun aplikasi. Jika instance tersebut meminta password yang tidak tersedia, instance lokal terpisah adalah opsi ketika targetnya belum ditetapkan. Pertahankan konfigurasi, kredensial, dan data instance yang sudah ada.\n\nLaporkan URL JDBC, nama akun aplikasi, status verifikasi, dan lokasi berkas kredensial tanpa menampilkan password. Untuk menjalankan backend, muat nilai yang dikembalikan skrip ke terminal yang sama.\n\n```powershell\n$db = Import-Clixml -LiteralPath $result.CredentialPath\n$env:SPRING_DATASOURCE_URL = $result.JdbcUrl\n$env:SPRING_DATASOURCE_USERNAME = $db.UserName\n$env:SPRING_DATASOURCE_PASSWORD = $db.GetNetworkCredential().Password\n```\n\nJika backend juga diminta berjalan, ikuti panduan [spring-boot-run](../spring-boot-run/SKILL.md) dan cek `/actuator/health/db` dengan pengaturan Actuator lokal di README backend. Untuk membuat tabel atau migrasi, gunakan [spring-boot-database](../spring-boot-database/SKILL.md).\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\create-postgres-database\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\create-postgres-database",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "implement-from-spec",
         "title":  "Implementasi dari Spesifikasi Modul",
-        "description":  "Gunakan untuk mengimplementasikan seluruh modul, fitur, atau acceptance scenario dari spesifikasi modul Markdown yang memuat Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios, seperti dokumentasi modul Dagantara."
+        "description":  "Gunakan untuk mengimplementasikan seluruh modul, fitur, atau acceptance scenario dari spesifikasi modul Markdown yang memuat Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios, seperti dokumentasi modul Dagantara.",
+        "markdown":  {
+                         "value":  "---\nname: implement-from-spec\ndescription: Gunakan untuk mengimplementasikan seluruh modul, fitur, atau acceptance scenario dari spesifikasi modul Markdown yang memuat Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios, seperti dokumentasi modul Dagantara.\n---\n\n# Implementasi dari Spesifikasi Modul\n\n## Tetapkan cakupan\n\n1. Jika pengguna memanggil skill dengan hanya satu file modul, seperti `$implement-from-spec @docs/user-management.md`, implementasikan seluruh modul tersebut. Jika pengguna menyebutkan aksi, ID, atau batas pekerjaan, ikuti cakupan yang diberikan. Untuk permintaan analisis atau review, ikuti tujuan tersebut.\n2. Baca `AGENTS.md`, `docs/README.md`, dan file modul yang dirujuk. Untuk perubahan backend, baca juga `backend/AGENTS.md`. Gunakan `docs/user-management.md` untuk ID `UM-*` dan `docs/product-management.md` untuk ID `PM-*`. Baca spesifikasi modul lain jika ada dependensi lintas modul.\n3. Petakan Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios yang relevan. Untuk satu modul penuh, petakan seluruh cakupan yang sudah disepakati sebelum coding. Urutkan pengerjaan per alur berdasarkan dependensi dan lacak tiap ID hingga verifikasi akhir. Untuk aksi tanpa ID, temukan ID dari tindakan yang diminta.\n4. Gunakan Admin UI Structure untuk menemukan lokasi aksi yang sudah dispesifikasikan. Perlakukan nama menu, contoh, dan diagram yang ditandai sebagai referensi sebagai konteks. Ambil perilaku, relasi, dan constraint yang mengikat dari keputusan yang tercatat di Markdown modul. Jika permintaan eksplisit mengubah keputusan terdokumentasi, sebutkan perubahan tersebut dan tandai konflik yang masih perlu diselesaikan.\n\n## Siapkan branch kerja di Dagantara\n\n1. Untuk setiap tugas implementasi baru, cek `git status --short --branch` dan jalankan `git fetch origin` sebelum mengubah file.\n2. Sinkronkan `dev` lokal dengan `origin/dev` secara fast-forward. Jika keduanya sudah sama atau dapat disamakan dengan aman, jalankan `git switch dev`, `git merge --ff-only origin/dev`, lalu `git switch -c \u003cbranch-kerja\u003e`. Gunakan nama branch yang mencerminkan ID atau fitur yang dikerjakan.\n3. Jika perubahan lokal harus dipertahankan, `dev` sedang digunakan di worktree lain, atau `dev` berisi commit lokal yang belum ada di remote, buat branch kerja baru di worktree terpisah langsung dari `origin/dev` yang sudah diperbarui. Pertahankan perubahan dan riwayat lokal yang ada.\n\n## Implementasikan cakupan yang disepakati\n\n1. Periksa kode, skema, kontrak API, dan tes yang terkait dengan ID dalam cakupan. Temukan jalur yang sudah ada dan perubahan yang dibutuhkan. Pilih skill dari tabel routing di `AGENTS.md` sesuai pekerjaan. Baca skill saat pertama kali diperlukan, lalu gunakan kembali instruksi dan dokumen yang sudah tersedia dalam konteks tugas.\n2. Bedakan keputusan teknis yang dapat mengikuti pola repo dari keputusan domain yang belum disepakati. Untuk bagian yang bergantung pada keputusan domain, sebutkan ID, informasi yang kurang, dan bagian yang tertahan. Lanjutkan bagian lain dalam cakupan yang dapat dikerjakan secara mandiri. Hindari menambah kontrak, permission, atau skema yang mengunci keputusan terbuka.\n3. Ikuti batas akses dari aturan bisnis. Saat menyentuh data tenant, telusuri konteks tenant pelaku, kepemilikan target, dan kepemilikan entitas yang ditautkan. Saat mengubah beberapa relasi, pertahankan invarian model pada akhir transaksi dan pastikan operasi yang ditolak tidak meninggalkan perubahan parsial.\n\n## Verifikasi terhadap spesifikasi\n\n- Gunakan kondisi, tindakan, dan hasil masing-masing Acceptance Scenario untuk memilih tes yang relevan. Cek hasil sukses dan penolakan jika tercakup, termasuk keadaan data setelah penolakan. Jalankan tes dan build yang tersedia untuk perubahan tersebut.\n- Untuk pengujian API HTTP, ikuti `spring-boot-testing`. Gunakan `spring-boot-run` jika perlu menjalankan backend lokal, lalu jalankan smoke test Bruno. Setelah smoke test lulus, jalankan semua skenario HTTP dalam cakupan tugas.\n- Laporkan hasil verifikasi per ID Acceptance Scenario beserta perintah dan keputusan yang masih diperlukan. Nyatakan modul selesai setelah seluruh requirement yang disepakati tercakup dan semua skenario wajib lulus.\n\n## Buka PR ke `dev` di Dagantara\n\n1. Setelah verifikasi, tinjau diff, commit file yang termasuk dalam tugas, lalu push branch kerja ke `origin` dengan `git push -u origin \u003cbranch-kerja\u003e`.\n2. Buka PR GitHub dengan base `dev` dan head branch kerja, misalnya lewat `gh pr create --base dev --head \u003cbranch-kerja\u003e --title \u003cjudul\u003e --body-file \u003cfile-body\u003e`. Isi PR dengan ringkasan perubahan, ID requirement dan skenario yang dicakup, perintah dan hasil verifikasi, serta dependensi atau batas verifikasi yang masih tersisa. Jika PR untuk branch itu sudah terbuka, gunakan PR tersebut.\n3. Pastikan PR terbuka dengan target `dev`. Laporkan tautan PR, branch, file yang berubah, dan hasil verifikasi. Jika push atau pembukaan PR terhambat, laporkan langkah yang tertahan dan alasannya.\n\n## Contoh penerapan di Dagantara\n\n- Pembuatan user mengikuti `UM-01` dan `UM-02`, dengan `UM-03` dan `UM-06` sebagai aturan terkait. Gunakan `UM-AT-01` dan `UM-AT-02` untuk memeriksa tenant, satu role aktif, dan penolakan jika pelaku tidak punya `users.create`. `tenant_id = NULL` pada akun platform tetap tunduk pada aturan izin yang terdokumentasi.\n- Asosiasi media dengan nilai opsi mengikuti `PM-03` dan `PM-04`. Gunakan `PM-AT-03` dan `PM-AT-04` untuk memeriksa relasi many-to-many dan kepemilikan media oleh produk. Jika tugas juga mencakup `PM-02`, cek status keputusan penyimpanan Primary Category di spesifikasi sebelum mengubah skema atau menutup `PM-AT-02`.\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\implement-from-spec\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\implement-from-spec",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "spring-boot-api",
         "title":  "Spring Boot API",
-        "description":  "Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara."
+        "description":  "Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara.",
+        "markdown":  {
+                         "value":  "---\r\nname: spring-boot-api\r\ndescription: Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara.\r\n---\r\n\r\n# Spring Boot API\r\n\r\n## Tujuan\r\n\r\nMembuat REST API yang konsisten, aman, dan sesuai spesifikasi modul Dagantara. Skill ini **bukan** izin untuk membuat endpoint yang belum diputuskan.\r\n\r\n## Sebelum coding\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan spesifikasi modul terkait.\r\n2. Catat Functional Specification ID dan Acceptance Scenario ID yang hendak dipenuhi.\r\n3. Periksa routing, response format, DTO, exception handler, validation, dan coding style aktual; ikuti yang sudah ada.\r\n4. Jika kontrak endpoint belum ada, jelaskan keputusan yang perlu dibuat. Jangan menetapkan URL, payload, atau fitur baru sebagai keputusan domain.\r\n\r\n## Aturan implementasi\r\n\r\n- Controller tipis: menerima request, validasi DTO, delegasi ke service, lalu bentuk HTTP response.\r\n- Jangan expose JPA entity secara langsung ke API. Gunakan request/response DTO dan mapping yang jelas.\r\n- Gunakan Bean Validation untuk bentuk data; validasi business rules dan tenant boundary di service.\r\n- Gunakan semantik HTTP yang konsisten dengan kode eksisting: 400 untuk input tidak valid, 401 bila belum terautentikasi, 403 bila tidak berizin, 404 bila resource tidak dapat ditemukan/diakses sesuai kebijakan, 409 untuk konflik state/integritas yang memang dipetakan sebagai konflik.\r\n- Buat error handling terpusat dan response yang stabil tanpa stack trace atau informasi internal ke client.\r\n- Untuk list endpoint yang diminta, saring berdasarkan tenant di sumber data; gunakan pagination, batas ukuran, serta sort field yang di-allowlist.\r\n- Jangan percaya `tenant_id`, `role_id`, atau permission dari body/header client sebagai bukti hak akses. Role target harus tetap divalidasi terhadap konteks dan scope.\r\n- Periksa update parsial, idempotensi, serta transaksi saat use case memang membutuhkannya. Jangan menambah proses asynchronous secara spekulatif.\r\n- Endpoint hanya mengembalikan data yang memang diizinkan; cegah mass assignment dengan DTO yang spesifik.\r\n\r\n## Domain-sensitive cases\r\n\r\n- User creation (UM-01/UM-02): cek `users.create`, konteks tenant, dan validitas role target sebelum persist.\r\n- Product (PM-01): request dan query harus menjaga Independent Catalog.\r\n- Primary Category (PM-02): jangan implementasikan detail storage yang masih menjadi dependency.\r\n\r\n## Definition of done\r\n\r\n- Kontrak request/response selaras dengan spesifikasi yang benar-benar final.\r\n- Ada pengujian untuk happy path, validation error, unauthorized/forbidden, dan lintas tenant (bila relevan).\r\n- Tidak ada endpoint atau field tambahan yang dibuat semata karena terlihat pada Admin UI Structure.\r\n- Laporkan path, ID spesifikasi, status test, dan unresolved dependency.\r\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-api\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-api",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "spring-boot-database",
         "title":  "Spring Boot Database",
-        "description":  "Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara."
+        "description":  "Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara.",
+        "markdown":  {
+                         "value":  "---\r\nname: spring-boot-database\r\ndescription: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara.\r\n---\r\n\r\n# Spring Boot Database\r\n\r\n## Source of truth\r\n\r\n- `docs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.\r\n- `docs/product-management.md`: ERD dan aturan PM-01 s.d. PM-04.\r\n- Detail yang tidak dicantumkan sebagai keputusan final **jangan** diisi dengan asumsi tanpa persetujuan.\r\n\r\n## Workflow\r\n\r\n1. Baca AGENTS root/backend dan spesifikasi yang menyebut tabel serta relasi terkait.\r\n2. Inspeksi schema, entity, naming, migration tool (jika ada), dan query yang saat ini dipakai.\r\n3. Buat rencana minimal: tabel/kolom/FK/index/constraint yang dibutuhkan **hanya** dari keputusan final.\r\n4. Periksa dampak perubahan pada data existing, migration/rollback, tenant isolation, dan referential integrity.\r\n5. Implementasikan migration melalui tool yang sudah dipakai project (Flyway/Liquibase jika tersedia). Jangan bergantung pada `ddl-auto=update` untuk perubahan production.\r\n6. Tambahkan integration test yang mengecek constraint dan isolasi tenant bila lingkungan test tersedia.\r\n\r\n## Model yang sudah disepakati\r\n\r\n- User management: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, `role_permissions`.\r\n- `users.role_id` menunjuk satu role aktif; `role_permissions` unik untuk pasangan `(role_id, permission_id)`.\r\n- `users.tenant_id` dapat NULL untuk akun platform; `roles.tenant_id` dapat NULL untuk role sistem. Penanganan NULL tidak sama dengan izin akses global.\r\n- Product management: `products` dimiliki tenant; `product_categories` menghubungkan produk dan kategori secara many-to-many.\r\n- Produk memiliki tepat satu Primary Category secara aturan bisnis, **namun representasi kolom/constraint penandanya belum diputuskan**. Tandai sebagai blocked; jangan mengarang skema finalnya.\r\n- `product_media` dan `product_option_values` terhubung many-to-many melalui `media_option_values`, dengan media tetap milik produk.\r\n- Jangan menyimpulkan `tenant_id` wajib ada pada tabel yang belum dirinci di ERD; identifikasi kebutuhan isolasi dan minta keputusan bila skema belum final.\r\n\r\n## Aturan query, transaction, dan constraint\r\n\r\n- Terapkan filter tenant pada query repository yang mengakses data tenant; validasi kedua sisi saat mengaitkan FK agar tidak dapat membuat relasi lintas tenant tanpa izin.\r\n- Jangan mengandalkan filter HTTP saja untuk tenant isolation.\r\n- Pertahankan FK, UNIQUE, dan NOT NULL yang sudah disepakati; beri indeks berdasar query yang nyata, bukan secara spekulatif.\r\n- Gunakan @Transactional di service untuk operasi atomik; tentukan locking/concurrency control dari kebutuhan terukur.\r\n- Cegah N+1 dan pagination tidak stabil; verifikasi query/filter dengan integration test.\r\n- Migration harus bisa dijalankan konsisten pada database bersih; perubahan data existing memerlukan strategi migrasi yang jelas.\r\n\r\n## Definition of done\r\n\r\nSertakan daftar perubahan schema, alasan dari ID requirement, pengujian query/constraint/tenant, serta keputusan yang masih belum final. Jangan klaim migration berhasil tanpa eksekusi.\r\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-database\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-database",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "spring-boot-run",
         "title":  "Menjalankan Backend Dagantara",
-        "description":  "Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur."
+        "description":  "Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur.",
+        "markdown":  {
+                         "value":  "---\nname: spring-boot-run\ndescription: Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur.\n---\n\n# Menjalankan Backend Dagantara\n\nPastikan repository dan branch yang diminta, lalu baca `AGENTS.md`, `backend/AGENTS.md`, dan `backend/README.md`. Gunakan `backend/pom.xml` untuk target Java. Tugas menjalankan backend lokal tidak mencakup ID Functional Specification atau Acceptance Scenario modul.\n\nLaporkan hasil startup, PID, URL health, dan keterbatasan verifikasi. Hindari menyalin rahasia dari log.\n\n## Orca Chat\n\nJalankan backend di foreground dalam tab terminal **Dagantara Backend** pada worktree chat. Gunakan `$orca-cli` untuk memilih worktree dan mengelola terminal. Di Windows, gunakan `$env:ORCA_CLI_COMMAND` jika tersedia, atau `orca`.\n\nDari root worktree, cek port tujuan dan cari judul persis `Dagantara Backend` di `result.terminals` dari `orca terminal list --worktree active --json`. Jika backend dari worktree ini sudah sehat, laporkan PID dan tabnya jika tersedia. Jika proses lain memakai port, laporkan konflik dan biarkan proses tersebut berjalan.\n\nPakai ulang handle tab yang ditemukan jika tab punya `tabId`, terhubung, dan bisa menerima input (`connected` dan `writable`). Baca tampilan terkininya dengan `orca terminal read --terminal \u0027\u003chandle\u003e\u0027 --screen --json`. Kirim perintah hanya jika prompt shell yang sesuai sudah siap dan draf perintah kosong. Jika tab sibuk atau tujuan ambigu, laporkan keadaannya. Gunakan `orca terminal switch --terminal \u0027\u003chandle\u003e\u0027` bila pengguna meminta langsung pindah ke tab yang dipakai ulang.\n\nBuat tab baru hanya bila belum ada tab **Dagantara Backend** di worktree itu. Tambahkan `--focus` bila pengguna meminta langsung pindah ke tab.\n\n```powershell\norca terminal create --worktree active --title \u0027Dagantara Backend\u0027 --shell powershell.exe --json\n```\n\nUntuk tab baru, gunakan `result.terminal.handle` setelah pembuatan mengonfirmasi `result.terminal.surface` bernilai `visible`. Jika tab terlihat tidak tersedia, laporkan kendalanya sebelum menjalankan backend.\n\nKirim perintah ke handle tab yang dipilih. Gunakan path absolut dari worktree agar perintah tetap benar jika direktori kerja tab berubah.\n\n```powershell\n$backendRunScript = (Resolve-Path \u0027.agents/skills/spring-boot-run/scripts/run-backend.ps1\u0027).Path.Replace(\"\u0027\", \"\u0027\u0027\")\norca terminal send --terminal \u0027\u003chandle\u003e\u0027 --text \"\u0026 \u0027$backendRunScript\u0027 -Foreground\" --enter --json\n```\n\nDi POSIX, buat tab baru tanpa `--shell` bila perlu, lalu kirim `cd \u0027\u003cpath absolut ke backend\u003e\u0027 \u0026\u0026 ./mvnw spring-boot:run`.\n\nGunakan `orca terminal read` pada handle tab untuk memantau build dan startup. Setelah Java mulai, cek `http://localhost:8080/actuator/health` dari sesi chat dan pastikan PID listener berasal dari worktree backend yang diminta. Tinggalkan proses yang sehat di tab. Pengguna bisa menghentikannya dengan `Ctrl+C`.\n\nGunakan `-Port \u003cnomor\u003e` di Windows hanya bila pengguna meminta port lain, lalu cek health pada port tersebut.\n\n## Windows PowerShell di luar Orca\n\nDari root repository, jalankan `\u0026 .\\.agents\\skills\\spring-boot-run\\scripts\\run-backend.ps1` untuk mode background. Skrip memvalidasi JDK dan port, membangun JAR dengan Maven Wrapper, lalu menunggu health `UP`. Gunakan `-Foreground` jika pengguna ingin log langsung di terminal. Cek health dari shell lain dalam mode foreground. Untuk kegagalan di mode background, baca `backend/target/run-backend.*.log`.\n\n## Shell POSIX\n\nGunakan `./mvnw spring-boot:run` dari folder `backend`, biarkan proses tetap hidup, lalu verifikasi `http://localhost:8080/actuator/health`. Periksa port sebelum memulai agar tidak membuka instance kedua.\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-run\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-run",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "spring-boot-security",
         "title":  "Spring Boot Security",
-        "description":  "Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara."
+        "description":  "Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara.",
+        "markdown":  {
+                         "value":  "---\r\nname: spring-boot-security\r\ndescription: Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara.\r\n---\r\n\r\n# Spring Boot Security\r\n\r\n## Tujuan\r\n\r\nMenegakkan authentication, authorization, dan tenant isolation pada semua jalur akses data, sesuai `docs/user-management.md` dan kontrak modul terkait.\r\n\r\n## Sebelum implementasi\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, dan spesifikasi terkait.\r\n2. Inspeksi konfigurasi keamanan aktual (JWT, session, filter chain, auth principal, exception handling). **Jangan mengasumsikan JWT sudah terpasang** ketika backend masih skeleton.\r\n3. Petakan akses tiap use case ke permission yang memang dinyatakan di spesifikasi. Jangan mengarang permission baru tanpa requirement.\r\n4. Identifikasi sumber tenant context dan aturan validasinya; jangan menerima tenant claim/header yang belum diverifikasi.\r\n\r\n## Authorization model\r\n\r\n- Setiap user memiliki satu `users.role_id` aktif.\r\n- Permission efektif berasal dari `users.role_id -\u003e roles -\u003e role_permissions -\u003e permissions`.\r\n- Untuk pembuatan user, butuh `users.create` (UM-01), lalu validasi role dan tenant target (UM-02/UM-06).\r\n- Role scope/tenant harus kompatibel dengan user target; periksa di service, bukan hanya di anotasi controller.\r\n- User platform `tenant_id = NULL` dan role sistem `tenant_id = NULL` tidak otomatis memberikan akses tak terbatas.\r\n- Prinsip deny by default: operasi tanpa aturan akses yang pasti tidak boleh dibuka hanya untuk mempermudah development.\r\n- Frontend menyembunyikan menu bukan mekanisme otorisasi backend.\r\n\r\n## Implementasi aman\r\n\r\n- Simpan password memakai `PasswordEncoder` yang aman; jangan simpan plaintext atau menuliskannya ke log.\r\n- Jika JWT dipakai, verifikasi signature, expiry, issuer/audience sesuai konfigurasi eksisting, dan jangan percaya claim yang tidak tervalidasi.\r\n- Validasi tenant pada lookup dan mutasi entity, termasuk hubungan entity, listing, dan resource ID yang bisa ditebak.\r\n- Utamakan hasil 401 untuk unauthenticated dan 403 untuk authenticated tetapi tidak memiliki izin; cegah kebocoran detail resource tenant lain.\r\n- Gunakan least privilege pada konfigurasi route dan service; cegah privilege escalation saat create/update role atau assign role.\r\n- Jangan commit key/secret; gunakan konfigurasi lingkungan dan jangan memaparkan token dalam response/log.\r\n\r\n## Test wajib saat fitur tersedia\r\n\r\n- Unauthenticated request ditolak.\r\n- Authenticated tanpa `users.create` tidak dapat membuat user (UM-AT-02).\r\n- Role yang salah scope/tenant ditolak (UM-AT-05).\r\n- Tenant A tidak dapat mengakses atau mengubah data tenant B (UM-AT-04).\r\n- Jalur sukses berizin diverifikasi (UM-AT-01/UM-AT-03).\r\n\r\n## Definition of done\r\n\r\nLaporkan aturan permission yang ditegakkan, tenant boundary, hasil security tests, dan keputusan autentikasi/otorisasi yang belum dinyatakan dalam spesifikasi.\r\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-security\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-security",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "spring-boot-testing",
         "title":  "Spring Boot Testing",
-        "description":  "Gunakan saat membuat atau menjalankan unit, MVC, integration, repository, security, dan acceptance tests untuk backend Spring Boot Dagantara, termasuk pengujian API HTTP dengan Bruno."
+        "description":  "Gunakan saat membuat atau menjalankan unit, MVC, integration, repository, security, dan acceptance tests untuk backend Spring Boot Dagantara, termasuk pengujian API HTTP dengan Bruno.",
+        "markdown":  {
+                         "value":  "---\r\nname: spring-boot-testing\r\ndescription: Gunakan saat membuat atau menjalankan unit, MVC, integration, repository, security, dan acceptance tests untuk backend Spring Boot Dagantara, termasuk pengujian API HTTP dengan Bruno.\r\n---\r\n\r\n# Spring Boot Testing\r\n\r\n## Prinsip\r\n\r\nPengujian harus membuktikan business rules dan acceptance scenarios yang telah diputuskan, bukan mengunci asumsi fitur yang belum disepakati.\r\n\r\n## Persiapan\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan modul relevan.\r\n2. Catat ID Acceptance Scenario (mis. UM-AT-01, PM-AT-04) pada nama test atau deskripsi test agar traceable.\r\n3. Inspeksi framework, build tool, test profile, fixture, dan infrastruktur yang tersedia. Jangan menambahkan dependency besar tanpa alasan tugas.\r\n4. Pilih level uji paling rendah yang memberi bukti memadai; tambahkan integration test untuk perilaku persistence/security yang tidak dapat dibuktikan oleh mock.\r\n\r\n## Strategi per lapisan\r\n\r\n- **Unit/service:** business rules, validation, role assignment, domain edge cases.\r\n- **Web/MVC:** serialization, request validation, HTTP status, error contract, dan endpoint authorization.\r\n- **API HTTP:** gunakan Bruno untuk memverifikasi kontrak dan acceptance scenario melalui request ke backend yang berjalan.\r\n- **Repository/integration:** FK/UNIQUE, transaction, query/filter tenant, relasi JPA, dan migration.\r\n- **Security integration:** authenticated vs unauthenticated, permission denied, role scope, tenant cross-access.\r\n- **Database:** gunakan PostgreSQL yang terisolasi (mis. Testcontainers) bila tersedia dan relevan; jangan menyamakan perilaku in-memory DB dengan PostgreSQL production.\r\n\r\n## Skenario API HTTP di Bruno\r\n\r\n- Simpan smoke test di `bruno/smoke/` dan acceptance scenario di `bruno/\u003cmodul\u003e/\u003cID\u003e-\u003cnama-skenario\u003e/`. Satu folder skenario memuat semua request yang diperlukan agar bisa dijalankan sendiri.\r\n- Untuk skenario dengan beberapa request, urutkan persiapan, aksi, dan verifikasi dengan awalan angka pada nama file dan nilai `seq` yang sesuai. Siapkan autentikasi dan data uji di dalam skenario bila diperlukan. Periksa respons persiapan sebelum meneruskan nilai yang dibutuhkan, seperti ID atau token, melalui variabel runtime Bruno (`bru.setVar`).\r\n- Jalankan skenario yang mengubah data di lingkungan uji terisolasi. Gunakan fixture unik tiap run dan siapkan cara membersihkan fixture atau mereset lingkungan bila run terhenti. Simpan kredensial uji di secret lokal Bruno atau variabel proses.\r\n- Dari `bruno/`, jalankan `bru run \u003cfolder-skenario\u003e --env Local`, atau pilih environment `Local` dan jalankan folder itu lewat Collection Runner. Untuk smoke test, gunakan `bru run smoke --env Local`. Aktifkan `--bail` jika skenario harus berhenti saat setup gagal dan pembersihan dapat dilakukan di luar run.\r\n\r\n## Skenario minimum berdasarkan dokumentasi\r\n\r\n| ID | Hal yang harus dibuktikan |\r\n| --- | --- |\r\n| UM-AT-01 | Pengguna berizin dapat membuat user dengan tenant dan role valid. |\r\n| UM-AT-02 | Tanpa `users.create` operasi ditolak tanpa perubahan data. |\r\n| UM-AT-03 | Permission efektif mengikuti role dan `role_permissions`. |\r\n| UM-AT-04 | Tenant A tidak dapat membaca/mengubah user tenant B. |\r\n| UM-AT-05 | Assignment role salah scope/tenant ditolak. |\r\n| PM-AT-01 | Produk dimiliki tenant yang benar dan tidak dibagikan lintas tenant. |\r\n| PM-AT-02 | Multi-category dengan tepat satu primary; implementasi test schema menunggu keputusan storage PM-02. |\r\n| PM-AT-03 | Satu media bisa terkait beberapa option value. |\r\n| PM-AT-04 | Satu option value bisa terkait beberapa media tanpa memindahkan ownership media. |\r\n\r\n## Praktik test\r\n\r\n- Gunakan data deterministik, fixture terisolasi, dan cleanup. Pastikan setiap skenario dapat dijalankan tanpa bergantung pada urutan antarskenario.\r\n- Sertakan negative cases: invalid input, duplicate relation, missing FK, unauthorized, forbidden, dan cross-tenant association.\r\n- Hindari mengganti semua dependency dengan mock pada test yang mengklaim menguji constraint database.\r\n- Jalankan tes Spring Boot lewat command build yang dipakai repository, misalnya `./mvnw test`.\r\n- Bila environment test, migration, atau server belum tersedia, tandai **not run** beserta sebabnya; jangan membuat laporan hijau palsu.\r\n\r\n## Definition of done\r\n\r\nLaporkan test yang ditambah, scenario ID yang dicakup, perintah aktual, hasil test, dan gap pengujian/keputusan yang masih terbuka.\r\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-testing\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\spring-boot-testing",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     },
     {
         "id":  "write-module-spec",
         "title":  "Menulis Spesifikasi Modul Dagantara",
-        "description":  "Gunakan untuk membuat atau memperbarui spesifikasi modul Markdown Dagantara di docs/ dari kebutuhan, catatan, atau keputusan pengguna. Hasilnya siap dirujuk oleh implement-from-spec."
+        "description":  "Gunakan untuk membuat atau memperbarui spesifikasi modul Markdown Dagantara di docs/ dari kebutuhan, catatan, atau keputusan pengguna. Hasilnya siap dirujuk oleh implement-from-spec.",
+        "markdown":  {
+                         "value":  "---\nname: write-module-spec\ndescription: Gunakan untuk membuat atau memperbarui spesifikasi modul Markdown Dagantara di docs/ dari kebutuhan, catatan, atau keputusan pengguna. Hasilnya siap dirujuk oleh implement-from-spec.\n---\n\n# Menulis Spesifikasi Modul Dagantara\n\n## Tetapkan sumber dan cakupan\n\n1. Baca `AGENTS.md`, `docs/README.md`, dan spesifikasi terkait. Pakai catatan serta keputusan yang dirujuk pengguna. Saat merevisi modul, pertahankan keputusan dan ID yang sudah berlaku, lalu sebutkan konflik jika perubahan yang diminta berbenturan dengan spesifikasi terkait.\n2. Simpan satu modul per file `docs/\u003cnama-modul\u003e.md`. Saat menambah modul, tambahkan tautannya ke `docs/README.md`. Gunakan pola file modul yang sudah ada sebagai acuan.\n\n## Periksa dependensi saat penulisan\n\n1. Sebelum memfinalkan spesifikasi, telusuri tiap alur dalam cakupan dari kondisi awal sampai hasil yang dapat diuji. Jika alur memerlukan tenant, akun, role, atau permission, cek siapa yang menyiapkannya pertama kali, dari mana konteks tenant diperoleh, dan siapa yang berwenang pada tiap aksi. Cek juga kepemilikan entitas, aturan penautan, dan cara menyiapkan kondisi awal skenario.\n2. Cari jawaban di sumber yang sudah disepakati. Gunakan pola repo untuk keputusan teknis yang bisa didelegasikan. Jika keputusan yang memengaruhi perilaku, hak akses, atau skema masih terbuka dan menghalangi alur, ajukan pertanyaan yang spesifik kepada pengguna saat menulis spesifikasi. Jelaskan dampak pilihan jika ada beberapa opsi yang masuk akal. Lanjutkan bagian yang sudah jelas.\n3. Tulis keputusan yang sudah disepakati sebagai requirement. Catat keputusan yang masih terbuka sebagai *implementation dependency*, dengan ID terkait, keputusan yang diperlukan, serta alur dan skenario yang tertahan. Jika pengguna meminta rancangan, tandai usulan yang masih membutuhkan konfirmasi.\n\n## Susun spesifikasi yang bisa diuji\n\nGunakan urutan bagian dari `docs/README.md`.\n\n- **Module Overview** menjelaskan tujuan dan batas modul.\n- **Admin UI Structure** mencatat navigasi dan aksi admin yang sudah diketahui. Cantumkan ID Functional Specification pada setiap aksi yang menjadi requirement.\n- **Functional Specification** menjelaskan siapa melakukan apa, kondisi awal, dan hasilnya. Gunakan ID stabil seperti `UM-01`.\n- **Business Rules** mencatat batas izin, kepemilikan tenant, validasi, dan invarian yang berlaku. Gunakan ID seperti `UM-BR-01`.\n- **Data Model** menjelaskan entitas, kepemilikan, kardinalitas, dan constraint yang sudah disepakati. Gunakan Mermaid jika membantu membaca relasi atau alur.\n- **Acceptance Scenarios** memakai format `ID | Requirement | Kondisi | Tindakan | Hasil yang diharapkan`. Gunakan ID skenario seperti `UM-AT-01` dan isi `Requirement` dengan ID Functional Specification yang dibuktikan. Buat kondisi awal yang bisa disiapkan, tindakan yang sesuai dengan cakupan resmi, dan hasil yang dapat diamati. Untuk penolakan, sebutkan data yang harus tetap sama atau tidak boleh diungkap. Untuk pengujian permission, uji aksi yang membutuhkan permission tersebut.\n\n## Periksa sebelum selesai\n\n- Pastikan ID unik dan stabil. Gunakan awalan modul yang konsisten dan belum dipakai saat membuat modul baru.\n- Periksa bahwa setiap requirement dapat ditelusuri ke skenario atau keputusan yang masih diperlukan. Laporkan bagian yang siap diimplementasikan dan bagian yang masih tertahan beserta ID-nya.\n- Cocokkan aksi, aturan, relasi, dan skenario antarbagiannya. Tulis hasil yang diharapkan agar bisa diverifikasi melalui tes HTTP Bruno atau tes backend yang sesuai.\n- Laporkan file yang dibuat atau diubah dan ID yang terdampak. Alur yang dependensinya sudah tuntas bisa dirujuk melalui `$implement-from-spec` dengan file modul dan ID terkait. Nyatakan seluruh modul siap diimplementasikan setelah dependensi penghambat di semua alur terselesaikan.\n",
+                         "PSPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\write-module-spec\\SKILL.md",
+                         "PSParentPath":  "C:\\Users\\jonat\\p\\dagantara\\.agents\\skills\\write-module-spec",
+                         "PSChildName":  "SKILL.md",
+                         "PSDrive":  {
+                                         "CurrentLocation":  "Users\\jonat\\p\\dagantara",
+                                         "Name":  "C",
+                                         "Provider":  "Microsoft.PowerShell.Core\\FileSystem",
+                                         "Root":  "C:\\",
+                                         "Description":  "Program Files",
+                                         "MaximumSize":  null,
+                                         "Credential":  "System.Management.Automation.PSCredential",
+                                         "DisplayRoot":  null
+                                     },
+                         "PSProvider":  {
+                                            "ImplementingType":  "Microsoft.PowerShell.Commands.FileSystemProvider",
+                                            "HelpFile":  "System.Management.Automation.dll-Help.xml",
+                                            "Name":  "FileSystem",
+                                            "PSSnapIn":  "Microsoft.PowerShell.Core",
+                                            "ModuleName":  "Microsoft.PowerShell.Core",
+                                            "Module":  null,
+                                            "Description":  "",
+                                            "Capabilities":  52,
+                                            "Home":  "C:\\Users\\jonat",
+                                            "Drives":  "C D"
+                                        },
+                         "ReadCount":  1
+                     }
     }
 ]
