@@ -1,6 +1,8 @@
 param(
     [ValidateRange(1, 65535)]
-    [int]$Port = 8080
+    [int]$Port = 8080,
+
+    [switch]$Foreground
 )
 
 $ErrorActionPreference = 'Stop'
@@ -83,6 +85,17 @@ try {
 
 $jar = Join-Path $backend "target\$($pom.project.artifactId)-$($pom.project.version).jar"
 if (-not (Test-Path -LiteralPath $jar)) { throw "JAR hasil build tidak ditemukan: $jar" }
+if ($Foreground) {
+    Write-Output "Menjalankan backend dengan Java $requiredJava di port $Port."
+    Push-Location $backend
+    try {
+        & $java -jar $jar "--server.port=$Port"
+        exit $LASTEXITCODE
+    } finally {
+        Pop-Location
+    }
+}
+
 $stdout = Join-Path $backend 'target\run-backend.stdout.log'
 $stderr = Join-Path $backend 'target\run-backend.stderr.log'
 $process = Start-Process -FilePath $java -ArgumentList "-jar `"$jar`" --server.port=$Port" -WorkingDirectory $backend -RedirectStandardOutput $stdout -RedirectStandardError $stderr -WindowStyle Hidden -PassThru
