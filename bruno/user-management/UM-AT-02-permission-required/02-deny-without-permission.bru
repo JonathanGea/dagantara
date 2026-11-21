@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-02 denies a user without users.create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "denied-account",
+    "email": "denied-account@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "00000000-0000-0000-0000-000000000102"
+  }
+}
+
+tests {
+  test("UM-AT-02 denies a user without users.create", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

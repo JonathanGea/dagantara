@@ -43,3 +43,44 @@ For Docker, `DB_URL` must point to a PostgreSQL host reachable from the containe
 ## Verification
 
 Untuk membuat JAR, jalankan `./mvnw clean package` dari folder `backend` (atau `.\mvnw.cmd clean package` di PowerShell).
+
+## User Management
+
+Terapkan skema PostgreSQL 15+ satu kali pada database target sebelum menggunakan akun
+tersimpan. Gunakan kredensial PostgreSQL dari lingkungan:
+
+```powershell
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/user-management.sql
+```
+
+- `POST /api/v1/auth/login` menerima `username` dan `password`. Sertakan
+  `tenantCode` untuk akun tenant. Username unik dalam tenant atau di antara akun
+  platform. Akun yang bisa login berstatus `ACTIVE`.
+- `POST /api/v1/users` menerima `username`, `email`, `fullName`, `password`,
+  dan `roleId`. JWT akun tersimpan dan permission efektif `users.create`
+  diperlukan. Tenant dan tipe akun mengikuti pembuat, dan role target harus
+  memiliki tenant serta scope yang sesuai (`TENANT` atau `PLATFORM`).
+  Password dibatasi hingga 72 byte UTF-8. Respons `201` berisi ID pengguna,
+  ID tenant, ID role, dan username.
+- Kredensial bootstrap teknis tetap dapat digunakan untuk login. Permission
+  pembuatan pengguna diberikan melalui role akun yang tersimpan.
+
+Provisioning tenant dan akun pengelola pertama serta kebijakan pengelolaan role
+masih menunggu keputusan dalam [spesifikasi User Management](../docs/user-management.md).
+
+Untuk memverifikasi alur yang tersedia, gunakan database PostgreSQL uji kosong
+dan set `UM_TEST_PASSWORD` ke password sementara alfanumerik di proses lokal.
+Arahkan `PGHOST`, `PGPORT`, `PGDATABASE`, dan `PGUSER` ke database uji.
+Terapkan skema dari root repo, muat fixture, lalu jalankan backend dengan koneksi ke
+database uji yang sama. Fixture hanya untuk pengujian.
+
+```powershell
+psql -X -v ON_ERROR_STOP=1 -f backend/src/main/resources/db/user-management.sql
+psql -X -v ON_ERROR_STOP=1 -f bruno/user-management/fixtures.sql
+cd bruno
+bru run smoke --env Local
+bru run user-management -r --env Local --bail
+psql -X -v ON_ERROR_STOP=1 -f user-management/verify.sql
+```
+
+Buat ulang database uji sebelum mengulangi rangkaian penuh.

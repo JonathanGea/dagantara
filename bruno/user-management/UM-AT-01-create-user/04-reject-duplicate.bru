@@ -1,0 +1,32 @@
+meta {
+  name: Duplicate login identity returns a conflict
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "created-account",
+    "email": "created-account@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "00000000-0000-0000-0000-000000000102"
+  }
+}
+
+tests {
+  test("Duplicate login identity returns a conflict", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("DATA_CONFLICT");
+  });
+}

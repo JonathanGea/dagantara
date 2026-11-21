@@ -19,7 +19,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "Technical bootstrap login (not public user registration)")
+    @Operation(summary = "Authenticate an existing account")
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success("Login successful", authService.login(request));
