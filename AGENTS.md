@@ -8,15 +8,15 @@ Dagantara adalah platform e-commerce multi-tenant. Backend direncanakan memakai 
 
 ## Source of truth
 
-1. Baca `docs/README.md` dan file modul terkait sebelum membuat perubahan.
-2. `docs/user-management.md` dan `docs/product-management.md` menentukan perilaku, business rules, model data, dan acceptance scenarios yang telah disepakati.
+1. Baca `docs/README.md` serta spesifikasi perubahan dan dokumen domain yang relevan sebelum membuat perubahan.
+2. Spesifikasi perubahan yang disetujui menetapkan hasil dan cakupan pekerjaan. Dokumen domain seperti `docs/user-management.md` dan `docs/product-management.md` menyimpan aturan modul yang berlaku.
 3. `docs/index.html` adalah viewer dokumentasi, **bukan** sumber requirement mandiri.
 4. Instruksi tugas yang eksplisit dapat mengubah cakupan; bila bertentangan dengan keputusan terdokumentasi, sebutkan konfliknya dan jangan diam-diam mengubah keputusan domain.
 5. Hal yang belum final tetap menjadi implementation dependency. Jangan menyamakan contoh, navigasi admin, atau usulan dengan fitur yang sudah disetujui.
 
 ## Workflow setiap tugas
 
-1. Identifikasi modul dan ID Functional Specification/Acceptance Scenario yang relevan.
+1. Identifikasi spesifikasi, tiket atau ID requirement, dan kriteria penerimaan yang relevan.
 2. Inspeksi struktur dan pola kode yang sudah ada; jangan berasumsi project telah ter-bootstrap.
 3. Batasi perubahan ke vertical slice yang diminta. Jangan membuat endpoint, tabel, UI, atau aturan bisnis tambahan tanpa spesifikasi.
 4. Tentukan dampak terhadap tenant isolation, authorization, transaksi data, dan kompatibilitas API.
@@ -40,8 +40,8 @@ Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal,
 
 | Ketika tugas menyangkut | Baca |
 | --- | --- |
-| Menulis atau memperbarui spesifikasi modul Markdown | `.agents/skills/write-module-spec/SKILL.md` |
-| Mengimplementasikan modul, fitur, atau skenario dari spesifikasi | `.agents/skills/implement-from-spec/SKILL.md` |
+| Membahas ide, menulis spesifikasi perubahan, atau mengusulkan tiket | `.agents/skills/write-module-spec/SKILL.md` |
+| Mengimplementasikan spesifikasi, tiket, atau skenario | `.agents/skills/implement-from-spec/SKILL.md` |
 | Endpoint REST, DTO, validasi request, response/error contract | `.agents/skills/spring-boot-api/SKILL.md` |
 | Membuat atau menyiapkan database PostgreSQL lokal Dagantara di Windows | `.agents/skills/create-postgres-database/SKILL.md` |
 | JPA, PostgreSQL, relasi, schema/migration, query | `.agents/skills/spring-boot-database/SKILL.md` |

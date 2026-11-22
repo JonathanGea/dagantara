@@ -12,7 +12,7 @@ foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
     $skillPath = Join-Path $directory.FullName 'SKILL.md'
     if (-not (Test-Path -LiteralPath $skillPath -PathType Leaf)) { continue }
 
-    $content = Get-Content -LiteralPath $skillPath -Raw -Encoding UTF8
+    $content = [System.IO.File]::ReadAllText($skillPath, [System.Text.Encoding]::UTF8)
     $titleMatch = [regex]::Match($content, '(?m)^#\s+(.+?)\s*$')
     $descriptionMatch = [regex]::Match($content, '(?m)^description:\s*(.+?)\s*$')
     $title = if ($titleMatch.Success) {
