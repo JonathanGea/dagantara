@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-06 Tolak username tak dikenal
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) {
+    throw new Error("Configure the isolated platform admin fixture before running UM-AT-06");
+  }
+  const prefix = username.startsWith("x") ? "y" : "x";
+  req.setBody({ username: prefix + username.slice(1), password });
+}
+
+tests {
+  test("Unknown username returns the same credential error", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("INVALID_CREDENTIALS");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

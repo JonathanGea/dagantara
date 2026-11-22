@@ -1,13 +1,18 @@
-package com.dagantara.backend.modules.auth;
+package com.dagantara.backend.modules.auth.service;
 
 import com.dagantara.backend.common.exception.ApiException;
-import com.dagantara.backend.common.security.BootstrapCredentials;
+import com.dagantara.backend.modules.auth.dto.LoginRequest;
+import com.dagantara.backend.modules.auth.dto.LoginResponse;
+import com.dagantara.backend.modules.users.repository.PlatformAccountRepository;
+import com.dagantara.backend.modules.users.repository.PlatformAccountRepository.PlatformLogin;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -17,14 +22,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-    private final BootstrapCredentials bootstrapCredentials;
+    private final PlatformAccountRepository accounts;
+    private final PasswordEncoder passwordEncoder;
+    private final String dummyPasswordHash;
     private final JwtEncoder jwtEncoder;
     private final String issuer;
     private final String audience;
     private final Duration accessTokenTtl;
 
     public AuthService(
-            BootstrapCredentials bootstrapCredentials,
+            PlatformAccountRepository accounts,
+            PasswordEncoder passwordEncoder,
             JwtEncoder jwtEncoder,
             @Value("${app.security.jwt.issuer:dagantara-backend}") String issuer,
             @Value("${app.security.jwt.audience:dagantara-api}") String audience,
@@ -34,7 +42,9 @@ public class AuthService {
                 || accessTokenTtl.compareTo(Duration.ofHours(24)) > 0) {
             throw new IllegalStateException("JWT access token TTL must be 1 minute to 24 hours");
         }
-        this.bootstrapCredentials = bootstrapCredentials;
+        this.accounts = accounts;
+        this.passwordEncoder = passwordEncoder;
+        this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
         this.jwtEncoder = jwtEncoder;
         this.issuer = issuer;
         this.audience = audience;
@@ -42,7 +52,10 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        if (!bootstrapCredentials.matches(request.username(), request.password())) {
+        PlatformLogin account = accounts.findLoginByUsername(request.username()).orElse(null);
+        String passwordHash = account == null ? dummyPasswordHash : account.passwordHash();
+        if (request.password().getBytes(StandardCharsets.UTF_8).length > 72
+                || !passwordEncoder.matches(request.password(), passwordHash) || account == null) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
                     "Invalid credentials");
         }
@@ -52,7 +65,7 @@ public class AuthService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .audience(List.of(audience))
-                .subject(request.username())
+                .subject(account.id().toString())
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
                 .id(UUID.randomUUID().toString())
