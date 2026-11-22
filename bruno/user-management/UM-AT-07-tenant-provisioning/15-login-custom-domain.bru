@@ -1,0 +1,31 @@
+meta {
+  name: UM-AT-07 Pemilik masuk melalui hostname toko yang sudah dipetakan
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Host: store-{{suffix}}.example.test
+}
+
+body:json {
+  {
+    "username": "{{owner}}",
+    "password": "{{customTemporary}}"
+  }
+}
+
+tests {
+  test("Pemilik masuk melalui hostname toko yang sudah dipetakan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(true);
+    expect(data.accessToken).to.be.a("string");
+  });
+}

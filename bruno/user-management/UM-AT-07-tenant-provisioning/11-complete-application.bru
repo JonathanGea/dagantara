@@ -1,0 +1,37 @@
+meta {
+  name: UM-AT-07 Operator menyelesaikan pengajuan dan menerima akses pemilik
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}/provision
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://store-{{suffix}}.example.test",
+    "loginUrlReady": true
+  }
+}
+
+tests {
+  test("Operator menyelesaikan pengajuan dan menerima akses pemilik", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.ownerUsername).to.equal(bru.getVar("owner"));
+    expect(data.loginUrl).to.equal("https://store-" + bru.getVar("suffix") + ".example.test");
+    expect(data.tenantId).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.ownerId).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.temporaryPassword).to.match(/^[A-Za-z0-9_-]{32}$/);
+    bru.setVar("approvedTenantId", data.tenantId);
+    bru.setVar("customTemporary", data.temporaryPassword);
+  });
+}

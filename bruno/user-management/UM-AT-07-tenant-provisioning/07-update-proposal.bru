@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-07 Operator memperbarui usulan domain
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "proposedDomain": "revised-{{suffix}}.example.test"
+  }
+}
+
+tests {
+  test("Operator memperbarui usulan domain", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data.proposedDomain).to.equal("revised-" + bru.getVar("suffix") + ".example.test");
+    expect(res.getBody().data.status).to.equal("IN_REVIEW");
+  });
+}

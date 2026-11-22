@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-07 Pengajuan selesai tidak menghasilkan tenant kedua
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}/provision
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://retry-{{suffix}}.example.test",
+    "loginUrlReady": true
+  }
+}
+
+tests {
+  test("Pengajuan selesai tidak menghasilkan tenant kedua", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("APPLICATION_NOT_IN_REVIEW");
+  });
+}

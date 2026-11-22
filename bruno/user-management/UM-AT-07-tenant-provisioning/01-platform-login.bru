@@ -1,0 +1,38 @@
+meta {
+  name: UM-AT-07 Login platform dengan akun fixture
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) {
+    throw new Error("Configure platform login fixture variables");
+  }
+  const suffix = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  bru.setVar("suffix", suffix);
+  bru.setVar("owner", "owner-" + suffix);
+  bru.setVar("platformHost", bru.getProcessEnv("DAGANTARA_TEST_PLATFORM_HOST") || "localhost");
+  req.setBody({ username, password });
+}
+
+tests {
+  test("Login platform dengan akun fixture", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(false);
+    expect(data.accessToken).to.be.a("string");
+    bru.setVar("operator", data.accessToken);
+  });
+}

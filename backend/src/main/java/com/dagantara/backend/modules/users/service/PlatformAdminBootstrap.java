@@ -1,6 +1,6 @@
 package com.dagantara.backend.modules.users.service;
 
-import com.dagantara.backend.modules.users.repository.PlatformAccountRepository;
+import com.dagantara.backend.modules.users.repository.AccountRepository;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,12 +14,12 @@ public class PlatformAdminBootstrap implements ApplicationRunner {
     private static final Pattern BCRYPT_HASH =
             Pattern.compile("^\\$2[aby]\\$12\\$[./A-Za-z0-9]{53}$");
 
-    private final PlatformAccountRepository accounts;
+    private final AccountRepository accounts;
     private final String username;
     private final String passwordHash;
 
     public PlatformAdminBootstrap(
-            PlatformAccountRepository accounts,
+            AccountRepository accounts,
             @Value("${app.security.bootstrap.username:}") String username,
             @Value("${app.security.bootstrap.password-hash:}") String passwordHash
     ) {

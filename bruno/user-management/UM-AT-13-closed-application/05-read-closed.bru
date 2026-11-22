@@ -1,0 +1,23 @@
+meta {
+  name: UM-AT-13 Data pengajuan tetap tertutup setelah ditolak
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+tests {
+  test("Data pengajuan tetap tertutup setelah ditolak", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data.status).to.equal("CLOSED");
+    expect(res.getBody().data.tenantId).to.equal(null);
+  });
+}

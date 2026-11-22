@@ -14,6 +14,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
@@ -49,6 +50,12 @@ public class GlobalExceptionHandler {
                 .map(v -> new FieldViolation(v.getPropertyPath().toString(), v.getMessage()))
                 .toList());
         return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleParameterType(HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER",
+                "An endpoint parameter has the wrong type", request);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
