@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-07 Tolak URL dengan port di luar rentang
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://invalid-port-{{suffix}}.example.test:65536",
+    "loginUrlReady": true,
+    "storeName": "umb-invalid-port-{{suffix}}",
+    "phoneNumber": "+628000000000"
+  }
+}
+
+tests {
+  test("URL yang tidak dapat digunakan ditolak", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_LOGIN_URL");
+  });
+}

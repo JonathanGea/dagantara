@@ -39,8 +39,10 @@ public class TenantLoginAddress {
             URI uri = URI.create(value);
             String hostname = uri.getHost();
             String path = uri.getRawPath();
+            int port = uri.getPort();
             if (hostname == null || hostname.length() > 253 || uri.getRawUserInfo() != null
                     || uri.getRawQuery() != null || uri.getRawFragment() != null
+                    || port == 0 || port > 65535
                     || !("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()))) {
                 return Optional.empty();
             }
