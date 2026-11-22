@@ -41,6 +41,7 @@ Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal,
 | Ketika tugas menyangkut | Baca |
 | --- | --- |
 | Membahas ide, menulis spesifikasi perubahan, atau mengusulkan tiket | `.agents/skills/write-module-spec/SKILL.md` |
+| Mendesain layout, halaman, alur UI, atau prototipe untuk ditinjau | `.agents/skills/design-ui/SKILL.md` |
 | Mengimplementasikan spesifikasi, tiket, atau skenario | `.agents/skills/implement-from-spec/SKILL.md` |
 | Endpoint REST, DTO, validasi request, response/error contract | `.agents/skills/spring-boot-api/SKILL.md` |
 | Membuat atau menyiapkan database PostgreSQL lokal Dagantara di Windows | `.agents/skills/create-postgres-database/SKILL.md` |

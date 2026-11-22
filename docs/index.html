@@ -286,6 +286,12 @@
         "markdown":  "---\nname: create-postgres-database\ndescription: Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.\n---\n\n# Membuat database PostgreSQL Dagantara\n\nJalankan skrip dari root repo untuk menyiapkan instance lokal dengan PostgreSQL 16 yang sudah terpasang. Skrip menggunakan kredensial Windows terenkripsi di luar repo dan memeriksa koneksi sebagai `dagantara_app`.\n\n```powershell\n$result = \u0026 .\\.agents\\skills\\create-postgres-database\\scripts\\create-database.ps1\n$result\n```\n\nDefault-nya adalah `127.0.0.1:5433` dengan data di `%LOCALAPPDATA%\\Dagantara\\postgresql-16`. Skrip memakai ulang instance tersebut, menyalakannya bila berhenti, dan mengisi role atau database yang masih belum ada. Gunakan `-PgBin` jika lokasi binary PostgreSQL 16 berbeda. Untuk instance tambahan yang memang diminta, gunakan nama direktori lokal dan port yang berbeda, misalnya `-StateName Dagantara-Test -Port 15433`. Periksa konflik port sebelum memilih instance tambahan.\n\nJika pengguna memilih instance PostgreSQL yang sudah ada, gunakan kredensial admin yang sah pada instance tersebut dan ikuti langkah SQL di [README backend](../../../backend/README.md#postgresql-lokal). Verifikasi koneksi dengan akun aplikasi. Jika instance tersebut meminta password yang tidak tersedia, instance lokal terpisah adalah opsi ketika targetnya belum ditetapkan. Pertahankan konfigurasi, kredensial, dan data instance yang sudah ada.\n\nLaporkan URL JDBC, nama akun aplikasi, status verifikasi, dan lokasi berkas kredensial tanpa menampilkan password. Untuk menjalankan backend, muat nilai yang dikembalikan skrip ke terminal yang sama.\n\n```powershell\n$db = Import-Clixml -LiteralPath $result.CredentialPath\n$env:SPRING_DATASOURCE_URL = $result.JdbcUrl\n$env:SPRING_DATASOURCE_USERNAME = $db.UserName\n$env:SPRING_DATASOURCE_PASSWORD = $db.GetNetworkCredential().Password\n```\n\nJika backend juga diminta berjalan, ikuti panduan [spring-boot-run](../spring-boot-run/SKILL.md) dan cek `/actuator/health/db` dengan pengaturan Actuator lokal di README backend. Untuk membuat tabel atau migrasi, gunakan [spring-boot-database](../spring-boot-database/SKILL.md).\n"
     },
     {
+        "id":  "design-ui",
+        "title":  "Desain UI",
+        "description":  "Rancang atau tinjau layout, halaman, dan alur UI lintas proyek. Gunakan aplikasi yang ada, spesifikasi, atau brief singkat untuk menghasilkan wireframe atau prototipe yang siap ditinjau.",
+        "markdown":  "---\nname: design-ui\ndescription: Rancang atau tinjau layout, halaman, dan alur UI lintas proyek. Gunakan aplikasi yang ada, spesifikasi, atau brief singkat untuk menghasilkan wireframe atau prototipe yang siap ditinjau.\n---\n\n# Desain UI\n\nTentukan pengguna, tugas utama, dan hasil desain yang diminta. Gunakan instruksi proyek dan batas cakupan dari pengguna. Pilih dasar desain yang tersedia.\n\n- **Aplikasi yang sudah berjalan.** Periksa layar, navigasi, komponen, dan pedoman desain yang dipakai. Ikuti pola yang relevan dengan alur yang sedang diubah.\n- **Spesifikasi atau tiket.** Petakan aktor, izin, aksi, hasil yang terlihat, dan skenario yang relevan. Gunakan aturan produk yang telah disepakati untuk menentukan perilaku prototipe.\n- **Brief proyek baru.** Mulai dari tujuan, pengguna, tugas utama, dan platform sasaran. Untuk layout dasar, gunakan satu tugas representatif untuk menguji navigasi dan area konten. Catat asumsi yang mudah direvisi dan tanyakan hanya hal yang diperlukan untuk melanjutkan desain.\n\n## Buat rancangan untuk ditinjau\n\n1. Pilih bentuk yang sesuai dengan keputusan yang akan ditinjau. Gunakan wireframe untuk struktur dan hierarki. Gunakan prototipe yang bisa diklik untuk urutan langkah, transisi, atau umpan balik. Ikuti format yang diminta pengguna dan gunakan komponen proyek bila tersedia.\n2. Gambarkan alur dengan data contoh. Sertakan keadaan yang memengaruhi langkah pengguna, seperti keadaan kosong, proses memuat, berhasil, input gagal, atau akses ditolak jika relevan. Periksa ukuran layar sasaran, keterbacaan, serta navigasi keyboard dan fokus jika prototipe interaktif.\n3. Tunjukkan rancangan dan keputusan yang perlu ditinjau. Putuskan susunan, label, dan interaksi dalam review UI. Jika rancangan menimbulkan pertanyaan tentang kemampuan produk, izin, atau aturan bisnis, rujuk sumbernya dan catat keputusan yang perlu disepakati di spec atau tiket. Lanjutkan bagian desain yang sudah jelas dan tandai bagian yang terdampak sebagai usulan.\n\n## Serahkan hasil\n\nSertakan rancangan, rujukan yang dipakai, asumsi dan keputusan terbuka, serta langkah singkat untuk mencoba hasilnya. Simpan artefak sesuai konvensi proyek. Saat desain siap diserahkan, catat perilaku UI yang perlu diverifikasi dan tautkan rancangan dari spec atau tiket jika relevan. Simpan kode prototipe sebagai artefak desain. Perubahan aplikasi produksi mengikuti permintaan implementasi dan proses proyek.\n"
+    },
+    {
         "id":  "implement-from-spec",
         "title":  "Implementasi dari Spesifikasi Dagantara",
         "description":  "Implementasikan spec perubahan atau tiket Dagantara berdasarkan judul, slug, atau path. Dukung juga spesifikasi modul, requirement, dan skenario uji.",
@@ -560,7 +566,141 @@ No tables or columns are introduced by this roadmap. ERDs and constraints belong
 - No implementation task should infer a new database table or Admin menu solely from a roadmap row.
 
   </script>
-  <script id="offline-readme" type="text/plain"># Dagantara
+  <script id="offline-skill-guide" type="text/plain">
+# Panduan Penggunaan Skill
+
+Buka chat Codex di root proyek. Tekan **Copy** pada blok prompt yang sesuai, lalu tempel ke chat. Awalan `$nama-skill` memilih skill. Sertakan tujuan, dokumen atau ID requirement jika ada, dan hasil yang ingin kamu lihat.
+
+## Pilih alur kerja
+
+- **Mulai dari ide fitur.** Gunakan `$write-module-spec` untuk menyepakati perilaku dan pengujian. Gunakan `$design-ui` jika perlu meninjau layar atau interaksi. Lanjutkan dengan `$implement-from-spec` saat cakupan siap dikerjakan.
+- **Mulai dari layout dasar atau aplikasi yang sudah ada.** Gunakan `$design-ui` dengan brief atau rujukan layar. Bawa keputusan yang mengubah fitur, izin, atau aturan bisnis ke pembahasan spesifikasi sebelum implementasi.
+- **Kerjakan atau verifikasi backend.** Gunakan skill API, database, security, atau testing sesuai cakupan. Gunakan skill penyiapan PostgreSQL atau menjalankan backend untuk kebutuhan lingkungan lokal.
+
+## $write-module-spec
+
+Gunakan saat ide atau perubahan perilaku masih perlu dibahas. Skill ini merangkum keputusan untuk dikonfirmasi, lalu menulis spesifikasi dan mengusulkan pembagian tiket jika perlu. [Instruksi skill](skills/write-module-spec.md)
+
+```text
+$write-module-spec Bahas fitur undangan pengguna lewat email untuk Dagantara.
+Mulai dari aturan User Management yang berlaku. Bahas siapa yang boleh mengundang,
+kapan akun dibuat, dan bagaimana undangan kedaluwarsa. Beri saya rekomendasi per
+keputusan dan rangkum skenario uji sebelum meminta konfirmasi untuk menulis spec.
+```
+
+## $design-ui
+
+Gunakan untuk merancang layout, halaman, atau alur yang akan ditinjau. Mulai dari brief, aplikasi yang berjalan, atau spec. Untuk memakai skill ini di proyek lain, salin folder `.agents/skills/design-ui` ke lokasi skill yang dipakai proyek atau akun Codex kamu. [Instruksi skill](skills/design-ui.md)
+
+**Contoh layout dasar tanpa spec**
+
+```text
+$design-ui Buat prototipe HTML untuk portal reservasi yang dipakai pelanggan di HP.
+Pelanggan perlu melihat jadwal dan memilih satu slot. Buat data contoh dan alur
+yang bisa diklik sampai slot terpilih. Catat asumsi dan cara mencoba prototipenya.
+```
+
+**Contoh alur dari requirement Dagantara**
+
+```text
+$design-ui Rancang alur Tambah Pengguna dari UM-01 dan UM-02 di User Management.
+Buat prototipe HTML untuk pengisian formulir, pemilihan role, dan umpan balik
+saat penyimpanan ditolak. Catat skenario UI yang perlu diuji saat implementasi.
+```
+
+**Contoh revisi aplikasi yang sudah berjalan**
+
+```text
+$design-ui Tinjau layar pencarian yang ada di proyek ini dari sudut pandang
+pengguna ponsel. Gunakan pola navigasi dan komponen yang sudah dipakai. Buat
+wireframe untuk pencarian, hasil, dan kondisi tanpa hasil untuk saya tinjau.
+```
+
+## $implement-from-spec
+
+Gunakan untuk membangun dan memverifikasi cakupan yang disepakati. Pilih spec lewat slug, tiket lewat slug dan nomor, atau cakupan modul lewat path dan ID requirement. Untuk tiket, pastikan statusnya `ready-for-agent` dan prasyaratnya sudah tersedia di branch dasar. Pengujian API HTTP dalam cakupan dijalankan dengan `$bruno-api-testing` sebagai bagian dari verifikasi. [Instruksi skill](skills/implement-from-spec.md)
+
+```text
+$implement-from-spec @docs/user-management.md UM-01 UM-02
+Fokus pada pembuatan pengguna dan penetapan tenant serta role. Verifikasi
+UM-AT-01 dan UM-AT-02. Laporkan keputusan yang masih menghalangi implementasi
+atau pengujian, lalu lanjutkan bagian yang cakupannya sudah jelas.
+```
+
+## $spring-boot-api
+
+Gunakan untuk mengerjakan atau meninjau controller, DTO, validasi input, serta kontrak respons dan error. Contoh ini meminta peninjauan kontrak yang tersedia. [Instruksi skill](skills/spring-boot-api.md)
+
+```text
+$spring-boot-api Tinjau kontrak REST untuk pembuatan pengguna pada UM-01 dan UM-02.
+Periksa controller, DTO, validasi request, dan respons error yang sudah ada.
+Laporkan yang sesuai dengan spec dan tunjukkan keputusan kontrak yang masih terbuka.
+```
+
+## $spring-boot-database
+
+Gunakan untuk merancang atau mengubah migration, entity, relasi, query, dan transaksi. Hubungkan perubahan data dengan aturan dan skenario yang sudah diputuskan. [Instruksi skill](skills/spring-boot-database.md)
+
+```text
+$spring-boot-database Rancang perubahan PostgreSQL dan JPA untuk PM-03 dan PM-04.
+Periksa bagaimana media produk bisa ditautkan ke beberapa nilai opsi pada produk
+yang sama. Tunjukkan constraint dan batas transaksi yang diperlukan untuk
+PM-AT-03 dan PM-AT-04.
+```
+
+## $spring-boot-security
+
+Gunakan untuk autentikasi, pemetaan role dan permission, serta isolasi tenant. Contoh ini meninjau keamanan alur tambah pengguna. [Instruksi skill](skills/spring-boot-security.md)
+
+```text
+$spring-boot-security Tinjau izin pada alur tambah pengguna berdasarkan UM-01,
+UM-02, dan UM-06. Telusuri cara backend menentukan permission users.create,
+konteks tenant, dan scope role target. Laporkan pemeriksaan yang sudah tersedia
+dan bagian yang masih tergantung pada keputusan domain.
+```
+
+## $create-postgres-database
+
+Gunakan untuk menyiapkan PostgreSQL pengembangan Dagantara di Windows. Contoh ini memakai instance lokal bawaan dan meminta verifikasi koneksi dengan akun aplikasi. [Instruksi skill](skills/create-postgres-database.md)
+
+```text
+$create-postgres-database Siapkan PostgreSQL lokal Dagantara di Windows dengan
+konfigurasi bawaan. Gunakan ulang instance lokal jika sudah tersedia. Verifikasi
+koneksi ke database dagantara sebagai dagantara_app dan laporkan host serta port
+tanpa menampilkan kata sandi.
+```
+
+## $spring-boot-run
+
+Gunakan untuk menyalakan atau memeriksa backend lokal. Prompt ini meminta alamat untuk pengujian berikutnya dan membiarkan proses tetap berjalan. [Instruksi skill](skills/spring-boot-run.md)
+
+```text
+$spring-boot-run Jalankan backend Dagantara secara lokal untuk pengujian Bruno.
+Jika sudah berjalan, periksa statusnya. Laporkan Base URL dan hasil pemeriksaan
+health jika tersedia, lalu biarkan backend tetap berjalan.
+```
+
+## $spring-boot-testing
+
+Gunakan untuk menulis atau menjalankan unit, MVC, integration, repository, dan security test Spring Boot. [Instruksi skill](skills/spring-boot-testing.md)
+
+```text
+$spring-boot-testing Jalankan tes Spring Boot untuk perubahan yang sedang
+dikerjakan. Laporkan perintah, hasil, dan kriteria penerimaan yang dibuktikan.
+```
+
+## $bruno-api-testing
+
+Gunakan untuk menulis atau menjalankan smoke test dan skenario penerimaan API HTTP. Periksa status, isi respons yang dijanjikan, dan keadaan data sesudah aksi bila relevan. [Instruksi skill](skills/bruno-api-testing.md)
+
+```text
+$bruno-api-testing Jalankan smoke test Dagantara dengan environment Local.
+Siapkan backend lokal bila diperlukan. Jalankan dari folder bruno dan
+laporkan perintah serta hasilnya.
+```
+</script>
+  <script id="offline-readme" type="text/plain">
+# Dagantara
 
 > **AI-Ready Development Specification** · Multi-tenant e-commerce
 
@@ -603,15 +743,19 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 
 ## Penggunaan dalam Pengembangan
 
+[Panduan Penggunaan Skill](skill-guide.md) memuat cara memilih skill dan contoh prompt siap salin untuk setiap skill di repository.
+
 1. Panggil `$write-module-spec <ide>`. AI menelusuri repo, mengajukan pertanyaan dengan rekomendasi, dan merangkum keputusan untuk kamu konfirmasi sebelum menulis spec di `docs/<slug>.md`.
-2. Untuk spec yang bisa dikerjakan dalam satu sesi, gunakan `$implement-from-spec <slug>`. Jika cakupannya besar, AI mengusulkan tiket dengan hasil dan dependensi. Setelah kamu menyetujui pembagiannya, gunakan `$implement-from-spec <slug> <NN>` untuk satu tiket yang sudah bisa dimulai.
-3. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
+2. Gunakan `$design-ui` jika perlu meninjau layout atau alur UI. Sertakan spec, layar yang sudah ada, atau brief. Layout dasar bisa dimulai dari brief dan satu contoh tugas pengguna.
+3. Untuk spec yang bisa dikerjakan dalam satu sesi, gunakan `$implement-from-spec <slug>`. Jika cakupannya besar, AI mengusulkan tiket dengan hasil dan dependensi. Setelah kamu menyetujui pembagiannya, gunakan `$implement-from-spec <slug> <NN>` untuk satu tiket yang sudah bisa dimulai.
+4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
 Untuk format modul yang sudah ada, `$implement-from-spec @docs/user-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan daftar offline di `index.html`, sehingga tautan skill bekerja melalui server HTTP maupun saat file dibuka langsung.</script>
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, atau indeks ini, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html`, sehingga daftar skill dan panduan tersedia saat halaman dibuka langsung.
+</script>
   <script id="offline-user-management" type="text/plain"># User Management
 
 ## Module Overview
@@ -918,6 +1062,7 @@ erDiagram
       let requestSeq = 0;
       const offlineFiles = {
         'README.md': byId('offline-readme').textContent.trim(),
+        'skill-guide.md': byId('offline-skill-guide').textContent.trim(),
         'user-management.md': byId('offline-user-management').textContent.trim(),
         'product-management.md': byId('offline-product-management').textContent.trim(),
         'module-roadmap.md': byId('offline-module-roadmap').textContent.trim(),

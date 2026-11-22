@@ -41,12 +41,15 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 
 ## Penggunaan dalam Pengembangan
 
+[Panduan Penggunaan Skill](skill-guide.md) memuat cara memilih skill dan contoh prompt siap salin untuk setiap skill di repository.
+
 1. Panggil `$write-module-spec <ide>`. AI menelusuri repo, mengajukan pertanyaan dengan rekomendasi, dan merangkum keputusan untuk kamu konfirmasi sebelum menulis spec di `docs/<slug>.md`.
-2. Untuk spec yang bisa dikerjakan dalam satu sesi, gunakan `$implement-from-spec <slug>`. Jika cakupannya besar, AI mengusulkan tiket dengan hasil dan dependensi. Setelah kamu menyetujui pembagiannya, gunakan `$implement-from-spec <slug> <NN>` untuk satu tiket yang sudah bisa dimulai.
-3. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
+2. Gunakan `$design-ui` jika perlu meninjau layout atau alur UI. Sertakan spec, layar yang sudah ada, atau brief. Layout dasar bisa dimulai dari brief dan satu contoh tugas pengguna.
+3. Untuk spec yang bisa dikerjakan dalam satu sesi, gunakan `$implement-from-spec <slug>`. Jika cakupannya besar, AI mengusulkan tiket dengan hasil dan dependensi. Setelah kamu menyetujui pembagiannya, gunakan `$implement-from-spec <slug> <NN>` untuk satu tiket yang sudah bisa dimulai.
+4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
 Untuk format modul yang sudah ada, `$implement-from-spec @docs/user-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan daftar offline di `index.html`, sehingga tautan skill bekerja melalui server HTTP maupun saat file dibuka langsung.
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, atau indeks ini, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html`, sehingga daftar skill dan panduan tersedia saat halaman dibuka langsung.
