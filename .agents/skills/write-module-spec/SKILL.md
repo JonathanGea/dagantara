@@ -22,7 +22,7 @@ Simpan sebagai `docs/<slug>.md` dan tautkan dari `docs/README.md`. Pilih judul y
 - **Solution** — Hasil yang akan dialami pengguna.
 - **User Stories** — Daftar bernomor yang menyebut pelaku, kemampuan, dan manfaat. Cakup alur utama dan kasus batas yang disepakati.
 - **Implementation Decisions** — Keputusan tentang modul, antarmuka, skema, API, interaksi, atau aturan domain yang memengaruhi hasil. Rujuk sumbernya jika sudah tercatat. Gunakan nama domain dan antarmuka yang stabil.
-- **Testing Decisions** — Antarmuka uji yang disepakati, perilaku yang harus teramati, dan pola tes yang dapat diikuti. Nyatakan kondisi dan hasil untuk kasus sukses dan penolakan yang relevan.
+- **Testing Decisions** — Antarmuka uji yang disepakati, perilaku yang harus teramati, dan pola tes yang dapat diikuti. Nyatakan kondisi, aksi, dan hasil untuk kasus sukses dan penolakan yang relevan. Untuk API HTTP, sepakati hasil yang perlu dibuktikan lewat respons dan keadaan data sesudah aksi bila relevan.
 - **Out of Scope** — Batas yang disepakati.
 - **Further Notes** — Konteks atau referensi tambahan jika diperlukan.
 

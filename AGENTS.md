@@ -46,7 +46,8 @@ Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal,
 | Membuat atau menyiapkan database PostgreSQL lokal Dagantara di Windows | `.agents/skills/create-postgres-database/SKILL.md` |
 | JPA, PostgreSQL, relasi, schema/migration, query | `.agents/skills/spring-boot-database/SKILL.md` |
 | Autentikasi, JWT, role/permission, tenant access | `.agents/skills/spring-boot-security/SKILL.md` |
-| Unit/integration/security testing, acceptance criteria | `.agents/skills/spring-boot-testing/SKILL.md` |
+| Unit, MVC, integration, repository, atau security test Spring Boot | `.agents/skills/spring-boot-testing/SKILL.md` |
+| Smoke test dan skenario penerimaan API HTTP melalui Bruno | `.agents/skills/bruno-api-testing/SKILL.md` |
 | Menjalankan atau memeriksa backend lokal | `.agents/skills/spring-boot-run/SKILL.md` |
 
 Gunakan beberapa skill sekaligus jika cakupannya saling bersinggungan. Jangan menganggap skill sebagai requirement fitur baru.

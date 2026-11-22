@@ -28,7 +28,7 @@ description: Implementasikan spec perubahan atau tiket Dagantara berdasarkan jud
 ## Verifikasi terhadap spesifikasi
 
 - Verifikasi perilaku melalui antarmuka uji yang disepakati di spec. Gunakan Testing Decisions dan Acceptance Criteria untuk spec atau tiket, serta Acceptance Scenarios untuk format modul. Cek hasil sukses dan penolakan yang tercakup, termasuk keadaan data setelah penolakan. Jalankan tes dan build yang tersedia untuk perubahan tersebut.
-- Untuk pengujian API HTTP, ikuti `spring-boot-testing`. Gunakan `spring-boot-run` jika perlu menjalankan backend lokal, lalu jalankan smoke test Bruno. Setelah smoke test lulus, jalankan semua skenario HTTP dalam cakupan tugas.
+- Untuk perubahan perilaku API HTTP, ikuti `bruno-api-testing` untuk menulis dan menjalankan skenario penerimaan lokal dalam cakupan. Skill tersebut menggunakan `spring-boot-run` jika backend perlu disiapkan. Gunakan `spring-boot-testing` untuk tes Spring Boot.
 - Laporkan hasil per kriteria atau ID skenario beserta perintah dan keputusan yang masih diperlukan. Nyatakan cakupan selesai setelah perilaku yang disepakati tercakup dan semua pemeriksaan wajib lulus. Untuk tiket, tandai kriteria yang terverifikasi dan ubah status menjadi `done` dalam perubahan yang sama. Sebutkan tiket lanjutan yang prasyaratnya lengkap setelah hasil ini tersedia di branch yang akan dipakai.
 
 ## Buka PR ke `dev` di Dagantara
