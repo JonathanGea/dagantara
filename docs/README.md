@@ -6,7 +6,6 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 
 ## Dokumentasi Modul
 
-- [User Management](user-management.md)
 - [Product Management](product-management.md)
 - [Module Roadmap & Ownership](module-roadmap.md)
 - [Development Dependencies & Parallel Workstreams](development-dependencies.md)
@@ -14,6 +13,8 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 ## Spesifikasi Perubahan
 
 Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa ekstensi dapat dipakai untuk memilih spec.
+
+- [User Management — Akses Platform dan Tenant](user-management.md)
 
 ## Aturan Membaca untuk AI Developer
 
@@ -48,7 +49,7 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 3. Untuk spec yang bisa dikerjakan dalam satu sesi, gunakan `$implement-from-spec <slug>`. Jika cakupannya besar, AI mengusulkan tiket dengan hasil dan dependensi. Setelah kamu menyetujui pembagiannya, gunakan `$implement-from-spec <slug> <NN>` untuk satu tiket yang sudah bisa dimulai.
 4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
-Untuk format modul yang sudah ada, `$implement-from-spec @docs/user-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
+Untuk format modul yang sudah ada, `$implement-from-spec @docs/product-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
 
 ### Daftar skill pada viewer
 

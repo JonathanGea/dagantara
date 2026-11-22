@@ -1,7 +1,10 @@
-package com.dagantara.backend.modules.auth;
+package com.dagantara.backend.modules.auth.controller;
 
 import com.dagantara.backend.common.api.ApiResponse;
 import com.dagantara.backend.common.api.ApiRoutes;
+import com.dagantara.backend.modules.auth.dto.LoginRequest;
+import com.dagantara.backend.modules.auth.dto.LoginResponse;
+import com.dagantara.backend.modules.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -19,7 +22,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "Technical bootstrap login (not public user registration)")
+    @Operation(summary = "Login akun platform")
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success("Login successful", authService.login(request));

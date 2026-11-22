@@ -1,4 +1,4 @@
-package com.dagantara.backend.modules.auth;
+package com.dagantara.backend.modules.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
