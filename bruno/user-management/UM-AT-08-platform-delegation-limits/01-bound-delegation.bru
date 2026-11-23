@@ -1,0 +1,99 @@
+meta {
+  name: UM-AT-08 Pembatasan delegasi dan pemisahan izin Help Center
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Izin di luar kewenangan ditolak dan provisioning didelegasikan terpisah dari reset admin tenant", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const helpCenter = "tenants.admins.password.reset";
+    const provision = "tenants.provision";
+    const helpRole = await fx.role("help-center-only", [helpCenter]);
+    const provisionRole = await fx.role("provisioning-only", [provision]);
+    const managerPermissions = ["users.create", "users.role.assign", "roles.permissions.update", "users.password.reset"];
+    const managerRole = await fx.role("limited-manager", managerPermissions);
+    const ordinaryRole = await fx.role("without-permissions");
+    const manager = await fx.operator("limited-manager", managerRole);
+    const provisioner = await fx.operator("provisioner", provisionRole);
+    const helpOperator = await fx.operator("help-operator", helpRole);
+    const ordinary = await fx.create(fx.name("delegation-target"), ordinaryRole);
+    const catalog = await fx.api("GET", "/roles/permissions", { token: manager.token });
+    expect(catalog.data.data).to.have.members(managerPermissions);
+
+    await fx.api("PUT", `/roles/${ordinaryRole}/permissions`, {
+      token: manager.token, body: { permissionCodes: ["unknown.permission"] },
+      status: 400, error: "INVALID_PERMISSION"
+    });
+    await fx.api("PUT", `/roles/${ordinaryRole}/permissions`, {
+      token: manager.token, body: { permissionCodes: [helpCenter] }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("PUT", `/roles/${helpRole}/permissions`, {
+      token: manager.token, body: { permissionCodes: [] }, status: 403, error: "FORBIDDEN"
+    });
+    const denied = fx.name("denied-privileged-create");
+    await fx.api("POST", "/users", {
+      token: manager.token, body: { username: denied, roleId: helpRole }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("PUT", `/users/${ordinary.id}/role`, {
+      token: manager.token, body: { roleId: helpRole }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("PUT", `/users/${helpOperator.id}/role`, {
+      token: manager.token, body: { roleId: ordinaryRole }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("POST", `/users/${helpOperator.id}/reset-password`, {
+      token: manager.token, status: 403, error: "FORBIDDEN"
+    });
+
+    const roles = await fx.roles();
+    expect(roles.find(role => role.id === helpRole).permissionCodes).to.deep.equal([helpCenter]);
+    expect(roles.find(role => role.id === provisionRole).permissionCodes).to.deep.equal([provision]);
+    expect(roles.find(role => role.id === ordinaryRole).permissionCodes).to.deep.equal([]);
+    expect((await fx.detail(ordinary.id)).roleId).to.equal(ordinaryRole);
+    expect((await fx.detail(helpOperator.id)).roleId).to.equal(helpRole);
+    expect((await fx.users()).some(user => user.username === denied)).to.equal(false);
+    await fx.login(helpOperator.username, helpOperator.password);
+
+    const hostname = bru.getProcessEnv("DAGANTARA_TEST_PLATFORM_HOST") || "localhost";
+    const slug = fx.name("provision-only");
+    const payload = {
+      storeName: slug,
+      phoneNumber: "+620000000003",
+      ownerUsername: slug,
+      loginUrl: `https://${hostname}/${slug}`,
+      loginUrlReady: true
+    };
+    await fx.api("POST", "/tenants", {
+      token: helpOperator.token, body: payload, status: 403, error: "FORBIDDEN"
+    });
+    // The identical address stays available after denial and can be used by the provisioning operator.
+    const tenant = await fx.api("POST", "/tenants", { token: provisioner.token, body: payload, status: 201 });
+    expect(tenant.data.data.loginUrl).to.equal(payload.loginUrl);
+    expect(tenant.data.data.ownerUsername).to.equal(payload.ownerUsername);
+    await fx.api("POST", `/users/${tenant.data.data.ownerId}/reset-password`, {
+      token: provisioner.token, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("POST", `/users/${ordinary.id}/reset-password`, {
+      token: helpOperator.token, status: 403, error: "FORBIDDEN"
+    });
+    const owner = await fx.request("POST", `/${slug}/api/v1/auth/login`, {
+      token: null, body: { username: payload.ownerUsername, password: tenant.data.data.temporaryPassword }
+    });
+    expect(owner.data.data.passwordChangeRequired).to.equal(true);
+  });
+}

@@ -1,0 +1,78 @@
+meta {
+  name: UM-AT-11 Siklus akun operator dan pencabutan sesi
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Izin per aksi, reset, nonaktif, aktif kembali, dan arsip berlaku pada data dan sesi", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const readerRole = await fx.role("lifecycle-reader", ["users.read"]);
+    const managerRole = await fx.role("lifecycle-manager", ["users.read", "users.deactivate"]);
+    const manager = await fx.operator("lifecycle-manager", managerRole);
+    const operator = await fx.operator("lifecycle-target", readerRole);
+    const path = `/users/${operator.id}`;
+    const original = await fx.detail(operator.id, operator.token);
+
+    for (const action of ["reset-password", "reactivate"]) {
+      await fx.api("POST", `${path}/${action}`, { token: manager.token, status: 403, error: "FORBIDDEN" });
+    }
+    await fx.api("DELETE", path, { token: manager.token, status: 403, error: "FORBIDDEN" });
+    expect(await fx.detail(operator.id, operator.token)).to.deep.equal(original);
+    await fx.login(operator.username, operator.password);
+
+    await fx.api("PUT", `/roles/${managerRole}/permissions`, {
+      body: { permissionCodes: ["users.read", "users.password.reset", "users.deactivate", "users.activate", "users.archive"] }
+    });
+    const reset = await fx.api("POST", `${path}/reset-password`, { token: manager.token });
+    expect(reset.headers["cache-control"]).to.include("no-store");
+    const credentials = reset.data.data;
+    expect(credentials).to.include({ id: operator.id, username: operator.username, roleId: readerRole });
+    expect(/^[\w-]{32}$/.test(credentials.temporaryPassword), "replacement password shape").to.equal(true);
+    expect(credentials.temporaryPassword !== operator.temporaryPassword, "replacement password differs").to.equal(true);
+    await fx.api("GET", path, { token: operator.token, status: 401, error: "UNAUTHORIZED" });
+    await fx.rejectLogin(operator.username, operator.password);
+    const limitedSession = await fx.login(operator.username, credentials.temporaryPassword, true);
+    await fx.api("GET", path, { token: limitedSession, status: 403, error: "PASSWORD_CHANGE_REQUIRED" });
+    const password = fx.name("password-after-reset");
+    await fx.api("POST", "/auth/password", { token: limitedSession, status: 204, body: { newPassword: password } });
+    await fx.rejectLogin(operator.username, credentials.temporaryPassword);
+    const beforeDeactivation = await fx.login(operator.username, password);
+    expect(await fx.detail(operator.id, beforeDeactivation)).to.deep.equal(original);
+
+    await fx.api("POST", `${path}/deactivate`, { token: manager.token });
+    expect((await fx.detail(operator.id)).status).to.equal("INACTIVE");
+    expect((await fx.users()).find(user => user.id === operator.id).status).to.equal("INACTIVE");
+    await fx.api("GET", path, { token: beforeDeactivation, status: 401, error: "UNAUTHORIZED" });
+    await fx.rejectLogin(operator.username, password);
+
+    await fx.api("POST", `${path}/reactivate`, { token: manager.token });
+    await fx.api("GET", path, { token: beforeDeactivation, status: 401, error: "UNAUTHORIZED" });
+    const activeToken = await fx.login(operator.username, password);
+    expect(await fx.detail(operator.id, activeToken)).to.deep.equal(original);
+
+    const beforeArchive = await fx.users();
+    await fx.api("DELETE", path, { token: manager.token });
+    await fx.api("GET", path, { token: activeToken, status: 401, error: "UNAUTHORIZED" });
+    await fx.rejectLogin(operator.username, password);
+    const afterArchive = await fx.users();
+    expect(afterArchive.map(user => user.id)).to.deep.equal(beforeArchive.filter(user => user.id !== operator.id).map(user => user.id));
+    await fx.api("POST", `${path}/reactivate`, { token: manager.token, status: 409, error: "ACCOUNT_ARCHIVED" });
+    expect(await fx.detail(operator.id)).to.deep.equal({ ...original, status: "ARCHIVED" });
+  });
+}
