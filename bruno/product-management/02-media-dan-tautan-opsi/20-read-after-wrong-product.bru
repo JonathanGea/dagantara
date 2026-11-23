@@ -1,0 +1,27 @@
+meta {
+  name: PM-AT-03 Tautan tetap utuh setelah ID produk salah
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+tests {
+  test("PM-AT-03 Tautan tetap utuh setelah ID produk salah", function () {
+    expect(res.getStatus()).to.equal(200);
+    const product = res.getBody().data;
+    expect(product.id).to.equal(bru.getVar("productA"));
+    expect(product.media).to.deep.equal([
+      { id: bru.getVar("mediaA"), url: "https://example.test/photo-a.jpg?size=full", optionValueIds: [bru.getVar("productABlack"), bru.getVar("productAWhite")].sort() },
+      { id: bru.getVar("mediaB"), url: "http://example.test/photo-b.jpg", optionValueIds: [].sort() }
+    ]);
+  });
+}

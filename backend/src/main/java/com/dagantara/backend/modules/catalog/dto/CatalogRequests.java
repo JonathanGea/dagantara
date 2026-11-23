@@ -56,6 +56,12 @@ public final class CatalogRequests {
     public record ChangeSkuRequest(@NotNull SkuMode skuMode, String sku) {
     }
 
+    public record MediaRequest(@NotBlank String url) {
+    }
+
+    public record MediaOptionValuesRequest(@NotNull Set<@NotNull UUID> optionValueIds) {
+    }
+
     public enum SkuMode {
         AUTO, MANUAL
     }

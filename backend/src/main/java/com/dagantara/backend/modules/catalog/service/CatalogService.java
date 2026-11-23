@@ -17,6 +17,7 @@ import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductDetail;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductStatus;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductSummary;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
+import com.dagantara.backend.modules.catalog.repository.CatalogMediaRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogRepository.Product;
 import com.dagantara.backend.modules.catalog.repository.CatalogRepository.SelectedValue;
@@ -42,11 +43,14 @@ public class CatalogService {
     private final CatalogAccess access;
     private final CatalogRepository catalog;
     private final CatalogVariantRepository variants;
+    private final CatalogMediaRepository media;
 
-    public CatalogService(CatalogAccess access, CatalogRepository catalog, CatalogVariantRepository variants) {
+    public CatalogService(CatalogAccess access, CatalogRepository catalog, CatalogVariantRepository variants,
+                          CatalogMediaRepository media) {
         this.access = access;
         this.catalog = catalog;
         this.variants = variants;
+        this.media = media;
     }
 
     @Transactional
@@ -186,7 +190,7 @@ public class CatalogService {
         return new ProductDetail(id, product.name(), product.description(), product.priceIdr(), product.productCode(),
                 product.status(), catalog.listCategoryIds(tenantId, id), product.primaryCategoryId(),
                 catalog.listOptions(tenantId, id), variants.listForProduct(tenantId, id).stream()
-                        .map(VariantRow::toResponse).toList());
+                        .map(VariantRow::toResponse).toList(), media.listForProduct(tenantId, id));
     }
 
     private void validateCategories(UUID tenantId, CategoriesRequest request) {

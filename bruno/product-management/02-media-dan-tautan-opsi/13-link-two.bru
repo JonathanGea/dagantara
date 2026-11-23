@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-03 Tautkan foto pertama ke dua nilai
+  type: http
+  seq: 13
+}
+
+put {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}/media/{{mediaA}}/option-values
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{productABlack}}",
+      "{{productAWhite}}"
+    ]
+  }
+}
+
+tests {
+  test("PM-AT-03 Tautkan foto pertama ke dua nilai", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data).to.deep.equal({ id: bru.getVar("mediaA"), url: "https://example.test/photo-a.jpg?size=full", optionValueIds: [bru.getVar("productABlack"), bru.getVar("productAWhite")].sort() });
+  });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: PM-AT-04 Foto kedua juga dapat memakai nilai yang sama
+  type: http
+  seq: 27
+}
+
+put {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}/media/{{mediaB}}/option-values
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{productABlack}}"
+    ]
+  }
+}
+
+tests {
+  test("PM-AT-04 Foto kedua juga dapat memakai nilai yang sama", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data).to.deep.equal({ id: bru.getVar("mediaB"), url: "http://example.test/photo-b.jpg", optionValueIds: [bru.getVar("productABlack")].sort() });
+  });
+}

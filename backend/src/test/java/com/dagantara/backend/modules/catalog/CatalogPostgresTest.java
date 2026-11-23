@@ -4,13 +4,19 @@ import com.dagantara.backend.common.config.TransactionConfig;
 import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ChangeSkuRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CreateProductRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.OptionRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.OptionValueRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ProductDetailsRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.SkuMode;
+import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Media;
+import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductDetail;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
+import com.dagantara.backend.modules.catalog.repository.CatalogMediaRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogVariantRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogVariantRepository.VariantRow;
 import com.dagantara.backend.modules.catalog.service.CatalogAccess;
+import com.dagantara.backend.modules.catalog.service.CatalogMediaService;
 import com.dagantara.backend.modules.catalog.service.CatalogService;
 import com.dagantara.backend.modules.tenants.repository.TenantAccountRepository;
 import com.dagantara.backend.modules.users.dto.AccountSession;
@@ -62,6 +68,7 @@ class CatalogPostgresTest {
     private TransactionTemplate transactions;
     private CatalogService catalog;
     private CatalogVariantRepository variants;
+    private CatalogMediaService media;
     private AccountSession ownerA;
     private AccountSession ownerB;
 
@@ -90,17 +97,19 @@ class CatalogPostgresTest {
                 INSERT INTO roles (id, tenant_id, code, name)
                 VALUES (gen_random_uuid(), :tenant, 'CUSTOM_READER', 'Custom reader')
                 """).param("tenant", ownerA.tenantId()).update();
-        new ResourceDatabasePopulator(migration("06-product-catalog")).execute(source);
+        new ResourceDatabasePopulator(migration("06-product-catalog"), migration("07-product-media")).execute(source);
 
         context = new AnnotationConfigApplicationContext();
         context.registerBean(DataSource.class, () -> source);
         context.registerBean(JdbcTransactionManager.class, () -> manager);
         context.registerBean(JdbcClient.class, () -> jdbc);
         context.register(TransactionConfig.class, CatalogService.class, CatalogAccess.class, CatalogRepository.class,
-                CatalogVariantRepository.class, TenantAccountRepository.class);
+                CatalogVariantRepository.class, CatalogMediaService.class, CatalogMediaRepository.class,
+                TenantAccountRepository.class);
         context.refresh();
         catalog = context.getBean(CatalogService.class);
         variants = context.getBean(CatalogVariantRepository.class);
+        media = context.getBean(CatalogMediaService.class);
     }
 
     @AfterAll
@@ -166,6 +175,75 @@ class CatalogPostgresTest {
                 "SKU-CONSTRAINT", "{00000000-0000-0000-0000-000000000001}"));
         assertSqlState("23505", () -> insertRawVariant(ownerA.tenantId(), first.product(), "DIFFERENT-SKU", "{}"));
         assertSqlState("23514", () -> insertRawVariant(ownerA.tenantId(), first.product(), "lowercase", "{}"));
+    }
+
+    @Test
+    void pmAt03MediaReferencesMustShareProductAndTenantAndBeUnique() {
+        var product = createProductWithOptions(ownerA, "Media ownership");
+        var other = createProductWithOptions(ownerA, "Other product");
+        var foreign = createProductWithOptions(ownerB, "Other tenant");
+        var photo = media.addMedia(ownerA, product.id(), "https://example.test/photo.png");
+        UUID linked = valueId(product, 0);
+        UUID extra = valueId(product, 1);
+        var original = media.replaceOptionValues(ownerA, product.id(), photo.id(), Set.of(linked));
+
+        assertSqlState("23503", () -> jdbc.sql("""
+                INSERT INTO product_media (id, tenant_id, product_id, url)
+                VALUES (gen_random_uuid(), :tenant, :product, 'https://example.test/foreign.png')
+                """).param("tenant", ownerB.tenantId()).param("product", product.id()).update());
+        assertSqlState("23503", () -> linkMedia(product.id(), photo.id(), valueId(other, 0)));
+        assertSqlState("23503", () -> linkMedia(other.id(), photo.id(), valueId(other, 0)));
+        assertSqlState("23503", () -> linkMedia(product.id(), photo.id(), valueId(foreign, 0)));
+        assertSqlState("23505", () -> linkMedia(product.id(), photo.id(), linked));
+
+        var rejected = assertThrows(ApiException.class, () -> media.replaceOptionValues(
+                ownerA, product.id(), photo.id(), Set.of(extra, valueId(other, 0))));
+        assertEquals(400, rejected.getStatus().value());
+        assertEquals("INVALID_OPTION_VALUES", rejected.getErrorCode());
+        assertEquals(List.of(original), catalog.getProduct(ownerA, product.id()).media());
+        var repository = context.getBean(CatalogMediaRepository.class);
+        assertTrue(repository.listForProduct(ownerB.tenantId(), product.id()).isEmpty());
+    }
+
+    @Test
+    void pmAt04MediaOrderBreaksTimestampTiesUsingId() {
+        var product = createProductWithOptions(ownerA, "Media order");
+        UUID earlier = UUID.fromString("ffffffff-0000-0000-0000-000000000003");
+        UUID firstTie = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID secondTie = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        jdbc.sql("""
+                INSERT INTO product_media (id, tenant_id, product_id, url, created_at)
+                VALUES (:secondTie, :tenant, :product, 'https://example.test/2', '2026-01-02T00:00:00Z'),
+                       (:earlier, :tenant, :product, 'https://example.test/3', '2026-01-01T00:00:00Z'),
+                       (:firstTie, :tenant, :product, 'https://example.test/1', '2026-01-02T00:00:00Z')
+                """).param("tenant", ownerA.tenantId()).param("product", product.id())
+                .param("secondTie", secondTie).param("earlier", earlier).param("firstTie", firstTie).update();
+
+        assertEquals(List.of(earlier, firstTie, secondTie),
+                catalog.getProduct(ownerA, product.id()).media().stream().map(Media::id).toList());
+    }
+
+    @Test
+    void pmAt04ConcurrentMediaReplacementsLeaveOnlyTheFinalSet() throws Exception {
+        var product = createProductWithOptions(ownerA, "Media replacement");
+        var photo = media.addMedia(ownerA, product.id(), "https://example.test/replace.png");
+        UUID first = valueId(product, 0);
+        UUID last = valueId(product, 1);
+
+        try (ExecutorService workers = Executors.newSingleThreadExecutor()) {
+            var waiting = new CompletableFuture<Integer>();
+            Future<Media> competing = transactions.execute(status -> {
+                media.replaceOptionValues(ownerA, product.id(), photo.id(), Set.of(first));
+                var replacement = workers.submit(() -> transactions.execute(other -> {
+                    waiting.complete(prepareCompetingConnection());
+                    return media.replaceOptionValues(ownerA, product.id(), photo.id(), Set.of(last));
+                }));
+                awaitBlockedByCurrentTransaction(waiting);
+                return replacement;
+            });
+            assertEquals(List.of(last), competing.get(10, TimeUnit.SECONDS).optionValueIds());
+        }
+        assertEquals(List.of(last), catalog.getProduct(ownerA, product.id()).media().getFirst().optionValueIds());
     }
 
     @Test
@@ -309,6 +387,25 @@ class CatalogPostgresTest {
         var draft = catalog.createProduct(owner, new CreateProductRequest(sku, null, null, Set.of(category), category,
                 null, List.of(), SkuMode.MANUAL, sku));
         return new DefaultProduct(draft.id(), draft.variants().getFirst());
+    }
+
+    private ProductDetail createProductWithOptions(AccountSession owner, String name) {
+        UUID category = catalog.createCategory(owner, name).id();
+        var color = new OptionRequest("Color",
+                List.of(new OptionValueRequest("Black", null), new OptionValueRequest("White", null)));
+        return catalog.createProduct(owner, new CreateProductRequest(name, null, null, Set.of(category), category,
+                null, List.of(color), null, null));
+    }
+
+    private static UUID valueId(ProductDetail product, int index) {
+        return product.options().getFirst().values().get(index).id();
+    }
+
+    private void linkMedia(UUID product, UUID mediaId, UUID value) {
+        jdbc.sql("""
+                INSERT INTO media_option_values (product_id, media_id, option_value_id)
+                VALUES (:product, :media, :value)
+                """).param("product", product).param("media", mediaId).param("value", value).update();
     }
 
     private void linkCategory(UUID tenant, UUID product, UUID category) {

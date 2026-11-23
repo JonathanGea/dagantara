@@ -1,0 +1,27 @@
+meta {
+  name: PM-AT-04 Detail menampilkan kedua foto dengan nilai yang sama
+  type: http
+  seq: 28
+}
+
+get {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+tests {
+  test("PM-AT-04 Detail menampilkan kedua foto dengan nilai yang sama", function () {
+    expect(res.getStatus()).to.equal(200);
+    const product = res.getBody().data;
+    expect(product.id).to.equal(bru.getVar("productA"));
+    expect(product.media).to.deep.equal([
+      { id: bru.getVar("mediaA"), url: "https://example.test/photo-a.jpg?size=full", optionValueIds: [bru.getVar("productABlack"), bru.getVar("productAWhite")].sort() },
+      { id: bru.getVar("mediaB"), url: "http://example.test/photo-b.jpg", optionValueIds: [bru.getVar("productABlack")].sort() }
+    ]);
+  });
+}

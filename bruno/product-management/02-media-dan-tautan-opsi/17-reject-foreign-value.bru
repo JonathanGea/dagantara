@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-03 Nilai dari tenant lain ditolak
+  type: http
+  seq: 17
+}
+
+put {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}/media/{{mediaA}}/option-values
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{productBBlack}}"
+    ]
+  }
+}
+
+tests {
+  test("PM-AT-03 Nilai dari tenant lain ditolak", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().errorCode).to.equal("INVALID_OPTION_VALUES");
+  });
+}

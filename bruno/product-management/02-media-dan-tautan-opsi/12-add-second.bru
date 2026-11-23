@@ -1,0 +1,32 @@
+meta {
+  name: PM-AT-04 Tambah foto HTTP tanpa tautan
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}/media
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "url": "http://example.test/photo-b.jpg"
+  }
+}
+
+tests {
+  test("PM-AT-04 Tambah foto HTTP tanpa tautan", function () {
+    expect(res.getStatus()).to.equal(201);
+    const photo = res.getBody().data;
+    expect(photo.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(photo.url).to.equal("http://example.test/photo-b.jpg");
+    expect(photo.optionValueIds).to.deep.equal([]);
+    bru.setVar("mediaB", photo.id);
+  });
+}

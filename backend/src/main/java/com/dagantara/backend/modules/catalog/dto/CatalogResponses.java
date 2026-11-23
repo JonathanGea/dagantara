@@ -19,7 +19,10 @@ public final class CatalogResponses {
 
     public record ProductDetail(UUID id, String name, String description, Long priceIdr, String productCode,
                                 ProductStatus status, List<UUID> categoryIds, UUID primaryCategoryId,
-                                List<Option> options, List<Variant> variants) {
+                                List<Option> options, List<Variant> variants, List<Media> media) {
+    }
+
+    public record Media(UUID id, String url, List<UUID> optionValueIds) {
     }
 
     public record Option(UUID id, String name, List<OptionValue> values) {

@@ -7,14 +7,18 @@ import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CategoryRequest
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ChangeSkuRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CreateProductRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CreateVariantRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.MediaOptionValuesRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.MediaRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.OptionValueRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ProductDetailsRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Category;
+import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Media;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.OptionValue;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductCategories;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductDetail;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductSummary;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
+import com.dagantara.backend.modules.catalog.service.CatalogMediaService;
 import com.dagantara.backend.modules.catalog.service.CatalogService;
 import com.dagantara.backend.modules.users.dto.AccountSession;
 import jakarta.validation.Valid;
@@ -38,9 +42,11 @@ import static com.dagantara.backend.common.security.AccountSessionFilter.ACCOUNT
 @RequestMapping({ApiRoutes.V1 + "/catalog", "/{shopSlug:[a-z0-9-]+}" + ApiRoutes.V1 + "/catalog"})
 public class CatalogController {
     private final CatalogService catalog;
+    private final CatalogMediaService media;
 
-    public CatalogController(CatalogService catalog) {
+    public CatalogController(CatalogService catalog, CatalogMediaService media) {
         this.catalog = catalog;
+        this.media = media;
     }
 
     @PostMapping("/categories")
@@ -114,6 +120,21 @@ public class CatalogController {
             @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, @PathVariable UUID productId,
             @PathVariable UUID variantId, @Valid @RequestBody ChangeSkuRequest request) {
         return ApiResponse.success("SKU updated", catalog.changeSku(actor, productId, variantId, request));
+    }
+
+    @PostMapping("/products/{productId}/media")
+    public ResponseEntity<ApiResponse<Media>> addMedia(
+            @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, @PathVariable UUID productId,
+            @Valid @RequestBody MediaRequest request) {
+        return created("Product media added", media.addMedia(actor, productId, request.url()));
+    }
+
+    @PutMapping("/products/{productId}/media/{mediaId}/option-values")
+    public ApiResponse<Media> replaceMediaOptionValues(
+            @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, @PathVariable UUID productId,
+            @PathVariable UUID mediaId, @Valid @RequestBody MediaOptionValuesRequest request) {
+        return ApiResponse.success("Media option values replaced",
+                media.replaceOptionValues(actor, productId, mediaId, request.optionValueIds()));
     }
 
     private static <T> ResponseEntity<ApiResponse<T>> created(String message, T data) {
