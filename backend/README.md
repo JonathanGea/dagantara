@@ -40,6 +40,45 @@ docker run --rm --env-file .env -p 8080:8080 dagantara-backend
 
 For Docker, `DB_URL` must point to a PostgreSQL host reachable from the container (not the container's own localhost). Secrets should be injected through a secrets manager or environment configuration, not baked into the image.
 
+## Deploy backend ke Railway
+
+### Pilih environment dan profil Spring
+
+Pilih environment dari dropdown proyek Railway sebelum membuka service backend. Environment tersebut menentukan kumpulan service dan variabel yang digunakan, termasuk database. Pilih branch Git yang dideploy pada **Settings → Source** untuk service di environment tersebut. [Environment Railway](https://docs.railway.com/environments) · [Service source](https://docs.railway.com/services#service-source)
+
+Pada tab **Variables** service backend, atur `SPRING_PROFILES_ACTIVE` sesuai profil Spring yang diinginkan.
+
+| Nilai | File konfigurasi Spring | Penggunaan |
+| --- | --- | --- |
+| `dev` | `application-dev.yml` | Pengembangan lokal dengan logging DEBUG dan Swagger aktif. |
+| `staging` | `application-staging.yml` | Deployment uji dengan konfigurasi database staging. |
+| `prod` | `application-prod.yml` | Deployment produksi dengan konfigurasi database produksi. |
+
+Nama environment Railway dan nama branch Git tidak mengatur profil Spring secara otomatis. Misalnya, untuk menguji branch `dev` di environment Railway `staging`, set `SPRING_PROFILES_ACTIVE` ke `staging` pada service backend di environment itu.
+
+### Isi variabel service backend
+
+Salin [railway.env.example.json](railway.env.example.json) ke **Variables → Raw Editor** pada service backend. Contoh memakai profil `prod` dan service PostgreSQL bernama `Postgres` di environment yang sama. Sesuaikan prefix `Postgres` jika nama servicenya berbeda. [Variabel Railway](https://docs.railway.com/variables) · [PostgreSQL di Railway](https://docs.railway.com/databases/postgresql)
+
+```json
+{
+  "SPRING_PROFILES_ACTIVE": "prod",
+  "DB_URL": "jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}",
+  "DB_USERNAME": "${{Postgres.PGUSER}}",
+  "DB_PASSWORD": "${{Postgres.PGPASSWORD}}",
+  "APP_PLATFORM_HOST": "${{RAILWAY_PUBLIC_DOMAIN}}",
+  "APP_JWT_SECRET_BASE64": "",
+  "APP_CORS_ALLOWED_ORIGINS": "",
+  "APP_BOOTSTRAP_USERNAME": "",
+  "APP_BOOTSTRAP_PASSWORD_HASH": ""
+}
+```
+
+- Isi `APP_JWT_SECRET_BASE64` dengan hasil `openssl rand -base64 48`. Simpan nilainya di Railway.
+- Buat domain publik untuk service backend agar `RAILWAY_PUBLIC_DOMAIN` tersedia. `APP_PLATFORM_HOST` berisi hostname yang dipakai untuk akses platform. Isi `APP_CORS_ALLOWED_ORIGINS` dengan origin frontend jika berbeda dari origin backend. Spring Boot membaca `PORT` yang disediakan Railway. [Referensi variabel Railway](https://docs.railway.com/variables/reference) · [Port dan health check](https://docs.railway.com/deployments/healthchecks)
+- Isi kedua variabel `APP_BOOTSTRAP_*` saat membuat Admin Platform pertama. Gunakan username dan hash BCrypt cost 12. Setelah akun dibuat, hapus kedua variabel dari Railway. Ikuti [panduan setup admin](#setup-admin-platform-pertama-um-07).
+- Terapkan [migrasi PostgreSQL 01–05](#setup-admin-platform-pertama-um-07) yang belum dijalankan sebelum startup. Jika menggunakan `backend/Dockerfile`, sesuaikan tahap build dan runtime ke Java 25. Proyek menargetkan Java 25 dan Dockerfile saat ini masih menggunakan Java 21.
+
 ## Setup Admin Platform pertama (UM-07)
 
 Jalankan migrasi User Management berikut berurutan dari folder `backend/` sebelum startup. Untuk database yang sudah memiliki sebagian skema, mulai dari migrasi pertama yang belum diterapkan. Setel host, port, nama database, dan user PostgreSQL ke instance tujuan.
