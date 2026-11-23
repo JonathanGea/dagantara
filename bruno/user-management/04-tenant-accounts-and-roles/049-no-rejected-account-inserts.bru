@@ -1,0 +1,25 @@
+meta {
+  name: UM-AT-02 UM-AT-05 Penolakan tidak menambah akun
+  type: http
+  seq: 49
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-02 UM-AT-05 Penolakan tidak menambah akun", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(res.getBody().meta.totalElements).to.equal(2);
+    expect(data.every(item => item.tenantId === bru.getVar("tenantAId"))).to.equal(true);
+    expect(data.map(item => item.id)).to.have.members([bru.getVar("ownerAId"), bru.getVar("staffId")]);
+  });
+}

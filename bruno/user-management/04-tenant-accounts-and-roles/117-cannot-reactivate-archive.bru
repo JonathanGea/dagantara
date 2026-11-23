@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-11 Pengarsipan tidak dapat dibalik lewat aktivasi biasa
+  type: http
+  seq: 117
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{staffId}}/activate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-11 Pengarsipan tidak dapat dibalik lewat aktivasi biasa", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("ACCOUNT_ARCHIVED");
+  });
+}

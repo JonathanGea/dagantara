@@ -1,0 +1,27 @@
+meta {
+  name: UM-AT-04 Pagination pengguna A tidak menghitung pemilik B
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users?page=0&size=1&tenantId={{tenantBId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-04 Pagination pengguna A tidak menghitung pemilik B", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(res.getBody().meta.totalElements).to.equal(1);
+    expect(data.every(item => item.tenantId === bru.getVar("tenantAId"))).to.equal(true);
+    expect(res.getBody().meta.size).to.equal(1);
+    expect(data.length).to.equal(1);
+    expect(data[0].id).to.equal(bru.getVar("ownerAId"));
+  });
+}

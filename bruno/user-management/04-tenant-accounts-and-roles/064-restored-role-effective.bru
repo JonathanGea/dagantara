@@ -1,0 +1,24 @@
+meta {
+  name: UM-AT-03 Staf dapat membaca lagi dengan token yang sama
+  type: http
+  seq: 64
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffToken}}
+}
+
+tests {
+  test("UM-AT-03 Staf dapat membaca lagi dengan token yang sama", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(res.getBody().meta.totalElements).to.equal(4);
+    expect(data.every(item => item.tenantId === bru.getVar("tenantAId"))).to.equal(true);
+  });
+}

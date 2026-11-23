@@ -1,0 +1,26 @@
+meta {
+  name: UM-AT-08 Penetapan role asisten tetap utuh
+  type: http
+  seq: 76
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{assistantId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-08 Penetapan role asisten tetap utuh", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("assistantId"));
+    expect(data.tenantId).to.equal(bru.getVar("tenantAId"));
+    expect(data.roleId).to.equal(bru.getVar("readerRole"));
+    expect(data.status).to.equal("ACTIVE");
+  });
+}

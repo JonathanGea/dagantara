@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-11 Sesi lama tetap dicabut setelah aktivasi
+  type: http
+  seq: 111
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffToken}}
+}
+
+tests {
+  test("UM-AT-11 Sesi lama tetap dicabut setelah aktivasi", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("UNAUTHORIZED");
+  });
+}

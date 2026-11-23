@@ -1,0 +1,33 @@
+meta {
+  name: UM-AT-03 Buat role tanpa izin awal
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+body:json {
+  {
+    "code": "READER",
+    "name": "Role READER"
+  }
+}
+
+tests {
+  test("UM-AT-03 Buat role tanpa izin awal", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.code).to.equal("READER");
+    expect(data.permissions).to.deep.equal([]);
+    bru.setVar("readerRole", data.id);
+  });
+}

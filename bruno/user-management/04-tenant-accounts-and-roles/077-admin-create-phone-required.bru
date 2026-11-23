@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-12 Pemilik wajib mencatat nomor pemulihan saat membuat admin
+  type: http
+  seq: 77
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+body:json {
+  {
+    "username": "{{adminUsername}}",
+    "roleId": "{{adminARole}}"
+  }
+}
+
+tests {
+  test("UM-AT-12 Pemilik wajib mencatat nomor pemulihan saat membuat admin", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("PHONE_NUMBER_REQUIRED");
+  });
+}

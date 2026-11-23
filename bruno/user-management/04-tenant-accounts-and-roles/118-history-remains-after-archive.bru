@@ -1,0 +1,26 @@
+meta {
+  name: UM-AT-11 Identitas dan role arsip masih tercatat
+  type: http
+  seq: 118
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{staffId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-11 Identitas dan role arsip masih tercatat", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("staffId"));
+    expect(data.tenantId).to.equal(bru.getVar("tenantAId"));
+    expect(data.roleId).to.equal(bru.getVar("readerRole"));
+    expect(data.status).to.equal("ARCHIVED");
+  });
+}

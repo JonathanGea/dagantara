@@ -1,0 +1,31 @@
+meta {
+  name: UM-AT-03 Pengelola menetapkan role yang dikuasai
+  type: http
+  seq: 60
+}
+
+put {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{assistantId}}/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{delegateToken}}
+}
+
+body:json {
+  {
+    "roleId": "{{readerRole}}"
+  }
+}
+
+tests {
+  test("UM-AT-03 Pengelola menetapkan role yang dikuasai", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("assistantId"));
+    expect(data.roleId).to.equal(bru.getVar("readerRole"));
+    expect(data.tenantId).to.equal(bru.getVar("tenantAId"));
+  });
+}

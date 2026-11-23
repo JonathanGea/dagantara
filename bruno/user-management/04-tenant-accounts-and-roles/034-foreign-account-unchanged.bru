@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-04 Akun B tetap utuh setelah penolakan
+  type: http
+  seq: 34
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tenant/users/{{ownerBId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Host: {{hostB}}
+}
+
+auth:bearer {
+  token: {{ownerBToken}}
+}
+
+tests {
+  test("UM-AT-04 Akun B tetap utuh setelah penolakan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("ownerBId"));
+    expect(data.tenantId).to.equal(bru.getVar("tenantBId"));
+    expect(data.roleId).to.equal(bru.getVar("adminBRole"));
+    expect(data.status).to.equal("ACTIVE");
+  });
+}

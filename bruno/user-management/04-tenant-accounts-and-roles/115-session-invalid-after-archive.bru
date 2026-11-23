@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-11 Pengarsipan mencabut sesi operasional
+  type: http
+  seq: 115
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffToken}}
+}
+
+tests {
+  test("UM-AT-11 Pengarsipan mencabut sesi operasional", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("UNAUTHORIZED");
+  });
+}

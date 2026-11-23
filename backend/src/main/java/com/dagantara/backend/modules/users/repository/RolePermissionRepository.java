@@ -1,5 +1,6 @@
 package com.dagantara.backend.modules.users.repository;
 
+import com.dagantara.backend.modules.tenants.TenantPermission;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -32,6 +33,10 @@ public class RolePermissionRepository {
                 INSERT INTO roles (id, tenant_id, code, name)
                 VALUES (:id, :tenantId, 'TENANT_ADMIN', 'Admin Tenant')
                 """).param("id", roleId).param("tenantId", tenantId).update();
+        jdbc.sql("""
+                INSERT INTO role_permissions (role_id, permission_id)
+                SELECT :roleId, id FROM permissions WHERE code IN (:codes)
+                """).param("roleId", roleId).param("codes", TenantPermission.CODES).update();
         return roleId;
     }
 }
