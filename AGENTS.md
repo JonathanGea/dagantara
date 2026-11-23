@@ -32,8 +32,9 @@ Gunakan koleksi Bruno di `bruno/` untuk pengujian API HTTP. Untuk backend lokal,
 - User memiliki satu role aktif melalui `users.role_id`; permission diturunkan dari `roles -> role_permissions -> permissions`.
 - Akun platform dapat memiliki `users.tenant_id = NULL`; ini bukan alasan otomatis untuk bypass semua izin.
 - Setiap tenant memiliki **Independent Catalog**, bukan katalog produk bersama.
-- Produk dapat memiliki beberapa kategori tetapi tepat satu Primary Category; **lokasi penyimpanan penanda primary belum final** di spesifikasi.
+- Produk dapat memiliki beberapa kategori milik tenant yang sama. Tepat satu Primary Category disimpan pada `products.primary_category_id` dan harus termasuk dalam `product_categories` produk itu.
 - Media tetap dimiliki produk; relasi `product_media <-> product_option_values` many-to-many melalui `media_option_values`.
+- Inventory mencatat saldo berdasarkan identitas varian dalam gudang tenant. Versi pertama mempunyai satu gudang per tenant dan SKU unik dalam tenant.
 - Nama menu/submenu pada `Admin UI Structure` tidak otomatis mengotorisasi implementasi API atau fitur baru.
 
 ## Skill routing
