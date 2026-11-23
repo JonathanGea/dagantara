@@ -11,26 +11,27 @@ Gunakan skill `orchestration` dan `orca-cli`. Muat panduan dari CLI Orca yang ak
 
 ## Pilih model dan effort worker
 
-Gunakan Codex CLI dengan model `gpt-6.2-sol`. Koordinator memilih effort dari perubahan yang akan dikerjakan.
+Koordinator memilih model dan effort Codex CLI per tiket. Gunakan `gpt-6.2-sol` sebagai default.
 
-- `medium` untuk tiket rutin dengan cakupan terlokalisasi dan kontrak jelas, seperti perubahan DTO, validasi yang sudah dispesifikasikan, atau penambahan skenario Bruno.
-- `high` jika tiket mengubah autentikasi, otorisasi, isolasi tenant, migration, transaksi atomik, atau komponen bersama yang berdampak lintas modul. Contohnya provisioning tenant dan delegasi izin operator platform sama-sama memakai `high`.
+- `gpt-6-luna` dengan `high` boleh dipilih untuk tiket kecil, terlokalisasi, dan mudah diverifikasi, seperti memperbarui dokumentasi atau menambah satu skenario Bruno mengikuti contoh yang sudah ada.
+- `gpt-6.2-sol` dengan `medium` untuk tiket rutin dengan kontrak jelas, seperti perubahan DTO atau validasi yang sudah dispesifikasikan.
+- `gpt-6.2-sol` dengan `high` jika tiket mengubah autentikasi, otorisasi, isolasi tenant, migration, transaksi atomik, atau komponen bersama yang berdampak lintas modul. Contohnya provisioning tenant dan delegasi izin operator platform.
 
-Terapkan pilihan model atau effort yang diberikan pengguna. Untuk tiket lain, pilih effort langsung dari cakupannya. Saat melanjutkan worker aktif yang sudah memegang tiket, gunakan konfigurasi worker tersebut.
+Terapkan pilihan model atau effort yang diberikan pengguna. Jika koordinator memilih Luna dan model itu tidak tersedia, gunakan model default dengan effort yang sesuai cakupan. Saat melanjutkan worker aktif yang sudah memegang tiket, gunakan konfigurasi worker tersebut.
 
 ## Luncurkan Codex CLI dan kirim tiket
 
 1. Ambil Task yang siap dengan `orca orchestration task-list --environment local --run <run-id> --ready --brief`. Cocokkan commit prasyarat dengan basis setiap worktree. Luncurkan tiket independen yang siap dalam kelompok yang sama sesuai kapasitas Orca, mengikuti referensi parallel start. Contohnya, jika 02 dan 03 masing-masing hanya bergantung pada 01, mulai keduanya setelah hasil 01 tersedia. Tetapkan pemilik file bersama seperti migration dan konfigurasi security sebelum peluncuran. Gunakan kontrak yang sudah disepakati untuk pekerjaan independen, dan jadwalkan perubahan pada file bersama melalui pemiliknya.
-2. Gunakan `--surface terminal` untuk membuka CLI secara eksplisit. `worker-start` mengikuti pengaturan surface Orca, sehingga peluncuran terminal dan pengiriman Task dilakukan bertahap. Buat child dan agen dalam satu perintah, dengan branch integrasi sebagai basis. Isi `<effort>` dengan pilihan untuk tiket itu.
+2. Gunakan `--surface terminal` untuk membuka CLI secara eksplisit. `worker-start` mengikuti pengaturan surface Orca, sehingga peluncuran terminal dan pengiriman Task dilakukan bertahap. Buat child dan agen dalam satu perintah, dengan branch integrasi sebagai basis. Isi `<model>` dan `<effort>` dengan pilihan untuk tiket itu.
 
    ```text
-   orca worktree create --environment local --parent-worktree <worktree-koordinator> --name <slug-NN> --base-branch <ref-integrasi> --agent codex --model gpt-6.2-sol --effort <effort> --surface terminal --json
+   orca worktree create --environment local --parent-worktree <worktree-koordinator> --name <slug-NN> --base-branch <ref-integrasi> --agent codex --model <model> --effort <effort> --surface terminal --json
    ```
 
    Bila child untuk tiket sudah ada, pakai ulang branch dan perubahan lokalnya. Periksa basis, status Git, serta kepemilikan pekerjaan sebelum menyerahkan tiket. Lanjutkan worker aktif yang sudah memegang Task. Jika agen induk atau agen lain sebelumnya mengedit melalui shell, pastikan pengerjaannya sudah berhenti atau diserahterimakan sebelum membuka worker baru. Setelah worktree siap, pakai terminal Codex yang sesuai atau luncurkan Codex di child itu.
 
    ```text
-   orca agent launch --environment local --worktree <worktree-tiket> --agent codex --model gpt-6.2-sol --effort <effort> --surface terminal --json
+   orca agent launch --environment local --worktree <worktree-tiket> --agent codex --model <model> --effort <effort> --surface terminal --json
    ```
 
 3. Dari receipt peluncuran, pastikan yang terbuka adalah terminal agen Codex dan ambil handle-nya. Tunggu TUI siap dengan `orca terminal wait --environment local --terminal <handle> --for tui-idle --timeout-ms 60000 --json` bila diperlukan. Serahkan brief melalui Task Orca, sehingga agen menerima identitas Task dan Dispatch di prompt.
