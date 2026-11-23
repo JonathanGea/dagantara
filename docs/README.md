@@ -46,7 +46,7 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 
 1. Panggil `$write-module-spec <ide>`. AI menelusuri repo, mengajukan pertanyaan dengan rekomendasi, dan merangkum keputusan untuk kamu konfirmasi sebelum menulis spec di `docs/<slug>.md`.
 2. Gunakan `$design-ui` jika perlu meninjau layout atau alur UI. Sertakan spec, layar yang sudah ada, atau brief. Layout dasar bisa dimulai dari brief dan satu contoh tugas pengguna.
-3. Untuk spec yang bisa dikerjakan dalam satu sesi, gunakan `$implement-from-spec <slug>`. Jika cakupannya besar, AI mengusulkan tiket dengan hasil dan dependensi. Setelah kamu menyetujui pembagiannya, gunakan `$implement-from-spec <slug> <NN>` untuk satu tiket yang sudah bisa dimulai.
+3. Gunakan `$implement-from-spec <slug>` untuk spec yang siap dikerjakan. Jika spec menautkan tiket yang sudah disetujui, panggilan ini mengoordinasikan worker di sesi Orca. Gunakan `$implement-from-spec <slug> <NN>` untuk memilih satu tiket yang sudah bisa dimulai.
 4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
 Untuk format modul yang sudah ada, `$implement-from-spec @docs/product-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
