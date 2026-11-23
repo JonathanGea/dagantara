@@ -6,6 +6,7 @@ import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ChangeSkuReques
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CreateProductRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.SkuMode;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
+import com.dagantara.backend.modules.catalog.repository.CatalogMediaRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogVariantRepository;
 import com.dagantara.backend.modules.catalog.service.CatalogAccess;
@@ -78,7 +79,7 @@ class InventoryPostgresTest {
     private AccountSession existingOwner;
 
     @BeforeAll
-    void migrateIsolatedSchemaWithoutMigration07() {
+    void migrateIsolatedSchema() {
         String url = System.getenv("INVENTORY01_TEST_DB_URL");
         String username = System.getenv("INVENTORY01_TEST_DB_USERNAME");
         String password = System.getenv("INVENTORY01_TEST_DB_PASSWORD");
@@ -94,7 +95,8 @@ class InventoryPostgresTest {
         roles = new RolePermissionRepository(jdbc);
         new ResourceDatabasePopulator(migration("01-platform-accounts"), migration("02-tenant-onboarding"),
                 migration("03-platform-operators"), migration("04-tenant-accounts"),
-                migration("05-help-center-recovery"), migration("06-product-catalog")).execute(dataSource);
+                migration("05-help-center-recovery"), migration("06-product-catalog"),
+                migration("07-product-media")).execute(dataSource);
         existingOwner = createOwner(false);
         new ResourceDatabasePopulator(migration("08-inventory-receipts")).execute(dataSource);
 
@@ -102,7 +104,8 @@ class InventoryPostgresTest {
         context.registerBean(JdbcClient.class, () -> jdbc);
         context.registerBean(JdbcTransactionManager.class, () -> transactionManager);
         context.register(TransactionConfig.class, CatalogAccess.class, CatalogRepository.class,
-                CatalogVariantRepository.class, CatalogService.class, TenantAccountRepository.class,
+                CatalogVariantRepository.class, CatalogMediaRepository.class, CatalogService.class,
+                TenantAccountRepository.class,
                 InventoryReceiptRepository.class, InventoryStockRepository.class,
                 InventoryService.class, InventoryAvailabilityService.class);
         context.refresh();
