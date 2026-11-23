@@ -1,0 +1,36 @@
+meta {
+  name: Tenant admin cannot provision tenants
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "at07-denied",
+    "name": "Provisioned Fixture",
+    "admin": {
+      "username": "initial-admin",
+      "email": "initial-admin@example.test",
+      "fullName": "Initial Tenant Admin",
+      "password": "{{testPassword}}"
+    }
+  }
+}
+
+tests {
+  test("Tenant admin cannot provision tenants", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

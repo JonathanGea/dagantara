@@ -1,0 +1,33 @@
+meta {
+  name: UM-AT-08 cannot create a user with a more privileged role
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "at08-denied",
+    "email": "at08-denied@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "00000000-0000-0000-0000-000000000106"
+  }
+}
+
+tests {
+  test("UM-AT-08 cannot create a user with a more privileged role", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

@@ -18,6 +18,7 @@ Menegakkan authentication, authorization, dan tenant isolation pada semua jalur 
 
 ## Authorization model
 
+- Tempatkan pemeriksaan izin bisnis di `modules/<nama_module>/service`. Gunakan `common/security` untuk konfigurasi dan komponen keamanan lintas modul.
 - Setiap user memiliki satu `users.role_id` aktif.
 - Permission efektif berasal dari `users.role_id -> roles -> role_permissions -> permissions`.
 - Untuk pembuatan user, butuh `users.create` (UM-01), lalu validasi role dan tenant target (UM-02/UM-06).

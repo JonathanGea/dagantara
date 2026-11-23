@@ -1,0 +1,28 @@
+meta {
+  name: Anonymous requests require authentication
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "anonymous-account",
+    "email": "anonymous-account@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "00000000-0000-0000-0000-000000000102"
+  }
+}
+
+tests {
+  test("Anonymous requests require authentication", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("UNAUTHORIZED");
+  });
+}

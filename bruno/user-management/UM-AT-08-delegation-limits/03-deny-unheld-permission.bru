@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-08 cannot grant a permission the manager lacks
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/roles/{{limitedRoleId}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "permissionCodes": [
+      "users.create",
+      "users.read"
+    ]
+  }
+}
+
+tests {
+  test("UM-AT-08 cannot grant a permission the manager lacks", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

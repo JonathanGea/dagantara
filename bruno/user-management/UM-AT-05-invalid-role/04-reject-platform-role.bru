@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-05 rejects a platform role for a tenant account
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "wrong-platform-account",
+    "email": "wrong-platform-account@example.test",
+    "fullName": "User Management Fixture",
+    "password": "{{testPassword}}",
+    "roleId": "00000000-0000-0000-0000-000000000105"
+  }
+}
+
+tests {
+  test("UM-AT-05 rejects a platform role for a tenant account", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_ROLE");
+  });
+}

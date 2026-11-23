@@ -1,0 +1,35 @@
+meta {
+  name: UM-AT-03 creates a tenant role
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "AT03_DELEGATE",
+    "name": "Delegated Creator"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody().data;
+    bru.setVar("managedRoleId", data.id);
+  }
+}
+
+tests {
+  test("UM-AT-03 creates a tenant role", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

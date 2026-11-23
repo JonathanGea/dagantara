@@ -1,0 +1,23 @@
+meta {
+  name: Assigned user can read a same-tenant user
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000302
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+tests {
+  test("Assigned user can read a same-tenant user", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data.id).to.equal("00000000-0000-0000-0000-000000000302");
+    expect(res.getBody().data).not.to.have.property("passwordHash");
+  });
+}

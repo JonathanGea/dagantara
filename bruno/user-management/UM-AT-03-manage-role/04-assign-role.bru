@@ -1,0 +1,29 @@
+meta {
+  name: Assign role returns 200
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000304/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "roleId": "{{managedRoleId}}"
+  }
+}
+
+tests {
+  test("Assign role returns 200", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data.roleId).to.equal(bru.getVar("managedRoleId"));
+    expect(res.getBody().data).to.have.all.keys("userId", "roleId");
+  });
+}

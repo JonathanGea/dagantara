@@ -1,0 +1,23 @@
+meta {
+  name: UM-AT-04 denies cross-tenant account details
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000305
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+tests {
+  test("UM-AT-04 denies cross-tenant account details", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

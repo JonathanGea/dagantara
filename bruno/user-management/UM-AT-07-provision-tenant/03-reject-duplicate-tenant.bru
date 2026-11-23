@@ -1,0 +1,36 @@
+meta {
+  name: Tenant code must be unique
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "at07-provisioned",
+    "name": "Provisioned Fixture",
+    "admin": {
+      "username": "initial-admin",
+      "email": "initial-admin@example.test",
+      "fullName": "Initial Tenant Admin",
+      "password": "{{testPassword}}"
+    }
+  }
+}
+
+tests {
+  test("Tenant code must be unique", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("DATA_CONFLICT");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

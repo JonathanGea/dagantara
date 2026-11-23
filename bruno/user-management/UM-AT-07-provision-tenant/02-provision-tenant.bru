@@ -1,0 +1,43 @@
+meta {
+  name: UM-AT-07 provisions tenant and first admin
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "at07-provisioned",
+    "name": "Provisioned Fixture",
+    "admin": {
+      "username": "initial-admin",
+      "email": "initial-admin@example.test",
+      "fullName": "Initial Tenant Admin",
+      "password": "{{testPassword}}"
+    }
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody().data;
+    bru.setVar("provisionedTenantId", data.id);
+    bru.setVar("tenantAdminRoleId", data.admin.roleId);
+  }
+}
+
+tests {
+  test("UM-AT-07 provisions tenant and first admin", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().data.id).to.equal(res.getBody().data.admin.tenantId);
+  });
+}

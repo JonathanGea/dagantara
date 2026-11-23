@@ -32,6 +32,7 @@ description: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity
 
 ## Aturan query, transaction, dan constraint
 
+- Gunakan subpackage `entity` dan `repository` di `modules/<nama_module>` untuk model persistence dan akses data modul.
 - Terapkan filter tenant pada query repository yang mengakses data tenant; validasi kedua sisi saat mengaitkan FK agar tidak dapat membuat relasi lintas tenant tanpa izin.
 - Jangan mengandalkan filter HTTP saja untuk tenant isolation.
 - Pertahankan FK, UNIQUE, dan NOT NULL yang sudah disepakati; beri indeks berdasar query yang nyata, bukan secara spekulatif.

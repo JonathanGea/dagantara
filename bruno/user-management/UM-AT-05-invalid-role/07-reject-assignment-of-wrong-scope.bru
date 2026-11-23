@@ -1,0 +1,29 @@
+meta {
+  name: Assign role returns 400
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000302/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "roleId": "00000000-0000-0000-0000-000000000103"
+  }
+}
+
+tests {
+  test("Assign role returns 400", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_ROLE");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

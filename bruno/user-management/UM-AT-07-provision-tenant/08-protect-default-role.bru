@@ -1,0 +1,29 @@
+meta {
+  name: Default system permissions cannot be replaced
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/v1/roles/{{tenantAdminRoleId}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "permissionCodes": []
+  }
+}
+
+tests {
+  test("Default system permissions cannot be replaced", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("SYSTEM_ROLE_PROTECTED");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}

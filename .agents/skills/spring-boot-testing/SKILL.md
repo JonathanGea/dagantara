@@ -18,6 +18,7 @@ Pengujian harus membuktikan business rules dan acceptance scenarios yang telah d
 
 ## Strategi per lapisan
 
+- Tempatkan tes Java di `src/test/java` dengan package yang mengikuti kelas yang diuji. Contohnya, tes `modules.users.service.UserService` memakai package `com.dagantara.backend.modules.users.service`.
 - **Unit/service:** business rules, validation, role assignment, domain edge cases.
 - **Web/MVC:** serialization, request validation, HTTP status, error contract, dan endpoint authorization.
 - **API HTTP:** ikuti `bruno-api-testing` untuk memverifikasi perilaku melalui backend yang berjalan. Pakai integration test untuk melengkapi bukti efek data yang tidak bisa diamati lewat API.

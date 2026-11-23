@@ -1,0 +1,36 @@
+meta {
+  name: Failure creating first admin rolls back provisioning
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "at07-rollback",
+    "name": "Provisioned Fixture",
+    "admin": {
+      "username": "initial-admin",
+      "email": "initial-admin@example.test",
+      "fullName": "Initial Tenant Admin",
+      "password": "ééééééééééééééééééééééééééééééééééééé"
+    }
+  }
+}
+
+tests {
+  test("Failure creating first admin rolls back provisioning", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("VALIDATION_ERROR");
+    expect(res.getBody()).not.to.have.property("data");
+  });
+}
