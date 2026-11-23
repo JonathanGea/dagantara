@@ -15,6 +15,7 @@ public class AccountRepository {
     private static final String ACCOUNT_FROM = """
             FROM users u JOIN roles r ON r.id = u.role_id
             WHERE r.tenant_id IS NOT DISTINCT FROM u.tenant_id
+              AND u.status = 'ACTIVE'
             """;
 
     private final JdbcClient jdbc;
@@ -68,6 +69,7 @@ public class AccountRepository {
         return jdbc.sql("""
                 SELECT password_hash FROM users
                 WHERE id = :id AND session_version = :sessionVersion AND password_change_required
+                  AND status = 'ACTIVE'
                 FOR UPDATE
                 """).param("id", session.id()).param("sessionVersion", session.sessionVersion())
                 .query(String.class).optional();
@@ -77,7 +79,7 @@ public class AccountRepository {
         jdbc.sql("""
                 UPDATE users SET password_hash = :passwordHash, password_change_required = false,
                                  session_version = session_version + 1
-                WHERE id = :id
+                WHERE id = :id AND status = 'ACTIVE'
                 """).param("id", id).param("passwordHash", passwordHash).update();
     }
 
