@@ -22,7 +22,7 @@ tests {
 
   test("Izin pengelolaan role terpisah dan sesi berjalan mengikuti role serta permission terkini", async function () {
     const fx = platformFixture(bru, expect, res);
-    const creatorRole = await fx.role("role-creator", ["roles.create", "users.create"]);
+    const creatorRole = await fx.role("role-creator", ["roles.create"]);
     const creator = await fx.operator("creator", creatorRole);
     const editorRole = await fx.role("permission-editor", ["roles.permissions.update", "users.read"]);
     const editor = await fx.operator("editor", editorRole);
@@ -33,7 +33,7 @@ tests {
     });
     const roleId = creation.data.data.id;
     expect(creation.data.data.permissionCodes).to.deep.equal([]);
-    const target = await fx.activate(await fx.create(fx.name("role-target"), roleId, creator.token));
+    const target = await fx.operator("role-target", roleId);
     await fx.api("GET", "/users", { token: target.token, status: 403, error: "FORBIDDEN" });
 
     const updatedRole = await fx.role("role-for-assignment", ["users.read"]);

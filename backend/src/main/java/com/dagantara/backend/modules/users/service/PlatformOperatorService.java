@@ -46,6 +46,7 @@ public class PlatformOperatorService {
     @Transactional
     public Credentials createUser(AccountSession session, String username, UUID roleId) {
         Actor actor = authorizeWrite(session, USER_CREATE);
+        actor.requireAny(ROLE_ASSIGN);
         Role role = assignableRole(roleId);
         requireAdminRoleAuthority(actor, role.code());
         actor.requireDelegation(role.permissionCodes());
