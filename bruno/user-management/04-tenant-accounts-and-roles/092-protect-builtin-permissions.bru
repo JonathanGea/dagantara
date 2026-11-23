@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-12 Izin role bawaan pemilik tidak dapat diganti
+  type: http
+  seq: 92
+}
+
+put {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/roles/{{adminARole}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "permissions": []
+  }
+}
+
+tests {
+  test("UM-AT-12 Izin role bawaan pemilik tidak dapat diganti", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("PROTECTED_ROLE");
+  });
+}

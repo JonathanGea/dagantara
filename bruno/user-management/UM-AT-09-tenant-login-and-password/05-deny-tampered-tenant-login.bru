@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-09 Body query dan forwarded host tidak memindahkan konteks tenant
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/shop-b-{{suffix}}/api/v1/auth/login?tenantId={{aTenantId}}
+  body: json
+  auth: none
+}
+
+headers {
+  X-Forwarded-Host: store-{{suffix}}.example.test
+}
+
+body:json {
+  {
+    "username": "{{owner}}",
+    "password": "{{aTemporary}}",
+    "tenantId": "{{aTenantId}}"
+  }
+}
+
+tests {
+  test("Body query dan forwarded host tidak memindahkan konteks tenant", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("INVALID_CREDENTIALS");
+  });
+}

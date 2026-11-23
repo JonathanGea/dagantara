@@ -1,0 +1,24 @@
+meta {
+  name: UM-AT-03 Permission baru berlaku pada token pengelola yang sudah ada
+  type: http
+  seq: 58
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{delegateToken}}
+}
+
+tests {
+  test("UM-AT-03 Permission baru berlaku pada token pengelola yang sudah ada", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(res.getBody().meta.totalElements).to.equal(3);
+    expect(data.every(item => item.tenantId === bru.getVar("tenantAId"))).to.equal(true);
+  });
+}

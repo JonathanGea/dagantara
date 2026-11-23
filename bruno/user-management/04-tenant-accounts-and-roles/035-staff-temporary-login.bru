@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-01 Staf masuk dengan password sementara
+  type: http
+  seq: 35
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{staffUsername}}",
+    "password": "{{staffTemporary}}"
+  }
+}
+
+tests {
+  test("UM-AT-01 Staf masuk dengan password sementara", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(true);
+    expect(data.accessToken).to.be.a("string");
+    bru.setVar("staffSetup", data.accessToken);
+  });
+}

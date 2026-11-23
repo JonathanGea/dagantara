@@ -1,0 +1,31 @@
+meta {
+  name: UM-AT-07 Pengajuan publik tersimpan dalam peninjauan
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "storeName": "umb-review-{{suffix}}",
+    "phoneNumber": "+628000000000",
+    "proposedDomain": "pending-{{suffix}}.example.test"
+  }
+}
+
+tests {
+  test("Pengajuan publik tersimpan dalam peninjauan", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.status).to.equal("IN_REVIEW");
+    expect(data.id).to.match(/^[0-9a-f-]{36}$/);
+    expect(data).not.to.have.property("tenantId");
+    expect(data).not.to.have.property("phoneNumber");
+    bru.setVar("applicationId", data.id);
+  });
+}

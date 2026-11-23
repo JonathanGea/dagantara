@@ -1,5 +1,6 @@
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: none
 
 spring:
   application:
@@ -44,6 +45,8 @@ springdoc:
     enabled: false
 
 app:
+  tenant:
+    platform-host: ${APP_PLATFORM_HOST:localhost}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:}
   security:

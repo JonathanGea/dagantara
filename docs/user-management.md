@@ -1,182 +1,104 @@
-# User Management
+# User Management — Akses Platform dan Tenant
 
-## Module Overview
+## Problem Statement
 
-Mengelola akun pengguna, role, dan permission pada platform Dagantara serta dalam ruang tenant. Pengguna mempunyai satu role aktif; akses didasarkan pada permission yang melekat pada role tersebut.
+Calon pemilik toko perlu mengajukan tenant, menyepakati alamat tokonya dengan Dagantara, dan menerima akses untuk mulai bekerja. Setelah toko berjalan, pemilik perlu membagi tugas ke staf dan menjaga kendali atas akun adminnya. Tim Dagantara juga perlu memisahkan kewenangan antaroperator, termasuk penyiapan tenant dan bantuan pemulihan password.
 
-## Admin UI Structure
+## Solution
 
-Struktur navigasi yang dicatat untuk Tenant Admin:
+Dagantara menyediakan pengajuan tenant yang diselesaikan oleh operator berizin. Pemilik pertama menerima URL login toko, username, dan password sementara. Dari URL tersebut, ia bisa masuk, mengganti password, lalu menyiapkan akun dan role untuk timnya.
 
-```text
-Tenant Admin
-└── User Management
-    ├── Users
-    └── Roles
-```
+Akun internal platform dan tenant menggunakan satu role aktif. Backend memeriksa permission untuk setiap tindakan dan membatasi data berdasarkan keanggotaan tenant akun yang terautentikasi. Admin tenant yang kehilangan akses dapat menghubungi Help Center.
 
-| Menu | Submenu / halaman | Fitur dan aksi | Requirement |
-| --- | --- | --- | --- |
-| User Management | Users | Membuat pengguna, melihat detail pengguna, dan menetapkan role pengguna. | `UM-01`, `UM-02`, `UM-04`, `UM-06` |
-| User Management | Roles | Membuat role dan menentukan permission role. | `UM-04` |
+## User Stories
 
-## Functional Specification
+1. **UM-01** — Sebagai pengelola akun yang berizin, saya bisa membuat akun staf atau operator dan menetapkan role agar anggota tim bisa mulai bekerja.
+2. **UM-02** — Sebagai pengguna baru yang akunnya dibuat pengelola, saya bisa login dengan username dan password sementara lalu memilih password sendiri.
+3. **UM-03** — Sebagai pengelola, saya bisa melihat dan mengganti satu role aktif pengguna sehingga aksesnya sesuai dengan tugas saat ini.
+4. **UM-04** — Sebagai pengelola role yang berizin, saya bisa membuat role, memilih permission, dan mendelegasikan akses dalam batas kewenangan saya.
+5. **UM-05** — Sebagai Admin Platform, saya bisa membedakan operator provisioning, operator Help Center, dan pengelola akun lewat permission role.
+6. **UM-06** — Sebagai admin atau staf tenant, saya bisa login di URL toko dan mengakses data tenant saya sesuai izin.
+7. **UM-07** — Sebagai tim Dagantara, saya bisa menyiapkan Admin Platform pertama dengan aman agar pengelolaan operator punya titik awal yang terlindungi.
+8. **UM-08** — Sebagai calon admin, saya bisa mengajukan toko dan menyepakati URL dengan operator. Sebagai operator berizin, saya juga bisa memulai onboarding langsung dan memberikan akses kepada pemilik pertama setelah URL siap.
+9. **UM-09** — Sebagai admin tenant yang lupa password, saya bisa menghubungi Help Center agar operator berizin memulihkan akses setelah memeriksa identitas saya.
+10. **UM-10** — Sebagai pengelola akun yang berizin, saya bisa melihat daftar dan detail, mereset, menonaktifkan, mengaktifkan kembali, atau mengarsipkan akun dalam cakupan saya.
+11. **UM-11** — Sebagai [Pemilik Tenant](../GLOSSARY.md#pemilik-tenant), saya bisa memberi dan mencabut role Admin Tenant pada akun lain. Sebagai Admin Platform pertama, saya memiliki kewenangan setara untuk role Admin Platform.
 
-| ID | Perilaku |
-| --- | --- |
-| **UM-01** | Pengguna terautentikasi dengan permission `users.create` dapat membuat akun pengguna. |
-| **UM-02** | Pada pembuatan pengguna, sistem menentukan tenant sesuai konteks akun pembuat dan memvalidasi role yang diberikan. |
-| **UM-03** | Setiap akun mempunyai satu role aktif yang disimpan melalui `users.role_id`. |
-| **UM-04** | Pengguna tenant dengan `roles.create` dapat membuat role tenant. Pengguna tenant dengan `roles.permissions.update` dapat mengganti daftar permission role yang dapat dikelola. Pengguna tenant dengan `users.role.assign` dapat menetapkan role ke pengguna. Ketiga aksi berlaku dalam tenant pelaku. |
-| **UM-05** | Otorisasi pengguna dihitung dari `users.role_id → roles → role_permissions → permissions`. |
-| **UM-06** | Akses data pengguna tenant mengikuti batas tenant pemilik akun. Pengguna dengan `users.read` dapat membaca detail pengguna dalam tenant yang sama. Role dan tenant target harus valid. |
-| **UM-07** | Sistem menyediakan role platform `SUPERADMIN` permanen. Operator menyiapkan akun platform pertama dengan role tersebut menggunakan kredensial yang disediakan saat penyiapan. |
-| **UM-08** | Akun platform dengan `tenants.provision` dapat menyiapkan tenant baru beserta role sistem `TENANT_ADMIN` yang dimiliki tenant dan akun pengelola pertamanya dalam satu transaksi. |
+## Implementation Decisions
 
-| Permission | Aksi | Pemberian awal |
+### Pengajuan dan provisioning tenant
+
+- Pengajuan publik dimulai dari domain Dagantara. Calon admin mengisi data toko, nomor HP, dan usulan domain. Pengajuan bisa diajukan sebelum ada akun tenant.
+- Operator yang memiliki izin provisioning meninjau pengajuan dan menghubungi calon admin. Operator bisa memperbarui usulan selama pengajuan berjalan atau menutup pengajuan jika proses batal. Pengajuan yang masih ditinjau atau sudah ditutup belum menghasilkan tenant dan akun yang bisa login.
+- Operator juga bisa memulai onboarding langsung. Kedua jalur menghasilkan tenant melalui proses provisioning yang sama setelah operator dan calon pemilik menyepakati URL final dan URL siap digunakan.
+- Pilihan utama adalah domain toko. Alamat Dagantara dengan jalur khusus, misalnya `toko.dagantara/nama-toko`, bisa digunakan berdasarkan kesepakatan. Satu alamat login yang aktif harus memetakan secara unik ke satu tenant. Pada alamat Dagantara, hostname dan jalur toko bersama-sama mengidentifikasi tenant.
+- Penyelesaian provisioning menyimpan tenant, pemetaan URL login, role bawaan `TENANT_ADMIN`, akun pemilik dengan nomor HP, serta hubungan pemilik ke tenant secara atomik. Untuk jalur pengajuan, penyelesaian juga menandai pengajuan sebagai selesai. Persetujuan ulang atau kegagalan di tengah proses tidak menghasilkan tenant atau akun ganda.
+- Sistem menghasilkan password sementara. Operator memberikan URL final, username, dan password sementara kepada pemilik. Detail pembuatan domain dan penyiapan frontend merupakan tanggung jawab alur terpisah.
+
+### Login dan konteks tenant
+
+- Pada URL toko, form login menerima username dan password. Backend menentukan tenant kandidat dari pemetaan URL yang sudah disiapkan, lalu mencocokkan username dan password dengan akun yang terdaftar di tenant tersebut. Username unik per tenant. Akun platform memakai username yang unik di lingkup platform dan masuk melalui akses platform.
+- Setelah login, konteks akses berasal dari akun terautentikasi dan `users.tenant_id`. Jika request memakai URL yang memetakan tenant, pemetaan itu juga harus cocok dengan tenant akun. Nilai tenant dari body, query, atau header yang dikirim klien tidak memberi hak akses atas tenant tersebut.
+- Untuk operasi tenant, backend memeriksa permission dan membatasi pencarian, perubahan, penghapusan, relasi, dan daftar berdasarkan tenant akun. Filter tenant berlaku sebelum pagination dan penghitungan total. Untuk produk, keputusan [PM-01](product-management.md#functional-specification) menetapkan `products.tenant_id` sebagai pemilik. Akses sumber daya memakai ID dan tenant secara bersamaan.
+- Pada operasi yang dilindungi, respons `401` berlaku saat autentikasi tidak valid dan `403` saat akun terautentikasi kurang izin. Pencarian objek di luar cakupan tenant memberikan `404` seperti objek yang tidak ditemukan di tenant sendiri.
+
+### Role, permission, dan akun yang dilindungi
+
+- `users.role_id` menunjuk satu role aktif. Permission efektif berasal dari `roles → role_permissions → permissions` dengan pasangan role dan permission unik. Akun serta role platform berada di cakupan platform. Akun tenant menggunakan role yang dimiliki tenant yang sama.
+- Pada kedua cakupan, pengelola memilih permission dari katalog yang disediakan Dagantara. Pembuatan role, perubahan permission, dan penetapan role diperiksa secara terpisah. Penggantian permission atau role menggunakan kewenangan terhadap izin yang sedang dikelola dan izin baru yang diminta. Operator platform yang mempunyai `tenant_id = NULL` memperoleh akses melalui permission eksplisit.
+- Permission pengelolaan akun diberikan per tindakan. `users.create` mengizinkan pembuatan akun, `users.read` mengizinkan daftar dan detail, `users.role.assign` mengizinkan penetapan role, `roles.create` mengizinkan pembuatan role, dan `roles.permissions.update` mengizinkan penggantian permission role. Aktivasi kembali, penonaktifan, reset password, dan pengarsipan juga memiliki izin tersendiri. Admin bawaan memperoleh permission pengelolaan di cakupannya melalui role.
+- Untuk tenant, akun yang dibuat saat provisioning menjadi satu-satunya Pemilik Tenant dan memegang role `TENANT_ADMIN`. Dagantara menyimpan status pemilik secara eksplisit. Hanya pemilik yang dapat memberi atau mencabut role bawaan tersebut pada akun lain, termasuk bila role itu ditetapkan pada saat pembuatan akun. Saat menunjuk admin tambahan, pemilik mencatat nomor HP yang akan dipakai untuk pemulihan.
+- Pengelolaan staf biasa tidak boleh mengubah, mereset, menonaktifkan, atau mengarsipkan akun Admin Tenant. Pemilik berwenang mengganti role admin tambahan melalui aturan penetapan role admin. Akun pemilik sendiri dilindungi dari penggantian role, penonaktifan, dan pengarsipan. Ganti password sendiri dan reset melalui Help Center mengikuti alur kredensial.
+- Admin Platform pertama dibuat saat setup Dagantara. Penyiapan ulang mempertahankan satu akun awal. Akun ini satu-satunya yang dapat memberi atau mencabut role Admin Platform pada akun lain dan dilindungi dari perubahan role, penonaktifan, pengarsipan, serta reset melalui pengelolaan operator biasa. Role sistem bawaan tetap tersedia sebagai dasar pemeriksaan izin.
+- Admin Platform bisa membuat akun operator, membuat role, memilih permission, dan mendelegasikan pengelolaan di platform. Role Admin Platform memiliki izin provisioning dan izin reset admin tenant, yang dapat diberikan secara terpisah kepada role operator. Reset Help Center memberi akses terbatas pada pemulihan akun target, termasuk informasi yang diperlukan untuk memeriksa permintaan.
+
+### Siklus akun dan pemulihan password
+
+- Akun staf dan operator dikelola di cakupan masing-masing. Pengelola yang memiliki izin bisa melihat daftar dan detail, membuat akun, menetapkan role, menonaktifkan, mengaktifkan kembali, mereset password, atau mengarsipkan akun sesuai perlindungan dan batas delegasi.
+- Penonaktifan mencabut akses dan bisa dibalik dengan izin aktivasi kembali. Aksi hapus mengarsipkan akun, mencabut akses, dan menyimpan identitas serta riwayatnya. Akun arsip tidak muncul pada daftar aktif dan tidak bisa diaktifkan kembali melalui aksi biasa.
+- Akun yang dibuat oleh pengelola dan akun yang direset menerima password sementara buatan sistem. Login dengan password sementara hanya memberikan akses untuk mengganti password. Setelah perubahan berhasil, password sementara ditolak. Backend menyimpan hash password dan menjaga kredensial di luar log serta audit.
+- Admin tenant yang lupa password menghubungi Help Center. Operator memeriksa pemohon dengan mencocokkan nomor masuk. Jika berbeda, operator dapat menelepon balik nomor yang tercatat atau mengonfirmasi langsung bila mengenal admin. Reset membutuhkan verifikasi operator dan permission reset admin tenant.
+- Operator memicu reset dan memberikan password sementara kepada admin yang telah diperiksa. Catatan audit memuat operator, akun target, dan waktu tindakan. Nomor HP dicatat saat onboarding atau penunjukan admin tambahan. Pada versi ini, pemeriksaan identitas berlangsung saat permintaan reset. Informasi proses pemulihan ditempatkan di alur Help Center, di luar halaman login.
+- Reset, penonaktifan, dan pengarsipan mencabut sesi yang sebelumnya memberi akses operasional. Setelah perubahan role atau permission, operasi berikutnya mengikuti kewenangan efektif terbaru.
+
+## Testing Decisions
+
+Gunakan API HTTP melalui Bruno untuk menguji alur pemohon, operator platform, dan pengguna tenant dengan fixture terisolasi. Gunakan jalur login yang diselesaikan melalui pemetaan URL per tenant. Gunakan kontrak Product Management untuk menguji kepemilikan produk ketika API produknya tersedia. Periksa hasil penolakan dan keadaan data setelahnya. Untuk halaman login yang memakai kontrak ini, periksa bahwa form berisi username dan password dan informasi proses reset berada di Help Center.
+
+| ID | User Stories | Perilaku yang harus teramati |
 | --- | --- | --- |
-| `users.create` | Membuat akun dalam scope pembuat | `SUPERADMIN`, `TENANT_ADMIN` |
-| `users.read` | Membaca detail pengguna dalam tenant pelaku | `TENANT_ADMIN` |
-| `roles.create` | Membuat role tenant tanpa permission awal | `TENANT_ADMIN` |
-| `roles.permissions.update` | Mengganti daftar permission role tenant | `TENANT_ADMIN` |
-| `users.role.assign` | Menetapkan role tenant pada pengguna | `TENANT_ADMIN` |
-| `tenants.provision` | Membuat tenant, role sistem tenant, dan akun pengelola pertama | `SUPERADMIN` |
+| UM-AT-01 | UM-01, UM-02, UM-03 | Pengelola berizin membuat akun dengan role yang sah di cakupannya. Login pertama hanya mengizinkan ganti password. Password baru bisa dipakai untuk login biasa. |
+| UM-AT-02 | UM-01, UM-05 | Akun tanpa `users.create` ditolak dan calon akun tidak tersimpan. Request tanpa autentikasi juga ditolak. |
+| UM-AT-03 | UM-03, UM-04, UM-05 | Pengelola membuat role, menetapkan permission, lalu menempatkan akun di role itu. Aksi berikutnya mengikuti permission efektif yang baru. |
+| UM-AT-04 | UM-06 | Akun A memenuhi izin dan berhasil membaca atau mengubah data A. Akses objek B melalui ID, penulisan, dan daftar terisolasi. Lookup objek B memberikan `404` tanpa mengungkap data B. |
+| UM-AT-05 | UM-02, UM-04, UM-06 | Pembuatan akun dan penggantian role menolak role dari scope atau tenant lain. Akun dan assignment sebelumnya tidak berubah. |
+| UM-AT-06 | UM-07, UM-11 | Setup ulang tidak menggandakan akun Admin Platform pertama. Akun tersebut bisa login, dapat menunjuk admin lain, dan terlindungi dari pengelolaan biasa. |
+| UM-AT-07 | UM-08, UM-11 | Pengajuan yang sedang ditinjau belum menghasilkan akses. Setelah URL siap, operator berizin menyelesaikan provisioning. Uji juga jalur yang bermula dari operator, konflik URL, dan kegagalan yang membatalkan seluruh operasi. |
+| UM-AT-08 | UM-03, UM-04, UM-05 | Pengelola tidak dapat memberi atau mengganti izin di luar kewenangannya. Operator dengan izin provisioning saja ditolak saat mencoba reset admin. |
+| UM-AT-09 | UM-02, UM-06, UM-08 | Uji URL domain toko dan alamat Dagantara dengan jalur toko. Username yang sama dapat dimiliki dua tenant. Akun hanya berhasil masuk melalui URL tenant tempat akun terdaftar dan sesinya ditolak di URL tenant lain. |
+| UM-AT-10 | UM-09 | Operator berizin menyelesaikan reset setelah memeriksa pemohon. Password serta sesi lama kehilangan akses, password sementara hanya membuka alur ganti password, dan audit tercatat. Permintaan tanpa verifikasi atau izin ditolak. |
+| UM-AT-11 | UM-10 | Pengelola dengan izin yang tepat dapat menonaktifkan dan mengaktifkan kembali akun. Akun arsip kehilangan akses, keluar dari daftar aktif, tetap memiliki riwayat, dan ditolak saat dicoba diaktifkan kembali. |
+| UM-AT-12 | UM-04, UM-11 | Pemilik dapat menunjuk admin tambahan dengan nomor HP dan mencabut role Admin Tenant. Pengelola biasa ditolak saat mencoba tindakan itu atau mengelola akun admin. Uji perlindungan pemilik dan kewenangan khusus Admin Platform pertama. |
+| UM-AT-13 | UM-08 | Operator bisa menutup pengajuan yang batal. Pengajuan tertutup tidak dapat diprovisioning dan tidak memberi akses tenant. |
 
-### Membuat Pengguna
+## Out of Scope
 
-```mermaid
-flowchart TD
-    A[Pengguna login] --> B{Memiliki permission users.create?}
-    B -- Ya --> C[Isi data pengguna dan pilih role]
-    C --> D[Validasi role dan tenant]
-    D --> E[Simpan pengguna]
-    B -- Tidak --> F[Akses ditolak]
-```
+- Identitas pembeli storefront dan akun pelanggan dibahas di Customer Management. Akun pembeli disimpan terpisah dari akun internal.
+- Pembuatan domain, konfigurasi DNS dan HTTPS, serta deployment frontend sesuai tema toko dibahas terpisah. User Management menggunakan URL login yang telah disiapkan.
+- Transfer kepemilikan, penggunaan email, dan verifikasi nomor HP dengan kode sekali pakai merupakan enhancement.
 
-### Mengelola Role
+## Further Notes
 
-```mermaid
-flowchart LR
-    A[Buat role] --> B[Pilih permissions]
-    B --> C[Simpan role_permissions]
-    C --> D[Tetapkan role ke pengguna]
-```
+- Backend saat ini memiliki login `POST /api/v1/auth/login`, provisioning `POST /api/v1/tenants`, serta jalur pengelolaan akun dan role pada `/api/v1/users` dan `/api/v1/roles`. Gunakan jalur tersebut sebagai titik awal saat perilakunya sesuai.
+- Implementasi perlu mengganti ketergantungan form login dari `tenantCode` ke pemetaan URL dan menghilangkan email sebagai syarat pendaftaran atau provisioning. Siapkan pemetaan URL bagi tenant yang sudah ada sebelum mengalihkan login mereka. Kode role sistem `SUPERADMIN` yang sudah tersimpan merepresentasikan Admin Platform.
+- Skema yang ada menampung domain berdasarkan hostname. Alamat Dagantara yang berbagi hostname membutuhkan pemetaan jalur per toko. Keputusan di spesifikasi ini menetapkan identitas dan keunikan pemetaan yang harus dijaga saat menyesuaikan skema.
 
-## Business Rules
+## Implementation Tickets
 
-- **UM-BR-01:** akun platform mempunyai `users.tenant_id = NULL`; akun tenant terhubung ke satu tenant.
-- **UM-BR-02:** setiap pengguna mempunyai satu `role_id` aktif.
-- **UM-BR-03:** permission diberikan kepada role melalui `role_permissions`, kemudian diperoleh pengguna melalui role-nya.
-- **UM-BR-04:** pembuatan pengguna membutuhkan permission `users.create`.
-- **UM-BR-05:** role yang ditetapkan harus sesuai dengan scope dan tenant pengguna. Data tenant hanya dapat diakses sesuai batas tenant yang diotorisasi.
-- **UM-BR-06:** pasangan `(role_id, permission_id)` pada `role_permissions` bersifat unik.
-- **UM-BR-07:** pelaku hanya boleh menambah permission yang dimilikinya dan termasuk permission tenant. Penggantian daftar permission role memerlukan akses atas seluruh permission role saat ini dan seluruh permission yang diminta. Penetapan role, termasuk saat membuat pengguna, memerlukan akses atas seluruh permission role yang akan diberikan. Penggantian role pengguna juga memerlukan akses atas permission role pengguna saat ini.
-- **UM-BR-08:** `SUPERADMIN` adalah role sistem unik dengan scope `PLATFORM` dan `tenant_id = NULL`. Role ini tidak dapat dihapus atau diubah identitasnya dan ditetapkan kepada akun pertama saat penyiapan. Permission role tetap diperiksa melalui relasi `role_permissions`.
-- **UM-BR-09:** kode role unik di dalam tenant. Kode `TENANT_ADMIN` dicadangkan untuk role sistem bawaan. Daftar permission role sistem tenant tidak dapat diubah melalui pengelolaan role.
-- **UM-BR-10:** provisioning mengaktifkan tenant dan akun pengelola pertamanya. Akun tersebut memiliki tenant baru, role `TENANT_ADMIN` yang sesuai, dan referensi akun platform pembuat. Kegagalan pembuatan salah satu bagian membatalkan seluruh operasi.
-
-## Data Model
-
-Skema final pada level tabel terdiri dari **6 tabel**: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, dan `role_permissions`.
-
-```mermaid
-erDiagram
-    TENANTS {
-        uuid id PK
-        varchar code UK
-        varchar name
-        varchar status
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    TENANT_DOMAINS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar hostname UK
-        varchar domain_kind
-        varchar status
-    }
-
-    USERS {
-        uuid id PK
-        uuid tenant_id FK "nullable for platform"
-        uuid role_id FK
-        varchar username
-        varchar email
-        varchar full_name
-        varchar password_hash
-        varchar account_type
-        varchar status
-        uuid created_by FK "nullable"
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    ROLES {
-        uuid id PK
-        uuid tenant_id FK "nullable for system"
-        varchar code
-        varchar name
-        varchar scope
-        boolean is_system
-        timestamp created_at
-    }
-
-    PERMISSIONS {
-        uuid id PK
-        varchar code UK
-        varchar module
-        text description
-    }
-
-    ROLE_PERMISSIONS {
-        uuid role_id PK,FK
-        uuid permission_id PK,FK
-    }
-
-    TENANTS ||--o{ TENANT_DOMAINS : owns
-    TENANTS |o--o{ USERS : contains
-    TENANTS |o--o{ ROLES : defines
-    ROLES ||--o{ USERS : assigned_to
-    ROLES ||--o{ ROLE_PERMISSIONS : grants
-    PERMISSIONS ||--o{ ROLE_PERMISSIONS : used_by
-    USERS |o--o{ USERS : created_by
-```
-
-**Keterangan:** relasi `TENANTS → USERS` dan `TENANTS → ROLES` bersifat opsional di sisi user/role karena akun platform dan role sistem dapat memiliki `tenant_id = NULL`.
-
-### Penjelasan tabel
-
-| Tabel | Fungsi |
-| --- | --- |
-| `tenants` | Menyimpan tenant yang menggunakan Dagantara. |
-| `tenant_domains` | Menyimpan hostname/domain yang terhubung dengan tenant. |
-| `users` | Menyimpan akun pengguna, tenant pengguna, dan role aktif pengguna. |
-| `roles` | Menyimpan role yang dapat ditetapkan kepada pengguna. |
-| `permissions` | Menyimpan kode permission yang digunakan untuk otorisasi. |
-| `role_permissions` | Menghubungkan role dengan permission yang dimilikinya. |
-
-### Penjelasan relasi
-
-| Relasi | Makna |
-| --- | --- |
-| `tenants → tenant_domains` | Satu tenant dapat memiliki beberapa domain. |
-| `tenants → users` | Satu tenant dapat memiliki banyak pengguna. Akun platform tidak memiliki `tenant_id`. |
-| `tenants → roles` | Tenant dapat memiliki role tenant; role sistem dapat memiliki `tenant_id = NULL`. |
-| `roles → users` | Setiap pengguna memiliki satu role aktif melalui `users.role_id`. |
-| `roles ↔ permissions` | Many-to-many melalui `role_permissions` dengan pasangan `(role_id, permission_id)` sebagai primary key. |
-| `users → users` | `users.created_by` mereferensikan pengguna pembuat akun. |
-
-## Acceptance Scenarios
-
-| ID | Requirement | Kondisi | Tindakan | Hasil yang diharapkan |
-| --- | --- | --- | --- | --- |
-| **UM-AT-01** | `UM-01`, `UM-02`, `UM-03` | Pengelola tenant login dengan permission `users.create` dan memilih role yang valid untuk tenant tersebut. | Membuat akun pengguna. | Pengguna tersimpan pada tenant pelaku dan `role_id` menunjuk ke satu role yang dipilih. |
-| **UM-AT-02** | `UM-01`, `UM-05` | Pengguna login tidak mempunyai permission `users.create`. Data calon pengguna dan role target valid. | Mencoba membuat pengguna. | Operasi ditolak dan calon pengguna tidak tersimpan. |
-| **UM-AT-03** | `UM-04`, `UM-05` | Pengelola berizin mengelola role dalam tenant. Pengguna target berada di tenant yang sama dan belum memiliki `users.create`. | Pengelola membuat role, menghubungkan beberapa permission termasuk `users.create`, lalu menetapkan role itu ke pengguna target. Pengguna target login dan membuat akun dengan role yang valid. | Relasi permission tersimpan, `role_id` pengguna target menunjuk ke role baru, dan pembuatan akun berhasil melalui permission efektif dari role tersebut. |
-| **UM-AT-04** | `UM-06` | Pengelola tenant A dapat menetapkan role di tenant A. Pengguna target berada di tenant B dan pengelola tidak berwenang di sana. | Mencoba menetapkan role yang valid untuk pengguna tenant B. Uji juga percobaan baca terhadap pengguna tersebut pada jalur baca yang sudah ditentukan. | Penetapan ditolak dan `role_id` pengguna tenant B tetap sama. Percobaan baca ditolak tanpa mengembalikan data pengguna target. |
-| **UM-AT-05** | `UM-02`, `UM-04`, `UM-06` | Pengelola berwenang membuat pengguna dan menetapkan role dalam tenant. Role yang dipilih tidak sesuai scope atau tenant pengguna target. | Uji pemilihan role tersebut saat membuat pengguna baru dan saat mengubah role pengguna yang sudah ada. | Kedua tindakan ditolak. Akun baru tidak tersimpan dan `role_id` pengguna yang sudah ada tetap sama. |
-| **UM-AT-06** | `UM-04`, `UM-07` | Role `SUPERADMIN` dan akun pertama sudah disiapkan. | Login dengan akun tersebut. Ulangi penyiapan akun, lalu coba hapus role saat tidak ada referensi pengguna. | Login berhasil. Penyiapan ulang tidak menggandakan akun. Penghapusan role ditolak dan role tetap tersedia. |
-| **UM-AT-07** | `UM-01`, `UM-04`, `UM-08` | Akun platform memiliki `tenants.provision`. | Buat tenant dengan pengelola pertama. Login sebagai pengelola dan buat pengguna tenant. | Tenant, role `TENANT_ADMIN`, dan akun pengelola tersimpan dengan relasi yang sesuai. Pengelola memiliki permission bawaan dan dapat membuat pengguna di tenant baru. |
-| **UM-AT-08** | `UM-04`, `UM-05`, `UM-06` | Pengelola memiliki akses pengelolaan role dengan sebagian permission tenant. | Beri permission di luar hak pengelola, tetapkan role yang melebihi haknya, atau baca detail pengguna tanpa `users.read`. | Operasi ditolak dan permission serta role pengguna tetap sama. Respons baca tidak mengembalikan data pengguna. |
+| No. | Hasil yang bisa didemokan | Prasyarat |
+| --- | --- | --- |
+| [01](tickets/user-management/01-bootstrap-platform-admin.md) | Admin Platform pertama bisa disiapkan ulang tanpa duplikasi dan login dengan username serta password. | Bisa langsung dimulai. |
+| [02](tickets/user-management/02-onboarding-tenant.md) | Operator menyelesaikan pengajuan atau onboarding langsung. Pemilik masuk dari URL toko dan mengganti password sementara. | 01 untuk autentikasi operator provisioning. |
+| [03](tickets/user-management/03-operator-platform.md) | Admin Platform membuat operator dan role, mendelegasikan permission, dan mengelola siklus akun operator. | 01 untuk akun Admin Platform pertama. |
+| [04](tickets/user-management/04-akun-dan-role-tenant.md) | Pemilik dan staf mengelola akun serta role tenant sesuai izin, dengan perlindungan akun pemilik dan admin. | 02 untuk identitas tenant, akun pemilik, dan konteks login. |
+| [05](tickets/user-management/05-pemulihan-help-center.md) | Operator Help Center yang berizin memulihkan akun admin awal atau tambahan dengan verifikasi, password sementara, dan audit. | 02 untuk akun pemilik, 03 untuk role operator Help Center, dan 04 untuk admin tambahan. |

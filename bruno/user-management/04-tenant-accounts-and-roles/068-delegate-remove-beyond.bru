@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-08 Pengelola tidak dapat mengubah role berisi izin di luar kewenangannya
+  type: http
+  seq: 68
+}
+
+put {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/roles/{{upperRole}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{delegateToken}}
+}
+
+body:json {
+  {
+    "permissions": []
+  }
+}
+
+tests {
+  test("UM-AT-08 Pengelola tidak dapat mengubah role berisi izin di luar kewenangannya", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

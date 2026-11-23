@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-07 Operator tanpa izin provisioning ditolak
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}/provision
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{limited}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://store-{{suffix}}.example.test",
+    "loginUrlReady": true
+  }
+}
+
+tests {
+  test("Operator tanpa izin provisioning ditolak", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

@@ -1,0 +1,41 @@
+meta {
+  name: UM-AT-12 Pemilik membuat admin tambahan dengan nomor pemulihan
+  type: http
+  seq: 78
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+body:json {
+  {
+    "username": "{{adminUsername}}",
+    "roleId": "{{adminARole}}",
+    "phoneNumber": "+628000000044",
+    "tenantId": "{{tenantBId}}"
+  }
+}
+
+tests {
+  test("UM-AT-12 Pemilik membuat admin tambahan dengan nomor pemulihan", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(res.getHeader("cache-control")).to.include("no-store");
+    expect(data.account.id).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.account.tenantId).to.equal(bru.getVar("tenantAId"));
+    expect(data.account.username).to.equal(bru.getVar("adminUsername"));
+    expect(data.account.roleId).to.equal(bru.getVar("adminARole"));
+    expect(data.account.status).to.equal("ACTIVE");
+    expect(data.account.owner).to.equal(false);
+    expect(data.temporaryPassword).to.match(/^[A-Za-z0-9_-]{32}$/);
+    bru.setVar("adminId", data.account.id);
+    bru.setVar("adminTemporary", data.temporaryPassword);
+  });
+}

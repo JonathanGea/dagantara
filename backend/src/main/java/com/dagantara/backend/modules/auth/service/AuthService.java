@@ -1,12 +1,13 @@
 package com.dagantara.backend.modules.auth.service;
 
 import com.dagantara.backend.common.exception.ApiException;
-import com.dagantara.backend.common.security.BootstrapCredentials;
-import com.dagantara.backend.common.security.UserIdentity;
+import com.dagantara.backend.modules.auth.dto.ChangeTemporaryPasswordRequest;
 import com.dagantara.backend.modules.auth.dto.LoginRequest;
 import com.dagantara.backend.modules.auth.dto.LoginResponse;
-import com.dagantara.backend.modules.users.entity.UserAccount;
-import com.dagantara.backend.modules.users.repository.UserAccountRepository;
+import com.dagantara.backend.modules.tenants.service.TenantRequestContext.Scope;
+import com.dagantara.backend.modules.users.dto.AccountSession;
+import com.dagantara.backend.modules.users.repository.AccountRepository;
+import com.dagantara.backend.modules.users.repository.AccountRepository.AccountCredentials;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,16 +18,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
-    private final BootstrapCredentials bootstrapCredentials;
-    private final UserAccountRepository users;
+    private final AccountRepository accounts;
     private final PasswordEncoder passwordEncoder;
     private final String dummyPasswordHash;
     private final JwtEncoder jwtEncoder;
@@ -35,8 +36,7 @@ public class AuthService {
     private final Duration accessTokenTtl;
 
     public AuthService(
-            BootstrapCredentials bootstrapCredentials,
-            UserAccountRepository users,
+            AccountRepository accounts,
             PasswordEncoder passwordEncoder,
             JwtEncoder jwtEncoder,
             @Value("${app.security.jwt.issuer:dagantara-backend}") String issuer,
@@ -47,8 +47,7 @@ public class AuthService {
                 || accessTokenTtl.compareTo(Duration.ofHours(24)) > 0) {
             throw new IllegalStateException("JWT access token TTL must be 1 minute to 24 hours");
         }
-        this.bootstrapCredentials = bootstrapCredentials;
-        this.users = users;
+        this.accounts = accounts;
         this.passwordEncoder = passwordEncoder;
         this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
         this.jwtEncoder = jwtEncoder;
@@ -57,49 +56,47 @@ public class AuthService {
         this.accessTokenTtl = accessTokenTtl;
     }
 
-    public LoginResponse login(LoginRequest request) {
-        if (request.password().getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw invalidCredentials();
-        }
-        if (request.tenantCode() == null
-                && bootstrapCredentials.matches(request.username(), request.password())) {
-            return issueToken(request.username(), false);
+    public LoginResponse login(LoginRequest request, Optional<Scope> scope) {
+        AccountCredentials account = scope
+                .flatMap(context -> accounts.findLogin(request.username(), context.tenantId()))
+                .orElse(null);
+        String passwordHash = account == null ? dummyPasswordHash : account.passwordHash();
+        if (tooLongForBcrypt(request.password()) || !passwordEncoder.matches(request.password(), passwordHash)
+                || account == null) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Invalid credentials");
         }
 
-        Optional<UserAccount> account = request.tenantCode() == null
-                ? users.findByUsernameAndTenantIdIsNull(request.username())
-                : users.findForTenantLogin(request.username(), request.tenantCode());
-        String passwordHash = account.map(UserAccount::getPasswordHash).orElse(dummyPasswordHash);
-        boolean passwordMatches = passwordEncoder.matches(request.password(), passwordHash);
-        if (account.isPresent()) {
-            UserAccount user = account.get();
-            if (passwordMatches && UserAccount.ACTIVE.equals(user.getStatus())) {
-                return issueToken(user.getId().toString(), true);
-            }
-        }
-        throw invalidCredentials();
-    }
-
-    private ApiException invalidCredentials() {
-        return new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Invalid credentials");
-    }
-
-    private LoginResponse issueToken(String subject, boolean persistedUser) {
+        AccountSession session = account.session();
         Instant issuedAt = Instant.now();
         Instant expiresAt = issuedAt.plus(accessTokenTtl);
-        JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
+        JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .audience(List.of(audience))
-                .subject(subject)
+                .subject(session.id().toString())
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
-                .id(UUID.randomUUID().toString());
-        if (persistedUser) {
-            claims.claim(UserIdentity.CLAIM, UserIdentity.USER);
-        }
+                .id(UUID.randomUUID().toString())
+                .claim("sessionVersion", session.sessionVersion())
+                .build();
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
-        String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(header, claims.build()))
-                .getTokenValue();
-        return new LoginResponse(accessToken, "Bearer", expiresAt);
+        String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+        return new LoginResponse(accessToken, "Bearer", expiresAt, session.passwordChangeRequired());
+    }
+
+    @Transactional
+    public void changeTemporaryPassword(AccountSession session, ChangeTemporaryPasswordRequest request) {
+        String temporaryHash = accounts.lockTemporaryPassword(session).orElseThrow(() ->
+                new ApiException(HttpStatus.CONFLICT, "PASSWORD_CHANGE_NOT_REQUIRED",
+                        "This session has no pending temporary password change"));
+        if (tooLongForBcrypt(request.newPassword()) || passwordEncoder.matches(request.newPassword(), temporaryHash)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_NEW_PASSWORD",
+                    "Choose a different password of at most 72 UTF-8 bytes");
+        }
+
+        accounts.replaceTemporaryPassword(session.id(), passwordEncoder.encode(request.newPassword()));
+    }
+
+    private static boolean tooLongForBcrypt(String password) {
+        return password.getBytes(StandardCharsets.UTF_8).length > 72;
     }
 }

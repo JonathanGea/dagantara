@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-01 Login awal pemilik B
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Host: {{hostB}}
+}
+
+body:json {
+  {
+    "username": "{{ownerBUsername}}",
+    "password": "{{ownerBTemporary}}"
+  }
+}
+
+tests {
+  test("UM-AT-01 Login awal pemilik B", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(true);
+    expect(data.accessToken).to.be.a("string");
+    bru.setVar("ownerBSetup", data.accessToken);
+  });
+}

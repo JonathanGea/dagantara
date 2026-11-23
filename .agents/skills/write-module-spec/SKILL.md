@@ -1,35 +1,35 @@
 ---
 name: write-module-spec
-description: Gunakan untuk membuat atau memperbarui spesifikasi modul Markdown Dagantara di docs/ dari kebutuhan, catatan, atau keputusan pengguna. Hasilnya siap dirujuk oleh implement-from-spec.
+description: Bahas ide perubahan Dagantara dengan pertanyaan dan rekomendasi, lalu tulis spec siap implementasi dan usulkan tiket bila cakupannya besar.
 ---
 
-# Menulis Spesifikasi Modul Dagantara
+# Dari Ide ke Spesifikasi
 
-## Tetapkan sumber dan cakupan
+Terima ide, masalah, atau usulan revisi. Baca `AGENTS.md`, `docs/README.md`, spesifikasi terkait, dan kode atau tes yang relevan. Gunakan istilah domain yang sudah disepakati. Jika ide mengubah aturan yang berlaku, tunjukkan keputusan yang terdampak dan minta pengguna menegaskan perubahan itu.
 
-1. Baca `AGENTS.md`, `docs/README.md`, dan spesifikasi terkait. Pakai catatan serta keputusan yang dirujuk pengguna. Saat merevisi modul, pertahankan keputusan dan ID yang sudah berlaku, lalu sebutkan konflik jika perubahan yang diminta berbenturan dengan spesifikasi terkait.
-2. Simpan satu modul per file `docs/<nama-modul>.md`. Saat menambah modul, tambahkan tautannya ke `docs/README.md`. Gunakan pola file modul yang sudah ada sebagai acuan.
+## Bahas dan konfirmasi desain
 
-## Periksa dependensi saat penulisan
+1. Temukan fakta dari repo. Petakan keputusan yang masih terbuka dan hubungan prasyaratnya. Telusuri alur nyata, termasuk kasus batas yang bisa mengubah hasil, pihak yang berwenang, kepemilikan tenant, serta dampak terhadap data atau kontrak yang sudah dipakai jika relevan.
+2. Per putaran, ajukan keputusan yang prasyaratnya sudah jelas. Beri nomor pada setiap pertanyaan dan sertakan rekomendasi, alasan, serta konsekuensi penting. Tunggu jawaban sebelum membahas keputusan turunannya. Catat keputusan yang sudah dijawab atau secara eksplisit didelegasikan.
+3. Gunakan keputusan pengujian yang sudah tercatat dan standar repo. Untuk antarmuka API HTTP, catat Bruno sebagai metode pengujian yang berlaku sesuai `AGENTS.md`. Fokuskan pertanyaan pada hasil yang harus bisa diamati. Bahas pilihan antarmuka uji hanya jika repo belum menentukan pilihannya dan pilihan itu mengubah kriteria penerimaan atau bukti yang dapat diperoleh.
+4. Saat keputusan yang memengaruhi hasil dan verifikasi sudah terjawab, rangkum tujuan, perilaku, batas cakupan, dan hasil yang akan diverifikasi. Cantumkan metode pengujian yang berlaku sebagai bagian dari ringkasan. Tunggu konfirmasi pengguna atas desain sebelum menulis spec final. Jika ada keputusan penghambat yang ditunda, identifikasi cakupan yang tertahan dan minta konfirmasi atas cakupan yang bisa diselesaikan.
 
-1. Sebelum memfinalkan spesifikasi, telusuri tiap alur dalam cakupan dari kondisi awal sampai hasil yang dapat diuji. Jika alur memerlukan tenant, akun, role, atau permission, cek siapa yang menyiapkannya pertama kali, dari mana konteks tenant diperoleh, dan siapa yang berwenang pada tiap aksi. Cek juga kepemilikan entitas, aturan penautan, dan cara menyiapkan kondisi awal skenario.
-2. Cari jawaban di sumber yang sudah disepakati. Gunakan pola repo untuk keputusan teknis yang bisa didelegasikan. Jika keputusan yang memengaruhi perilaku, hak akses, atau skema masih terbuka dan menghalangi alur, ajukan pertanyaan yang spesifik kepada pengguna saat menulis spesifikasi. Jelaskan dampak pilihan jika ada beberapa opsi yang masuk akal. Lanjutkan bagian yang sudah jelas.
-3. Tulis keputusan yang sudah disepakati sebagai requirement. Catat keputusan yang masih terbuka sebagai *implementation dependency*, dengan ID terkait, keputusan yang diperlukan, serta alur dan skenario yang tertahan. Jika pengguna meminta rancangan, tandai usulan yang masih membutuhkan konfirmasi.
+## Tulis satu spec per perubahan
 
-## Susun spesifikasi yang bisa diuji
+Simpan sebagai `docs/<slug>.md` dan tautkan dari `docs/README.md`. Pilih judul yang menyatakan hasil dan slug yang unik. Rujuk aturan domain yang sudah ada. Jika pengguna menyetujui perubahan aturan, perbarui juga bagian dokumen sumber yang terdampak dalam cakupan yang sama. Simpan istilah domain baru yang perlu dipakai ulang di `GLOSSARY.md`. Gunakan ADR di `docs/adr/` ketika sebuah keputusan sulit dibalik, membutuhkan konteks, dan lahir dari pertukaran yang nyata.
 
-Gunakan urutan bagian dari `docs/README.md`.
+- **Problem Statement** — Masalah dari sudut pandang pengguna.
+- **Solution** — Hasil yang akan dialami pengguna.
+- **User Stories** — Daftar bernomor yang menyebut pelaku, kemampuan, dan manfaat. Cakup alur utama dan kasus batas yang disepakati.
+- **Implementation Decisions** — Keputusan tentang modul, antarmuka, skema, API, interaksi, atau aturan domain yang memengaruhi hasil. Rujuk sumbernya jika sudah tercatat. Gunakan nama domain dan antarmuka yang stabil.
+- **Testing Decisions** — Metode pengujian yang berlaku dan perilaku yang harus teramati. Nyatakan kondisi, aksi, dan hasil untuk kasus sukses dan penolakan yang relevan. Untuk API HTTP, catat penggunaan Bruno dan hasil yang perlu dibuktikan lewat respons serta keadaan data sesudah aksi bila relevan.
+- **Out of Scope** — Batas yang disepakati.
+- **Further Notes** — Konteks atau referensi tambahan jika diperlukan.
 
-- **Module Overview** menjelaskan tujuan dan batas modul.
-- **Admin UI Structure** mencatat navigasi dan aksi admin yang sudah diketahui. Cantumkan ID Functional Specification pada setiap aksi yang menjadi requirement.
-- **Functional Specification** menjelaskan siapa melakukan apa, kondisi awal, dan hasilnya. Gunakan ID stabil seperti `UM-01`.
-- **Business Rules** mencatat batas izin, kepemilikan tenant, validasi, dan invarian yang berlaku. Gunakan ID seperti `UM-BR-01`.
-- **Data Model** menjelaskan entitas, kepemilikan, kardinalitas, dan constraint yang sudah disepakati. Gunakan Mermaid jika membantu membaca relasi atau alur.
-- **Acceptance Scenarios** memakai format `ID | Requirement | Kondisi | Tindakan | Hasil yang diharapkan`. Gunakan ID skenario seperti `UM-AT-01` dan isi `Requirement` dengan ID Functional Specification yang dibuktikan. Buat kondisi awal yang bisa disiapkan, tindakan yang sesuai dengan cakupan resmi, dan hasil yang dapat diamati. Untuk penolakan, sebutkan data yang harus tetap sama atau tidak boleh diungkap. Untuk pengujian permission, uji aksi yang membutuhkan permission tersebut.
+Periksa kesiapan dari sudut pandang sesi baru. Spec dan rujukannya harus cukup untuk menentukan hasil yang dibangun, keputusan yang wajib diikuti, dan cara membuktikan hasil tanpa menggali riwayat percakapan.
 
-## Periksa sebelum selesai
+## Serahkan ke implementasi
 
-- Pastikan ID unik dan stabil. Gunakan awalan modul yang konsisten dan belum dipakai saat membuat modul baru.
-- Periksa bahwa setiap requirement dapat ditelusuri ke skenario atau keputusan yang masih diperlukan. Laporkan bagian yang siap diimplementasikan dan bagian yang masih tertahan beserta ID-nya.
-- Cocokkan aksi, aturan, relasi, dan skenario antarbagiannya. Tulis hasil yang diharapkan agar bisa diverifikasi melalui tes HTTP Bruno atau tes backend yang sesuai.
-- Laporkan file yang dibuat atau diubah dan ID yang terdampak. Alur yang dependensinya sudah tuntas bisa dirujuk melalui `$implement-from-spec` dengan file modul dan ID terkait. Nyatakan seluruh modul siap diimplementasikan setelah dependensi penghambat di semua alur terselesaikan.
+- Jika cakupan dapat dibangun dan diverifikasi dalam satu sesi, berikan `$implement-from-spec <slug>`.
+- Jika cakupan perlu beberapa sesi, usulkan tiket berupa bagian fitur end-to-end yang masing-masing dapat didemokan atau diuji. Untuk setiap tiket, tampilkan nomor, hasil, dan prasyarat yang benar-benar menghalanginya. Tambahkan `## Implementation Tickets` ke spec dengan catatan `Menunggu persetujuan pembagian tiket.` Tunggu pengguna menyetujui atau merevisi pembagian sebelum membuat tiket.
+- Setelah pembagian disetujui, buat satu file per tiket di `docs/tickets/<slug>/<NN>-<judul>.md`. Cantumkan judul, tautan ke spec induk, bagian **What to Build**, **Acceptance Criteria** berupa checklist hasil teramati, **Blocked By** dengan tautan ke tiket prasyarat atau keterangan bahwa tiket bisa langsung dimulai, serta `Status: ready-for-agent`. Ganti catatan persetujuan di spec dengan tautan tiket. Di Orca, berikan `$implement-from-spec <slug>` untuk mengoordinasikan tiket. Untuk satu tiket yang siap, berikan `$implement-from-spec <slug> <NN>`. Jika pengguna sekaligus meminta mulai implementasi, lanjutkan dengan skill tersebut.

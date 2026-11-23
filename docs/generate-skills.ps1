@@ -6,13 +6,29 @@ $manifestPath = Join-Path $PSScriptRoot 'skills.json'
 $publicSkillsPath = Join-Path $PSScriptRoot 'skills'
 $indexPath = Join-Path $PSScriptRoot 'index.html'
 
+function Set-OfflineBlock($html, $id, $content) {
+    $pattern = '(?s)(<script id="' + [regex]::Escape($id) + '" type="[^"]+">).*?(</script>)'
+    $block = [regex]::new($pattern)
+    if (-not $block.IsMatch($html)) {
+        throw "Could not find the $id data block in docs/index.html."
+    }
+    if ($content -match '</script\b') {
+        throw "The $id data contains a closing script tag."
+    }
+    return $block.Replace($html, {
+        param($match)
+        $match.Groups[1].Value + [Environment]::NewLine +
+            $content.TrimEnd() + [Environment]::NewLine + $match.Groups[2].Value
+    }, 1)
+}
+
 New-Item -ItemType Directory -Path $publicSkillsPath -Force | Out-Null
 $skills = @()
 foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
     $skillPath = Join-Path $directory.FullName 'SKILL.md'
     if (-not (Test-Path -LiteralPath $skillPath -PathType Leaf)) { continue }
 
-    $content = Get-Content -LiteralPath $skillPath -Raw -Encoding UTF8
+    $content = [System.IO.File]::ReadAllText($skillPath, [System.Text.Encoding]::UTF8)
     $titleMatch = [regex]::Match($content, '(?m)^#\s+(.+?)\s*$')
     $descriptionMatch = [regex]::Match($content, '(?m)^description:\s*(.+?)\s*$')
     $title = if ($titleMatch.Success) {
@@ -43,13 +59,11 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 
 $indexHtml = [System.IO.File]::ReadAllText($indexPath, $utf8)
 $offlineJson = $json.Replace('<', '\u003c').Replace('>', '\u003e').Replace('&', '\u0026')
-$offlinePattern = '(?s)(<script id="offline-skills" type="application/json">).*?(</script>)'
-$offlineRegex = [regex]::new($offlinePattern)
-if (-not $offlineRegex.IsMatch($indexHtml)) {
-    throw 'Could not find the offline-skills data block in docs/index.html.'
-}
-$replacement = '$1' + [Environment]::NewLine + $offlineJson + [Environment]::NewLine + '$2'
-$indexHtml = $offlineRegex.Replace($indexHtml, $replacement, 1)
+$indexHtml = Set-OfflineBlock $indexHtml 'offline-skills' $offlineJson
+$readme = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'README.md'), $utf8)
+$indexHtml = Set-OfflineBlock $indexHtml 'offline-readme' $readme
+$skillGuide = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'skill-guide.md'), $utf8)
+$indexHtml = Set-OfflineBlock $indexHtml 'offline-skill-guide' $skillGuide
 [System.IO.File]::WriteAllText($indexPath, $indexHtml, $utf8)
 
-Write-Output "Generated manifest and $($skills.Count) public skill pages."
+Write-Output "Generated manifest, $($skills.Count) public skill pages, and viewer fallback data."

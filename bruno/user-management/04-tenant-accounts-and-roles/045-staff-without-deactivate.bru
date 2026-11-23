@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-11 Siklus akun memerlukan izin tindakan deactivate
+  type: http
+  seq: 45
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{staffId}}/deactivate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffToken}}
+}
+
+tests {
+  test("UM-AT-11 Siklus akun memerlukan izin tindakan deactivate", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

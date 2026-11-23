@@ -1,0 +1,39 @@
+meta {
+  name: UM-AT-09 Onboarding langsung tenant A
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://{{platformHost}}/shop-a-{{suffix}}",
+    "loginUrlReady": true,
+    "storeName": "umb-path-a-{{suffix}}",
+    "phoneNumber": "+628000000000"
+  }
+}
+
+tests {
+  test("Onboarding langsung tenant A", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.ownerUsername).to.equal(bru.getVar("owner"));
+    expect(data.loginUrl).to.equal("https://" + bru.getVar("platformHost") + "/shop-a-" + bru.getVar("suffix"));
+    expect(data.tenantId).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.ownerId).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.temporaryPassword).to.match(/^[A-Za-z0-9_-]{32}$/);
+    bru.setVar("aTenantId", data.tenantId);
+    bru.setVar("aTemporary", data.temporaryPassword);
+  });
+}

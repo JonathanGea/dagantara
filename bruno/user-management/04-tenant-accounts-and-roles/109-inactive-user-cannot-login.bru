@@ -1,0 +1,25 @@
+meta {
+  name: UM-AT-11 Akun nonaktif tidak dapat login
+  type: http
+  seq: 109
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{staffUsername}}",
+    "password": "{{resetPassword}}"
+  }
+}
+
+tests {
+  test("UM-AT-11 Akun nonaktif tidak dapat login", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("INVALID_CREDENTIALS");
+  });
+}

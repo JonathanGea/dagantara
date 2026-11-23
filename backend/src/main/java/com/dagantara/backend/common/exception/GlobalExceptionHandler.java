@@ -52,6 +52,12 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleParameterType(HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER",
+                "An endpoint parameter has the wrong type", request);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleInvalidJson(HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",

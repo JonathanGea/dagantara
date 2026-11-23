@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-12 Admin tambahan tidak dapat membuat admin baru
+  type: http
+  seq: 83
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "username": "denied-admin-{{suffix}}",
+    "roleId": "{{adminARole}}",
+    "phoneNumber": "+628000000044"
+  }
+}
+
+tests {
+  test("UM-AT-12 Admin tambahan tidak dapat membuat admin baru", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("PROTECTED_ACCOUNT");
+  });
+}

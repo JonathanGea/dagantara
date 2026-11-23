@@ -6,21 +6,28 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 
 ## Dokumentasi Modul
 
-- [User Management](user-management.md)
 - [Product Management](product-management.md)
+- [Module Roadmap & Ownership](module-roadmap.md)
+- [Development Dependencies & Parallel Workstreams](development-dependencies.md)
+
+## Spesifikasi Perubahan
+
+Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa ekstensi dapat dipakai untuk memilih spec.
+
+- [User Management — Akses Platform dan Tenant](user-management.md)
 
 ## Aturan Membaca untuk AI Developer
 
-1. **Source of truth:** file Markdown modul adalah sumber spesifikasi. `README.md` adalah indeks dan pedoman; `index.html` hanya viewer.
-2. **Keputusan final:** implementasikan hanya aturan, fitur, dan relasi yang sudah disepakati di modul. Jangan menjadikan contoh, struktur referensi, atau dugaan sebagai requirement.
+1. Ambil cakupan dari spesifikasi perubahan yang disetujui dan aturan domain dari dokumen modul. Gunakan `README.md` sebagai indeks dan `index.html` sebagai viewer.
+2. Implementasikan keputusan yang disetujui. Gunakan contoh dan struktur referensi untuk memahami konteksnya.
 3. **Batas navigasi:** entri pada Admin UI Structure menjelaskan lokasi UI. Nama submenu saja tidak otomatis menetapkan fitur, CRUD, API, atau halaman turunannya.
 4. **Keputusan yang dibutuhkan:** jika sebuah spesifikasi belum menentukan hal esensial, laporkan dependensinya dan jangan menentukan sendiri. Kerjakan bagian lain yang tidak bergantung pada keputusan tersebut.
-5. **Pengerjaan terarah:** implementasikan satu cakupan kecil dengan mengacu pada ID Functional Specification. Jangan menambah fitur di luar cakupan tugas.
-6. **Verifikasi:** cocokkan hasil dengan Business Rules, Data Model, dan Acceptance Scenarios yang relevan. Jangan menyimpulkan fitur sudah terimplementasi hanya karena dokumentasinya tersedia.
+5. Ambil satu cakupan dari spec, tiket, atau ID Functional Specification yang diminta.
+6. Verifikasi perilaku dengan Testing Decisions, Acceptance Criteria, atau Acceptance Scenarios yang relevan.
 7. **Konsistensi:** pertahankan aturan tenant isolation, role-based permissions, serta integritas relasi yang telah disepakati.
-8. **Penulisan dokumen:** simpan satu modul per file Markdown. Tulis keputusan yang berlaku, bukan alternatif atau fitur yang tidak dipilih; jangan mengulang informasi tanpa kebutuhan.
+8. Simpan satu perubahan per spec Markdown. Tautkan dokumen modul untuk aturan yang berlaku lintas perubahan.
 
-## Struktur Spesifikasi Modul
+## Referensi Format Modul
 
 | Bagian | Tujuan |
 | --- | --- |
@@ -35,12 +42,15 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 
 ## Penggunaan dalam Pengembangan
 
-Untuk menulis spesifikasi modul, gunakan `$write-module-spec` dengan nama modul dan catatan kebutuhan. Untuk memperbarui spesifikasi, sertakan file dan perubahan yang diminta, misalnya `$write-module-spec @docs/user-management.md` diikuti keputusan yang ingin dicatat.
+[Panduan Penggunaan Skill](skill-guide.md) memuat cara memilih skill dan contoh prompt siap salin untuk setiap skill di repository.
 
-Bahas keputusan yang menghalangi suatu alur saat menulis spesifikasi. Kaitkan setiap keputusan yang masih terbuka dengan ID dan skenario yang tertahan sebelum menyatakan modul siap diimplementasikan.
+1. Panggil `$write-module-spec <ide>`. AI menelusuri repo, mengajukan pertanyaan dengan rekomendasi, dan merangkum keputusan untuk kamu konfirmasi sebelum menulis spec di `docs/<slug>.md`.
+2. Gunakan `$design-ui` jika perlu meninjau layout atau alur UI. Sertakan spec, layar yang sudah ada, atau brief. Layout dasar bisa dimulai dari brief dan satu contoh tugas pengguna.
+3. Gunakan `$implement-from-spec <slug>` untuk spec yang siap dikerjakan. Jika spec menautkan tiket yang sudah disetujui, panggilan ini mengoordinasikan worker di sesi Orca. Gunakan `$implement-from-spec <slug> <NN>` untuk memilih satu tiket yang sudah bisa dimulai.
+4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
-Untuk mengimplementasikan seluruh modul, cukup panggil skill dengan file modul, misalnya `$implement-from-spec @docs/user-management.md`. Untuk cakupan yang lebih kecil, tambahkan aksi, ID spesifikasi, atau batas pekerjaan. AI harus membaca seluruh aturan terkait sebelum mengubah kode, lalu memverifikasi acceptance scenario yang sesuai.
+Untuk format modul yang sudah ada, `$implement-from-spec @docs/product-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah menambah atau mengubah skill, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan daftar offline di `index.html`, sehingga tautan skill bekerja melalui server HTTP maupun saat file dibuka langsung.
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, atau indeks ini, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html`, sehingga daftar skill dan panduan tersedia saat halaman dibuka langsung.

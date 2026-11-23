@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-04 Perubahan akun B memberi 404
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{ownerBId}}/deactivate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-04 Perubahan akun B memberi 404", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+  });
+}

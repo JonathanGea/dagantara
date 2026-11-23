@@ -1,0 +1,58 @@
+meta {
+  name: UM-AT-12 Hanya Admin Platform pertama dapat memberi dan mencabut SUPERADMIN
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Penunjukan dan pencabutan SUPERADMIN membutuhkan penanda akun awal", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const initial = (await fx.users()).find(user => user.initialPlatformAdmin);
+    const ordinaryRole = await fx.role("ordinary-admin-target");
+    const secondary = await fx.operator("secondary-admin", initial.roleId);
+    expect(await fx.detail(secondary.id, secondary.token)).to.include({
+      initialPlatformAdmin: false, roleId: initial.roleId, roleCode: "SUPERADMIN"
+    });
+    const target = await fx.activate(await fx.create(fx.name("admin-assignment-target"), ordinaryRole, secondary.token));
+    const denied = fx.name("denied-secondary-admin");
+    await fx.api("POST", "/users", {
+      token: secondary.token, body: { username: denied, roleId: initial.roleId }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("PUT", `/users/${target.id}/role`, {
+      token: secondary.token, body: { roleId: initial.roleId }, status: 403, error: "FORBIDDEN"
+    });
+    expect((await fx.detail(target.id)).roleId).to.equal(ordinaryRole);
+    expect((await fx.users()).some(user => user.username === denied)).to.equal(false);
+    await fx.api("GET", "/users", { token: target.token, status: 403, error: "FORBIDDEN" });
+
+    await fx.api("PUT", `/users/${target.id}/role`, { body: { roleId: initial.roleId } });
+    expect((await fx.detail(target.id, target.token)).roleCode).to.equal("SUPERADMIN");
+    await fx.api("PUT", `/users/${target.id}/role`, {
+      token: secondary.token, body: { roleId: ordinaryRole }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("PUT", `/users/${initial.id}/role`, {
+      token: secondary.token, body: { roleId: ordinaryRole }, status: 403, error: "INITIAL_ADMIN_PROTECTED"
+    });
+    expect((await fx.detail(target.id)).roleId).to.equal(initial.roleId);
+    expect(await fx.detail(initial.id)).to.deep.equal(initial);
+
+    await fx.api("PUT", `/users/${target.id}/role`, { body: { roleId: ordinaryRole } });
+    expect((await fx.detail(target.id)).roleId).to.equal(ordinaryRole);
+    await fx.api("GET", "/users", { token: target.token, status: 403, error: "FORBIDDEN" });
+  });
+}

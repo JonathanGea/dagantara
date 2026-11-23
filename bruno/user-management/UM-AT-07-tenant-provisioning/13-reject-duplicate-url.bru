@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-07 Alamat yang sudah digunakan ditolak lintas jalur provisioning
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://STORE-{{suffix}}.EXAMPLE.TEST/",
+    "loginUrlReady": true,
+    "storeName": "umb-duplicate-{{suffix}}",
+    "phoneNumber": "+628000000000"
+  }
+}
+
+tests {
+  test("Alamat yang sudah digunakan ditolak lintas jalur provisioning", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("LOGIN_URL_IN_USE");
+  });
+}

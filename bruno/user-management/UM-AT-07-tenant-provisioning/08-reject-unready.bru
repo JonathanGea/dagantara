@@ -1,0 +1,31 @@
+meta {
+  name: UM-AT-07 Provisioning memerlukan konfirmasi URL siap
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}/provision
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://store-{{suffix}}.example.test",
+    "loginUrlReady": false
+  }
+}
+
+tests {
+  test("Provisioning memerlukan konfirmasi URL siap", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("VALIDATION_ERROR");
+    expect(res.getBody().violations.some(v => v.field === "loginUrlReady")).to.equal(true);
+  });
+}

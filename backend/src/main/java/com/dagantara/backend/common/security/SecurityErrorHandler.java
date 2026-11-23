@@ -38,6 +38,11 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
                 "You do not have permission to access this resource");
     }
 
+    void passwordChangeRequired(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        writeProblem(request, response, HttpStatus.FORBIDDEN, "PASSWORD_CHANGE_REQUIRED",
+                "Change the temporary password before performing other operations");
+    }
+
     private void writeProblem(HttpServletRequest request, HttpServletResponse response,
                               HttpStatus status, String code, String detail) throws IOException {
         if (response.isCommitted()) {

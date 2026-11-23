@@ -1,0 +1,179 @@
+meta {
+  name: UM-AT-08 dan UM-AT-10 Pemulihan admin melalui Help Center
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture, isTemporaryPassword } = require("./user-management/platform-operator-fixture.js");
+
+  test("Izin, verifikasi, dan pasangan tenant-akun membatasi pemulihan kedua jenis admin", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const recoveryPermission = "tenants.admins.password.reset";
+    const helpRole = await fx.role("um05-help", [recoveryPermission]);
+    const provisionRole = await fx.role("um05-provision", ["tenants.provision"]);
+    const help = await fx.operator("um05-help", helpRole);
+    const provisioner = await fx.operator("um05-provision", provisionRole);
+    const hostname = bru.getProcessEnv("DAGANTARA_TEST_PLATFORM_HOST") || "localhost";
+    const tenantSlug = fx.name("um05-shop");
+    const otherSlug = fx.name("um05-other");
+    const ownerUsername = fx.name("um05-owner");
+    const ownerPhone = "+620000000051";
+    const adminPhone = "+620000000052";
+    const otherPhone = "+620000000053";
+    const staffPhone = "+620000000054";
+    const ownerVerification = { verificationMethod: "MATCHED_INCOMING_NUMBER" };
+    const adminVerification = { verificationMethod: "CALLBACK_TO_REGISTERED_NUMBER" };
+    const shopApi = (slug, method, path, options) => fx.request(method, `/${slug}/api/v1${path}`, options);
+    const lookup = (token, loginUrl, username, options = {}) =>
+      fx.api("POST", "/help-center/tenant-admins/lookup", { token, body: { loginUrl, username }, ...options });
+    const reset = (token, tenantId, accountId, body, options = {}) => fx.api("POST",
+      `/help-center/tenants/${tenantId}/admins/${accountId}/reset-password`, { token, body, ...options });
+
+    async function provision(slug, phoneNumber) {
+      const loginUrl = `https://${hostname}/${slug}`;
+      const response = await fx.api("POST", "/tenants", {
+        token: provisioner.token, status: 201,
+        body: { storeName: slug, phoneNumber, ownerUsername, loginUrl, loginUrlReady: true }
+      });
+      expect(response.data.data.loginUrl).to.equal(loginUrl);
+      return response.data.data;
+    }
+
+    async function login(slug, username, password, temporary = false) {
+      const response = await shopApi(slug, "POST", "/auth/login", { token: null, body: { username, password } });
+      expect(response.data.data.passwordChangeRequired).to.equal(temporary);
+      const token = response.data.data.accessToken;
+      expect(typeof token === "string" && token.split(".").length === 3, "tenant bearer token").to.equal(true);
+      return token;
+    }
+
+    async function changePassword(slug, token, newPassword) {
+      await shopApi(slug, "POST", "/auth/password", { token, status: 204, body: { newPassword } });
+    }
+
+    async function activate(username, temporaryPassword) {
+      expect(isTemporaryPassword(temporaryPassword), "generated onboarding password").to.equal(true);
+      const temporary = await login(tenantSlug, username, temporaryPassword, true);
+      const password = fx.name("um05-original-password");
+      await changePassword(tenantSlug, temporary, password);
+      return { username, password, token: await login(tenantSlug, username, password) };
+    }
+
+    async function expectRecoveryTarget(tenant, accountId, username, phoneNumber) {
+      const response = await lookup(help.token, tenant.loginUrl, username);
+      expect(response.headers["cache-control"]).to.include("no-store");
+      expect(response.data.data, "lookup only exposes recovery fields")
+        .to.deep.equal({ tenantId: tenant.tenantId, accountId, phoneNumber });
+    }
+
+    async function rejectLogin(slug, username, password) {
+      await shopApi(slug, "POST", "/auth/login", {
+        token: null, body: { username, password }, status: 401, error: "INVALID_CREDENTIALS"
+      });
+    }
+
+    async function expectOperational(accountId, session, owner) {
+      const response = await shopApi(tenantSlug, "GET", `/tenant/users/${accountId}`, { token: session });
+      expect(response.data.data).to.include({
+        id: accountId, tenantId: tenant.tenantId, status: "ACTIVE", roleCode: "TENANT_ADMIN", owner
+      });
+    }
+
+    async function recover(accountId, account, verification, owner) {
+      const response = await reset(help.token, tenant.tenantId, accountId, verification);
+      expect(response.headers["cache-control"]).to.include("no-store");
+      expect(Object.keys(response.data.data)).to.deep.equal(["temporaryPassword"]);
+      const temporaryPassword = response.data.data.temporaryPassword;
+      expect(isTemporaryPassword(temporaryPassword), "generated recovery password").to.equal(true);
+      await rejectLogin(tenantSlug, account.username, account.password);
+      const accountPath = `/tenant/users/${accountId}`;
+      await shopApi(tenantSlug, "GET", accountPath, { token: account.token, status: 401, error: "UNAUTHORIZED" });
+      const temporaryToken = await login(tenantSlug, account.username, temporaryPassword, true);
+      await shopApi(tenantSlug, "GET", accountPath, {
+        token: temporaryToken, status: 403, error: "PASSWORD_CHANGE_REQUIRED"
+      });
+      const newPassword = fx.name("um05-replaced-password");
+      await changePassword(tenantSlug, temporaryToken, newPassword);
+      await rejectLogin(tenantSlug, account.username, temporaryPassword);
+      await shopApi(tenantSlug, "GET", accountPath, { token: temporaryToken, status: 401, error: "UNAUTHORIZED" });
+      await expectOperational(accountId, await login(tenantSlug, account.username, newPassword), owner);
+    }
+
+    const tenant = await provision(tenantSlug, ownerPhone);
+    const other = await provision(otherSlug, otherPhone);
+    const owner = await activate(tenant.ownerUsername, tenant.temporaryPassword);
+    const roles = await shopApi(tenantSlug, "GET", "/tenant/roles", { token: owner.token });
+    const adminRole = roles.data.data.find(role => role.code === "TENANT_ADMIN");
+    expect(Boolean(adminRole), "built-in tenant administrator role").to.equal(true);
+    const adminUsername = fx.name("um05-admin");
+    const adminCreation = await shopApi(tenantSlug, "POST", "/tenant/users", {
+      token: owner.token, status: 201, body: { username: adminUsername, roleId: adminRole.id, phoneNumber: adminPhone }
+    });
+    const adminId = adminCreation.data.data.account.id;
+    const admin = await activate(adminUsername, adminCreation.data.data.temporaryPassword);
+    const staffRole = await shopApi(tenantSlug, "POST", "/tenant/roles", {
+      token: owner.token, status: 201, body: { code: "STAFF_05", name: "Staff 05" }
+    });
+    const staffUsername = fx.name("um05-staff");
+    const staff = await shopApi(tenantSlug, "POST", "/tenant/users", {
+      token: owner.token, status: 201,
+      body: { username: staffUsername, roleId: adminRole.id, phoneNumber: staffPhone }
+    });
+    const staffId = staff.data.data.account.id;
+
+    await expectRecoveryTarget(tenant, tenant.ownerId, owner.username, ownerPhone);
+    await expectRecoveryTarget(tenant, adminId, admin.username, adminPhone);
+    await expectRecoveryTarget(other, other.ownerId, owner.username, otherPhone);
+    await expectRecoveryTarget(tenant, staffId, staffUsername, staffPhone);
+    const demoted = await shopApi(tenantSlug, "PUT", `/tenant/users/${staffId}/role`, {
+      token: owner.token, body: { roleId: staffRole.data.data.id }
+    });
+    expect(demoted.data.data.roleCode).to.equal("STAFF_05");
+    const forbidden = { status: 403, error: "FORBIDDEN" };
+    const unauthorized = { status: 401, error: "UNAUTHORIZED" };
+    const notFound = { status: 404, error: "NOT_FOUND" };
+    await lookup(null, tenant.loginUrl, owner.username, unauthorized);
+    await reset(null, tenant.tenantId, tenant.ownerId, ownerVerification, unauthorized);
+    await lookup(provisioner.token, tenant.loginUrl, owner.username, forbidden);
+    await reset(provisioner.token, tenant.tenantId, tenant.ownerId, ownerVerification, forbidden);
+    await lookup(owner.token, tenant.loginUrl, owner.username, forbidden);
+    await reset(owner.token, tenant.tenantId, adminId, adminVerification, forbidden);
+    await fx.api("GET", "/users", { token: help.token, ...forbidden });
+    await lookup(help.token, tenant.loginUrl, staffUsername, notFound);
+    await lookup(help.token, other.loginUrl, admin.username, notFound);
+    await reset(help.token, tenant.tenantId, staffId, adminVerification, notFound);
+    await reset(help.token, tenant.tenantId, help.id, adminVerification, notFound);
+    await reset(help.token, other.tenantId, adminId, adminVerification, notFound);
+    await reset(help.token, tenant.tenantId, tenant.ownerId, {}, { status: 400, error: "VALIDATION_ERROR" });
+    await reset(help.token, tenant.tenantId, adminId, { verificationMethod: 0 }, {
+      status: 400, error: "INVALID_REQUEST_BODY"
+    });
+    await reset(help.token, tenant.tenantId, adminId, { verificationMethod: "UNVERIFIED" }, {
+      status: 400, error: "INVALID_REQUEST_BODY"
+    });
+
+    await expectOperational(tenant.ownerId, owner.token, true);
+    await expectOperational(adminId, admin.token, false);
+    await login(tenantSlug, owner.username, owner.password);
+    await login(tenantSlug, admin.username, admin.password);
+
+    await recover(tenant.ownerId, owner, ownerVerification, true);
+    await recover(adminId, admin, adminVerification, false);
+    await login(otherSlug, owner.username, other.temporaryPassword, true);
+    await login(tenantSlug, staffUsername, staff.data.data.temporaryPassword, true);
+  });
+}
