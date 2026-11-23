@@ -1,0 +1,31 @@
+meta {
+  name: IM-AT-01 Baca riwayat jumlah awal dan efektif yang sama
+  type: http
+  seq: 37
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receiptA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+tests {
+  test("IM-AT-01 Baca riwayat jumlah awal dan efektif yang sama", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    const original = bru.getVar("receiptAData");
+    expect(data.id).to.equal(original.id);
+    expect(data.warehouseId).to.equal(original.warehouseId);
+    expect(data.receivedBy).to.equal(original.receivedBy);
+    expect(data.createdAt).to.equal(original.createdAt);
+    expect(data.corrections).to.deep.equal([]);
+    expect(data.lines).to.deep.equal(original.lines.map(({id, variantId, sku, quantity}) => ({
+      id, variantId, sku, originalQuantity: quantity, effectiveQuantity: quantity
+    })));
+  });
+}

@@ -1,0 +1,42 @@
+meta {
+  name: IM-AT-01 Fixture produk tanpa opsi tenant B
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{baseUrl}}/{{shopB}}/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminB}}
+}
+
+body:json {
+  {
+    "name": "Produk B tanpa opsi",
+    "categoryIds": [
+      "{{b1}}"
+    ],
+    "primaryCategoryId": "{{b1}}",
+    "options": [],
+    "skuMode": "MANUAL",
+    "sku": "FOREIGN-B"
+  }
+}
+
+tests {
+  test("IM-AT-01 Fixture produk tanpa opsi tenant B", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(data.status).to.equal("DRAFT");
+    expect(data.variants).to.have.length(1);
+    expect(data.variants[0].sku).to.equal("FOREIGN-B");
+    expect(data.variants[0].id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(data.variants[0].optionValueIds).to.deep.equal([]);
+    bru.setVar("defaultBVariant", data.variants[0].id);
+  });
+}

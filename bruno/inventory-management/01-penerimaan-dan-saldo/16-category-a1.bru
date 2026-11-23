@@ -1,0 +1,31 @@
+meta {
+  name: Fixture buat kategori tenant A
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Apparel"
+  }
+}
+
+tests {
+  test("Fixture buat kategori tenant A", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.name).to.equal("Apparel");
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    bru.setVar("a1", result.id);
+  });
+}

@@ -1,0 +1,27 @@
+meta {
+  name: IM-AT-02 Penolakan atomik tidak menambah riwayat
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts?page=0&size=1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+tests {
+  test("IM-AT-02 Penolakan atomik tidak menambah riwayat", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.meta.page).to.equal(0);
+    expect(body.meta.size).to.equal(1);
+    expect(body.meta.totalElements).to.equal(0);
+    expect(body.data.map(entry => entry.id)).to.deep.equal([]);
+  });
+}

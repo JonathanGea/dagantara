@@ -1,0 +1,20 @@
+meta {
+  name: IM-AT-07 Riwayat tanpa autentikasi ditolak
+  type: http
+  seq: 42
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: none
+  auth: none
+}
+
+tests {
+  test("IM-AT-07 Riwayat tanpa autentikasi ditolak", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("UNAUTHORIZED");
+  });
+}

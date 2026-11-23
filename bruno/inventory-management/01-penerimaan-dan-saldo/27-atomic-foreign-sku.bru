@@ -1,0 +1,43 @@
+meta {
+  name: IM-AT-02 SKU yang ada di tenant B membatalkan semua baris
+  type: http
+  seq: 27
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+headers {
+  Idempotency-Key: receipt-a
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": "FIX.HTP-M",
+        "quantity": 8
+      },
+      {
+        "sku": "FOREIGN-B",
+        "quantity": 3
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-02 SKU yang ada di tenant B membatalkan semua baris", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_SKU");
+  });
+}
