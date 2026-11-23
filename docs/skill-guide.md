@@ -58,7 +58,7 @@ UM-AT-01 dan UM-AT-02. Laporkan keputusan yang masih menghalangi implementasi
 atau pengujian, lalu lanjutkan bagian yang cakupannya sudah jelas.
 ```
 
-Di sesi Orca, panggil spec yang menautkan tiket yang sudah disetujui untuk mengoordinasikan seluruh tiket. Koordinator membaca kondisi branch dan worktree untuk melanjutkan pekerjaan yang sudah ada. Ia menjalankan satu worker Codex CLI Sol per child, dengan effort `medium` untuk tiket rutin atau `high` untuk perubahan berisiko tinggi. Tiket independen berjalan paralel. Tambahkan nomor tiket untuk mengerjakan satu tiket saja.
+Di sesi Orca, panggil spec yang menautkan tiket yang sudah disetujui untuk mengoordinasikan seluruh tiket. Koordinator membaca kondisi branch dan worktree untuk melanjutkan pekerjaan yang sudah ada. Ia menjalankan satu worker Codex CLI per child. GPT-6.2 Sol adalah default, dengan effort `medium` untuk tiket rutin atau `high` untuk perubahan berisiko tinggi. GPT-6 Luna dengan `high` bisa dipakai untuk tiket kecil dengan kriteria penerimaan yang jelas dan mudah diverifikasi. Tiket independen berjalan paralel. Tambahkan nomor tiket untuk mengerjakan satu tiket saja.
 
 ```text
 $implement-from-spec @docs/user-management.md
