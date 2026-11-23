@@ -1,14 +1,20 @@
 ---
 name: implement-from-spec
-description: Implementasikan spec perubahan atau tiket Dagantara berdasarkan judul, slug, atau path. Dukung juga spesifikasi modul, requirement, dan skenario uji.
+description: Implementasikan spec atau tiket Dagantara. Di Orca, koordinasikan tiket yang disetujui saat pengguna meminta implementasi seluruh spec.
 ---
 
 # Implementasi dari Spesifikasi Dagantara
 
+## Pilih cara pengerjaan
+
+- Jika menerima Task Orca sebagai worker, kerjakan satu tiket pada branch child yang diberikan. Pertahankan perubahan yang diserahkan, ikuti cakupan, routing skill di `AGENTS.md` dan `backend/AGENTS.md` saat relevan, lalu kembalikan commit serta hasil verifikasi ke koordinator. Gunakan bagian penyiapan branch dan PR untuk alur langsung. Dalam orkestrasi, koordinator menangani integrasi dan PR akhir.
+- Jika pengguna menyebut nomor tiket atau cakupan terbatas, kerjakan cakupan itu. Untuk satu tiket atau spec yang bisa dijalankan langsung, ikuti alur branch dan PR di bawah.
+- Jika pengguna meminta implementasi seluruh spec di sesi Orca dan spec menautkan tiket yang sudah disetujui, koordinasikan tiket tersebut. Baca `references/orca-orchestration.md` sebelum menyiapkan branch atau worker dan memilih effort per tiket. Default worker adalah Codex CLI dengan model `gpt-6.2-sol`.
+
 ## Tetapkan cakupan
 
 1. Baca `AGENTS.md` dan `docs/README.md`. Temukan spesifikasi dari judul, slug `docs/<slug>.md`, path, atau ID yang disebut pengguna. Jika ada beberapa kecocokan setelah mencari di repo, minta pengguna memilih. Baca aturan domain yang menjadi rujukan dan `backend/AGENTS.md` untuk perubahan backend. Ikuti cakupan permintaan analisis atau review jika disebutkan.
-2. Untuk spec perubahan, petakan user stories, keputusan implementasi, keputusan pengujian, dan batas cakupan. `$implement-from-spec <slug>` menjalankan seluruh spec yang bisa dikerjakan langsung. Jika bagian **Implementation Tickets** menunggu persetujuan, laporkan statusnya. Jika bagian itu menautkan tiket yang sudah disetujui dan pengguna belum memilih tiket, tampilkan tiket yang bisa dimulai beserta perintahnya.
+2. Untuk spec perubahan, petakan user stories, keputusan implementasi, keputusan pengujian, dan batas cakupan. `$implement-from-spec <slug>` menjalankan spec langsung atau memilih orkestrasi sesuai aturan di atas. Jika bagian **Implementation Tickets** menunggu persetujuan, laporkan statusnya. Di luar sesi Orca, jika bagian itu menautkan tiket yang sudah disetujui dan pengguna belum memilih cakupan, tampilkan tiket yang bisa dimulai beserta perintahnya.
 3. Untuk `$implement-from-spec <slug> <NN>`, baca spec induk dan tiket bernomor tersebut dari daftar tiket yang disetujui. Gunakan hasil dan Acceptance Criteria tiket sebagai cakupan. Periksa bahwa tiket masih `ready-for-agent`. Jika sudah `done`, laporkan statusnya. Setiap prasyarat harus `done` dan hasilnya tersedia di basis branch kerja sebelum coding. Laporkan prasyarat yang masih menghalangi jika ada.
 4. Untuk format modul, path atau nama modul saja memilih seluruh cakupan yang disepakati. Aksi, ID requirement, atau ID skenario mempersempit cakupan. Petakan Functional Specification, Business Rules, Data Model, dan Acceptance Scenarios yang relevan. Admin UI Structure menunjukkan lokasi aksi yang terhubung ke requirement. Jika permintaan mengubah keputusan yang terdokumentasi, sebutkan konflik yang perlu dituntaskan.
 

@@ -58,6 +58,12 @@ UM-AT-01 dan UM-AT-02. Laporkan keputusan yang masih menghalangi implementasi
 atau pengujian, lalu lanjutkan bagian yang cakupannya sudah jelas.
 ```
 
+Di sesi Orca, panggil spec yang menautkan tiket yang sudah disetujui untuk mengoordinasikan seluruh tiket. Koordinator membaca kondisi branch dan worktree untuk melanjutkan pekerjaan yang sudah ada. Ia menjalankan satu worker Codex CLI Sol per child, dengan effort `medium` untuk tiket rutin atau `high` untuk perubahan berisiko tinggi. Tiket independen berjalan paralel. Tambahkan nomor tiket untuk mengerjakan satu tiket saja.
+
+```text
+$implement-from-spec @docs/user-management.md
+```
+
 ## $spring-boot-api
 
 Gunakan untuk mengerjakan atau meninjau controller, DTO, validasi input, serta kontrak respons dan error. Contoh ini meminta peninjauan kontrak yang tersedia. [Instruksi skill](skills/spring-boot-api.md)
