@@ -1,0 +1,19 @@
+meta {
+  name: PM-AT-09 Detail admin memerlukan login
+  type: http
+  seq: 44
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("PM-AT-09 Detail admin memerlukan login", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(401);
+  });
+}

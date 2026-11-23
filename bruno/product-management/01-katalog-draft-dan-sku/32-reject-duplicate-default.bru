@@ -1,0 +1,35 @@
+meta {
+  name: PM-AT-05 Produk ikut batal jika varian bawaan bentrok
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Berbenturan",
+    "categoryIds": [
+      "{{a2}}"
+    ],
+    "primaryCategoryId": "{{a2}}",
+    "productCode": "aks"
+  }
+}
+
+tests {
+  test("PM-AT-05 Produk ikut batal jika varian bawaan bentrok", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("DATA_CONFLICT");
+  });
+}

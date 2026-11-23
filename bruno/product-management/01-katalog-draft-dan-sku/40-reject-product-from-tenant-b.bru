@@ -1,0 +1,23 @@
+meta {
+  name: PM-AT-01 Detail produk A dari tenant B menghasilkan 404
+  type: http
+  seq: 40
+}
+
+get {
+  url: {{baseUrl}}/{{shopB}}/api/v1/catalog/products/{{productA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminB}}
+}
+
+tests {
+  test("PM-AT-01 Detail produk A dari tenant B menghasilkan 404", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(404);
+  });
+}

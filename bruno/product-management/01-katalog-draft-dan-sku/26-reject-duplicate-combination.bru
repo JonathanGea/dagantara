@@ -1,0 +1,35 @@
+meta {
+  name: PM-AT-05 Tolak kombinasi sama meskipun ID dibalik
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{medium}}",
+      "{{black}}"
+    ],
+    "skuMode": "MANUAL",
+    "sku": "another-code"
+  }
+}
+
+tests {
+  test("PM-AT-05 Tolak kombinasi sama meskipun ID dibalik", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("DATA_CONFLICT");
+  });
+}

@@ -1,0 +1,32 @@
+meta {
+  name: PM-AT-05 Tambah nilai pada opsi yang sudah terdaftar
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/options/{{color}}/values
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "label": "Biru",
+    "code": " bru "
+  }
+}
+
+tests {
+  test("PM-AT-05 Tambah nilai pada opsi yang sudah terdaftar", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result).to.include({ label: "Biru", code: "BRU" });
+    bru.setVar("blue", result.id);
+  });
+}

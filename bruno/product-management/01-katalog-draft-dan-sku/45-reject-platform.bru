@@ -1,0 +1,23 @@
+meta {
+  name: PM-AT-09 Akun platform tanpa tenant ditolak
+  type: http
+  seq: 45
+}
+
+get {
+  url: {{baseUrl}}/api/v1/catalog/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{platformToken}}
+}
+
+tests {
+  test("PM-AT-09 Akun platform tanpa tenant ditolak", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+  });
+}

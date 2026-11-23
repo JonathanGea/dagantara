@@ -1,0 +1,35 @@
+meta {
+  name: PM-AT-05 Tolak SKU yang sama dengan kapitalisasi berbeda
+  type: http
+  seq: 27
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{white}}",
+      "{{medium}}"
+    ],
+    "skuMode": "MANUAL",
+    "sku": " Putih.L_01 "
+  }
+}
+
+tests {
+  test("PM-AT-05 Tolak SKU yang sama dengan kapitalisasi berbeda", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("DATA_CONFLICT");
+  });
+}

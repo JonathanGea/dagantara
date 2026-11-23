@@ -1,0 +1,32 @@
+meta {
+  name: PM-01 Harga pecahan ditolak
+  type: http
+  seq: 46
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/details
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Harga pecahan",
+    "priceIdr": 1.5,
+    "productCode": "KBS"
+  }
+}
+
+tests {
+  test("PM-01 Harga pecahan ditolak", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_PRICE");
+  });
+}

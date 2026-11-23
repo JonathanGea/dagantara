@@ -1,0 +1,23 @@
+meta {
+  name: PM-AT-01 Token A ditolak pada URL tenant B
+  type: http
+  seq: 38
+}
+
+get {
+  url: {{baseUrl}}/{{shopB}}/api/v1/catalog/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+tests {
+  test("PM-AT-01 Token A ditolak pada URL tenant B", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+  });
+}

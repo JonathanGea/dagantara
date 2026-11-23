@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-02 Buat kategori A2
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Basics"
+  }
+}
+
+tests {
+  test("PM-AT-02 Buat kategori A2", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.name).to.equal("Basics");
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    bru.setVar("a2", result.id);
+  });
+}

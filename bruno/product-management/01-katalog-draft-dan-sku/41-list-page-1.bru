@@ -1,0 +1,24 @@
+meta {
+  name: PM-AT-01 dan PM-AT-05 Halaman pertama A dan produk gagal tidak tersimpan
+  type: http
+  seq: 41
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products?page=0&size=1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{readerToken}}
+}
+
+tests {
+  test("PM-AT-01 dan PM-AT-05 Halaman pertama A dan produk gagal tidak tersimpan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.meta).to.include({ page: 0, size: 1, totalElements: 2, totalPages: 2 });
+    expect(body.data.map(item => item.id)).to.deep.equal([bru.getVar("defaultA")]);
+  });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: PM-AT-09 Token yang sama mengikuti permission terbaru
+  type: http
+  seq: 49
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{readerToken}}
+}
+
+tests {
+  test("PM-AT-09 Token yang sama mengikuti permission terbaru", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+  });
+}

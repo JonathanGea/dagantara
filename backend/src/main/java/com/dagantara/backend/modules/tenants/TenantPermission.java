@@ -13,7 +13,9 @@ public enum TenantPermission {
     RESET_PASSWORDS("users.password.reset"),
     ARCHIVE_USERS("users.archive"),
     CREATE_ROLES("roles.create"),
-    UPDATE_ROLE_PERMISSIONS("roles.permissions.update");
+    UPDATE_ROLE_PERMISSIONS("roles.permissions.update"),
+    READ_CATALOG("catalog.read"),
+    MANAGE_CATALOG("catalog.manage");
 
     public static final Set<String> CODES = Arrays.stream(values())
             .map(TenantPermission::code)

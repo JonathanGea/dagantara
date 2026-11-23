@@ -1,0 +1,37 @@
+meta {
+  name: PM-AT-05 SKU AUTO mengikuti urutan opsi server
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{medium}}",
+      "{{black}}"
+    ],
+    "skuMode": "AUTO"
+  }
+}
+
+tests {
+  test("PM-AT-05 SKU AUTO mengikuti urutan opsi server", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result.sku).to.equal("KBS-HTM-M");
+    expect(result.skuMode).to.equal("AUTO");
+    expect(result.optionValueIds).to.deep.equal([bru.getVar("black"), bru.getVar("medium")]);
+    bru.setVar("autoVariant", result.id);
+  });
+}

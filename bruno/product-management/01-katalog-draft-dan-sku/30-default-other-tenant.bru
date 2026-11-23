@@ -1,0 +1,43 @@
+meta {
+  name: PM-AT-05 Tenant B dapat memakai SKU yang sama untuk varian bawaan
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{baseUrl}}/{{shopB}}/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminB}}
+}
+
+body:json {
+  {
+    "name": "Kaos Tenant B",
+    "priceIdr": 0,
+    "categoryIds": [
+      "{{b1}}"
+    ],
+    "primaryCategoryId": "{{b1}}",
+    "skuMode": "MANUAL",
+    "sku": "putih.l_01"
+  }
+}
+
+tests {
+  test("PM-AT-05 Tenant B dapat memakai SKU yang sama untuk varian bawaan", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result.status).to.equal("DRAFT");
+    expect(result.priceIdr).to.equal(0);
+    expect(result.variants).to.have.length(1);
+    expect(result.variants[0]).to.include({ sku: "PUTIH.L_01", skuMode: "MANUAL" });
+    expect(result.variants[0].id).not.to.equal(bru.getVar("manualVariant"));
+    expect(result.variants[0].optionValueIds).to.deep.equal([]);
+    bru.setVar("productB", result.id);
+  });
+}

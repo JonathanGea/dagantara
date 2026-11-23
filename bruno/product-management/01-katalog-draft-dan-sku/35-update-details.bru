@@ -1,0 +1,34 @@
+meta {
+  name: PM-AT-05 Kode baru berlaku tanpa menghitung ulang SKU tersimpan
+  type: http
+  seq: 35
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/details
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Kaos Basic",
+    "description": "Deskripsi baru",
+    "priceIdr": 12000,
+    "productCode": " kbt "
+  }
+}
+
+tests {
+  test("PM-AT-05 Kode baru berlaku tanpa menghitung ulang SKU tersimpan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const result = res.getBody().data;
+    expect(result).to.include({ description: "Deskripsi baru", priceIdr: 12000, productCode: "KBT", status: "DRAFT" });
+    expect(result.variants.find(variant => variant.id === bru.getVar("autoVariant")).sku).to.equal("KBS-HTM-M");
+    expect(result.options[0].values.map(value => value.id)).to.have.members([bru.getVar("black"), bru.getVar("white"), bru.getVar("blue")]);
+  });
+}

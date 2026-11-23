@@ -1,0 +1,29 @@
+meta {
+  name: PM-AT-05 Ganti label dan kode tanpa mengganti ID
+  type: http
+  seq: 34
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/options/{{color}}/values/{{black}}/details
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "label": "Hitam Pekat",
+    "code": " htp "
+  }
+}
+
+tests {
+  test("PM-AT-05 Ganti label dan kode tanpa mengganti ID", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data).to.deep.equal({ id: bru.getVar("black"), label: "Hitam Pekat", code: "HTP" });
+  });
+}
