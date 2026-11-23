@@ -1,0 +1,42 @@
+meta {
+  name: UM-AT-02 Pembuatan operator tanpa izin ditolak
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Request tamu dan akun tanpa users.create ditolak tanpa menyimpan akun", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const roleId = await fx.role("read-only", ["users.read"]);
+    const reader = await fx.operator("limited-reader", roleId);
+    expect((await fx.detail(reader.id, reader.token)).roleId).to.equal(roleId);
+
+    const before = await fx.users();
+    const guest = fx.name("denied-guest");
+    const restricted = fx.name("denied-create");
+    await fx.api("POST", "/users", {
+      token: null, body: { username: guest, roleId }, status: 401, error: "UNAUTHORIZED"
+    });
+    await fx.api("POST", "/users", {
+      token: reader.token, body: { username: restricted, roleId }, status: 403, error: "FORBIDDEN"
+    });
+    const after = await fx.users();
+    expect(after.map(user => user.id)).to.deep.equal(before.map(user => user.id));
+    expect(after.some(user => [guest, restricted].includes(user.username))).to.equal(false);
+  });
+}

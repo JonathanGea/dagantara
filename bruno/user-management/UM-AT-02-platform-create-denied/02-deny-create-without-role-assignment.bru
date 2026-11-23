@@ -1,0 +1,47 @@
+meta {
+  name: UM-AT-02 dan UM-AT-03 Pembuatan operator membutuhkan izin penetapan role awal
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Operator dengan hanya users.create menerima 403 dan calon akun tidak tersimpan", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const creatorRole = await fx.role("account-creator", ["users.create"]);
+    const creator = await fx.operator("account-creator", creatorRole);
+    const roleId = await fx.role("initial-role");
+    const roles = (await fx.api("GET", "/roles", { token: creator.token })).data.data;
+    expect(roles.find(role => role.id === creatorRole).permissionCodes).to.deep.equal(["users.create"]);
+    expect(roles.find(role => role.id === roleId).permissionCodes).to.deep.equal([]);
+
+    const before = await fx.users();
+    const username = fx.name("denied-initial-role-assignment");
+    await fx.api("POST", "/users", {
+      token: creator.token, body: { username, roleId }, status: 403, error: "FORBIDDEN"
+    });
+    const after = await fx.users();
+    expect(after.map(user => user.id)).to.deep.equal(before.map(user => user.id));
+    expect(after.some(user => user.username === username)).to.equal(false);
+
+    await fx.api("PUT", `/roles/${creatorRole}/permissions`, {
+      body: { permissionCodes: ["users.create", "users.role.assign"] }
+    });
+    const created = await fx.create(fx.name("with-initial-role-assignment"), roleId, creator.token);
+    expect(await fx.detail(created.id)).to.include({ id: created.id, username: created.username, roleId });
+  });
+}

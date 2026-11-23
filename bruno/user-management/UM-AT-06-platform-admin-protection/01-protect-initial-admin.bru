@@ -1,0 +1,44 @@
+meta {
+  name: UM-AT-06 Perlindungan akun Admin Platform pertama
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Admin Platform pertama tidak dapat diubah role, direset, dinonaktifkan, atau diarsipkan", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const initialAccounts = (await fx.users()).filter(user => user.initialPlatformAdmin);
+    expect(initialAccounts).to.have.lengthOf(1);
+    const initial = initialAccounts[0];
+    expect(initial).to.include({ roleCode: "SUPERADMIN", status: "ACTIVE" });
+    const ordinaryRole = await fx.role("ordinary");
+    await fx.api("PUT", `/users/${initial.id}/role`, {
+      body: { roleId: ordinaryRole }, status: 403, error: "INITIAL_ADMIN_PROTECTED"
+    });
+    for (const action of ["reset-password", "deactivate", "reactivate"]) {
+      await fx.api("POST", `/users/${initial.id}/${action}`, { status: 403, error: "INITIAL_ADMIN_PROTECTED" });
+    }
+    await fx.api("DELETE", `/users/${initial.id}`, { status: 403, error: "INITIAL_ADMIN_PROTECTED" });
+    await fx.api("PUT", `/roles/${initial.roleId}/permissions`, {
+      body: { permissionCodes: [] }, status: 409, error: "SYSTEM_ROLE_PROTECTED"
+    });
+
+    expect(await fx.detail(initial.id)).to.deep.equal(initial);
+    await fx.login(bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME"), bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD"));
+  });
+}
