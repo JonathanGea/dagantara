@@ -1,0 +1,69 @@
+meta {
+  name: IM-AT-01 dan IM-AT-03 Terima beberapa SKU dan gunakan kembali key setelah 400
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+headers {
+  Idempotency-Key: receipt-a
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": " fix.htp-m ",
+        "quantity": 2
+      },
+      {
+        "sku": "PUTIH.L_01",
+        "quantity": 5
+      },
+      {
+        "sku": "FIX.HTP-M",
+        "quantity": 6
+      },
+      {
+        "sku": "DEFAULT-A",
+        "quantity": 3
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-01 dan IM-AT-03 Terima beberapa SKU dan gunakan kembali key setelah 400", function () {
+    expect(res.getStatus()).to.equal(201);
+    const response = res.getBody();
+    expect(response.success).to.equal(true);
+    const data = response.data;
+    expect(data.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(data.warehouseId).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(data.receivedBy).to.equal(bru.getVar("ownerAId"));
+    expect(Number.isNaN(Date.parse(data.createdAt))).to.equal(false);
+    expect(data.lines).to.have.length(3);
+    const bySku = Object.fromEntries(data.lines.map(line => [line.sku, line]));
+    for (const [sku, variable, quantity] of [
+      ["FIX.HTP-M", "autoVariant", 8],
+      ["PUTIH.L_01", "manualVariant", 5],
+      ["DEFAULT-A", "defaultAVariant", 3]
+    ]) {
+      expect(bySku[sku].id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+      expect(bySku[sku].variantId).to.equal(bru.getVar(variable));
+      expect(bySku[sku].quantity).to.equal(quantity);
+    }
+    bru.setVar("receiptA", data.id);
+    bru.setVar("receiptAWarehouse", data.warehouseId);
+    bru.setVar("receiptAData", data);
+  });
+}

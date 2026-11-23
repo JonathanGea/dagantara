@@ -1,0 +1,29 @@
+meta {
+  name: IM-AT-01 dan IM-AT-03 Saldo varian bawaan terhitung sekali
+  type: http
+  seq: 48
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/products/{{defaultA}}/stock
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+tests {
+  test("IM-AT-01 dan IM-AT-03 Saldo varian bawaan terhitung sekali", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.productId).to.equal(bru.getVar("defaultA"));
+    expect(data.variants).to.deep.equal([{
+      variantId: bru.getVar("defaultAVariant"),
+      sku: "DEFAULT-A",
+      optionValues: [],
+      quantity: 3
+    }]);
+  });
+}

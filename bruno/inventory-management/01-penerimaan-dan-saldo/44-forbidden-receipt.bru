@@ -1,0 +1,39 @@
+meta {
+  name: IM-AT-07 Akun tanpa inventory.receive tidak dapat mencatat stok
+  type: http
+  seq: 44
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{readerToken}}
+}
+
+headers {
+  Idempotency-Key: permission-denied
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": "FIX.HTP-M",
+        "quantity": 1
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-07 Akun tanpa inventory.receive tidak dapat mencatat stok", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

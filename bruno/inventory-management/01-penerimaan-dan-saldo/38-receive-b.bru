@@ -1,0 +1,47 @@
+meta {
+  name: IM-AT-07 Fixture penerimaan B memakai gudang dan SKU B
+  type: http
+  seq: 38
+}
+
+post {
+  url: {{baseUrl}}/{{shopB}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminB}}
+}
+
+headers {
+  Idempotency-Key: receipt-a
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": "FOREIGN-B",
+        "quantity": 4
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-07 Fixture penerimaan B memakai gudang dan SKU B", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(data.id).not.to.equal(bru.getVar("receiptA"));
+    expect(data.warehouseId).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(data.warehouseId).not.to.equal(bru.getVar("receiptAWarehouse"));
+    expect(data.receivedBy).to.equal(bru.getVar("ownerBId"));
+    expect(data.lines).to.have.length(1);
+    expect(data.lines[0].variantId).to.equal(bru.getVar("defaultBVariant"));
+    expect(data.lines[0].quantity).to.equal(4);
+    bru.setVar("receiptB", data.id);
+    bru.setVar("receiptBWarehouse", data.warehouseId);
+  });
+}

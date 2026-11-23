@@ -1,0 +1,49 @@
+meta {
+  name: IM-AT-03 Retry identik menghasilkan respons penerimaan awal
+  type: http
+  seq: 34
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+headers {
+  Idempotency-Key: receipt-a
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": " fix.htp-m ",
+        "quantity": 2
+      },
+      {
+        "sku": "PUTIH.L_01",
+        "quantity": 5
+      },
+      {
+        "sku": "FIX.HTP-M",
+        "quantity": 6
+      },
+      {
+        "sku": "DEFAULT-A",
+        "quantity": 3
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-03 Retry identik menghasilkan respons penerimaan awal", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().data).to.deep.equal(bru.getVar("receiptAData"));
+  });
+}
