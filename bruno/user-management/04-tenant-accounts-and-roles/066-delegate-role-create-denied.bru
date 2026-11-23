@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-03 Izin mengganti permission tidak memberi izin membuat role
+  type: http
+  seq: 66
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{delegateToken}}
+}
+
+body:json {
+  {
+    "code": "DENIED",
+    "name": "Denied"
+  }
+}
+
+tests {
+  test("UM-AT-03 Izin mengganti permission tidak memberi izin membuat role", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

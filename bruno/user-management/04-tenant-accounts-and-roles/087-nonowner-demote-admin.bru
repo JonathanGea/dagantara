@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-12 Admin tambahan tidak dapat mencabut kewenangan admin lain
+  type: http
+  seq: 87
+}
+
+put {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{assistantId}}/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "roleId": "{{readerRole}}"
+  }
+}
+
+tests {
+  test("UM-AT-12 Admin tambahan tidak dapat mencabut kewenangan admin lain", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("PROTECTED_ACCOUNT");
+  });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: UM-AT-13 Operator menutup pengajuan tanpa membuat tenant
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}/close
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+tests {
+  test("Operator menutup pengajuan tanpa membuat tenant", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data.status).to.equal("CLOSED");
+    expect(res.getBody().data.tenantId).to.equal(null);
+  });
+}

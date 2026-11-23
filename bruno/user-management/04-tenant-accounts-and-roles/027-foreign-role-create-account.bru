@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-05 Pembuatan akun dengan role B memberi 404
+  type: http
+  seq: 27
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+body:json {
+  {
+    "username": "denied-foreign-{{suffix}}",
+    "roleId": "{{adminBRole}}"
+  }
+}
+
+tests {
+  test("UM-AT-05 Pembuatan akun dengan role B memberi 404", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+  });
+}

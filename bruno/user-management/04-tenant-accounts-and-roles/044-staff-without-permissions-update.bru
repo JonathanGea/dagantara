@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-03 Izin baca tidak memberi izin mengganti permission
+  type: http
+  seq: 44
+}
+
+put {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/roles/{{emptyRole}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffToken}}
+}
+
+body:json {
+  {
+    "permissions": [
+      "users.read"
+    ]
+  }
+}
+
+tests {
+  test("UM-AT-03 Izin baca tidak memberi izin mengganti permission", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

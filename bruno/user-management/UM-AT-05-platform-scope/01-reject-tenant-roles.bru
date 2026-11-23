@@ -1,0 +1,53 @@
+meta {
+  name: UM-AT-05 Role dan akun tenant di luar cakupan operator platform
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Role tenant ditolak pada pembuatan dan penetapan tanpa mengubah akun", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const tenantRoleId = "03000000-0000-4000-8000-000000000003";
+    const tenantUserId = "03000000-0000-4000-8000-000000000002";
+    const roleId = await fx.role("platform-role");
+    const target = await fx.create(fx.name("scope-target"), roleId);
+    const before = await fx.users();
+    const username = fx.name("denied-cross-scope");
+
+    await fx.api("POST", "/users", {
+      body: { username, roleId: tenantRoleId }, status: 400, error: "INVALID_ROLE"
+    });
+    await fx.api("PUT", `/users/${target.id}/role`, {
+      body: { roleId: tenantRoleId }, status: 400, error: "INVALID_ROLE"
+    });
+    await fx.api("PUT", `/roles/${tenantRoleId}/permissions`, {
+      body: { permissionCodes: [] }, status: 404, error: "NOT_FOUND"
+    });
+    await fx.api("GET", `/users/${tenantUserId}`, { status: 404, error: "NOT_FOUND" });
+    await fx.api("POST", `/users/${tenantUserId}/reset-password`, { status: 404, error: "NOT_FOUND" });
+    await fx.api("POST", `/users/${tenantUserId}/deactivate`, { status: 404, error: "NOT_FOUND" });
+    await fx.api("POST", `/users/${tenantUserId}/reactivate`, { status: 404, error: "NOT_FOUND" });
+    await fx.api("DELETE", `/users/${tenantUserId}`, { status: 404, error: "NOT_FOUND" });
+
+    expect((await fx.detail(target.id)).roleId).to.equal(roleId);
+    expect((await fx.roles()).some(role => role.id === tenantRoleId)).to.equal(false);
+    const after = await fx.users();
+    expect(after.some(user => user.username === username || user.id === tenantUserId)).to.equal(false);
+    expect(after.map(user => user.id)).to.deep.equal(before.map(user => user.id));
+  });
+}

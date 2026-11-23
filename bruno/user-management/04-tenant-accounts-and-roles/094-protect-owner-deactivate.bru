@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-12 Pemilik terlindungi dari penonaktifan
+  type: http
+  seq: 94
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{ownerAId}}/deactivate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+  test("UM-AT-12 Pemilik terlindungi dari penonaktifan", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("PROTECTED_ACCOUNT");
+  });
+}

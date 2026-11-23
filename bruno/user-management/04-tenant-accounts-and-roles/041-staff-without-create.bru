@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-02 Staf yang bisa membaca tidak bisa membuat akun
+  type: http
+  seq: 41
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffToken}}
+}
+
+body:json {
+  {
+    "username": "denied-no-permission-{{suffix}}",
+    "roleId": "{{readerRole}}"
+  }
+}
+
+tests {
+  test("UM-AT-02 Staf yang bisa membaca tidak bisa membuat akun", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

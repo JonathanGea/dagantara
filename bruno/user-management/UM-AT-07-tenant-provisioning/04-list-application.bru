@@ -1,0 +1,24 @@
+meta {
+  name: UM-AT-07 Operator berizin dapat menemukan pengajuan
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tenant-applications
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+tests {
+  test("Operator berizin dapat menemukan pengajuan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.meta.totalElements).to.be.greaterThan(0);
+    expect(body.data.some(item => item.id === bru.getVar("applicationId"))).to.equal(true);
+  });
+}

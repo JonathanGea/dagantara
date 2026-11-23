@@ -1,0 +1,46 @@
+meta {
+  name: UM-AT-04 Login operator untuk fixture
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  const platformRole = bru.getProcessEnv("DAGANTARA_TEST_PLATFORM_ROLE_ID");
+  if (!username || !password || !platformRole) {
+    throw new Error("Configure the platform account and role fixtures");
+  }
+  const suffix = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  bru.setVar("suffix", suffix);
+  bru.setVar("platformRole", platformRole);
+  const platformHost = bru.getProcessEnv("DAGANTARA_TEST_PLATFORM_HOST") || "localhost";
+  bru.setVar("platformHost", platformHost);
+  bru.setVar("hostB", "um04-b-" + suffix + ".example.test");
+  for (const name of ["ownerA", "ownerB", "staff", "admin", "upper", "delegate", "assistant"]) {
+    bru.setVar(name + "Username", "um04-" + name.toLowerCase() + "-" + suffix);
+    bru.setVar(name + "Password", "um04-" + suffix + "-" + Math.random().toString(36).slice(2));
+  }
+  bru.setVar("resetPassword", "um04-reset-" + suffix + "-" + Math.random().toString(36).slice(2));
+  req.setBody({ username, password });
+}
+
+tests {
+  test("UM-AT-04 Login operator untuk fixture", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(false);
+    expect(data.accessToken).to.be.a("string");
+    bru.setVar("platformToken", data.accessToken);
+  });
+}

@@ -1,0 +1,39 @@
+meta {
+  name: UM-AT-04 Provisioning tenant B
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{platformToken}}
+}
+
+body:json {
+  {
+    "storeName": "UM04 tenant B {{suffix}}",
+    "phoneNumber": "+628000000042",
+    "ownerUsername": "{{ownerBUsername}}",
+    "loginUrl": "https://{{hostB}}",
+    "loginUrlReady": true
+  }
+}
+
+tests {
+  test("UM-AT-04 Provisioning tenant B", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.tenantId).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.ownerId).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.ownerUsername).to.equal(bru.getVar("ownerBUsername"));
+    expect(data.temporaryPassword).to.match(/^[A-Za-z0-9_-]{32}$/);
+    bru.setVar("tenantBId", data.tenantId);
+    bru.setVar("ownerBId", data.ownerId);
+    bru.setVar("ownerBTemporary", data.temporaryPassword);
+  });
+}

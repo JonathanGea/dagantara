@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-07 Domain pengajuan pending belum menerima login
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Host: pending-{{suffix}}.example.test
+}
+
+body:json {
+  {
+    "username": "{{owner}}",
+    "password": "pending-{{suffix}}"
+  }
+}
+
+tests {
+  test("Domain pengajuan pending belum menerima login", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().errorCode).to.equal("INVALID_CREDENTIALS");
+  });
+}

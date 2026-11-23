@@ -1,0 +1,27 @@
+meta {
+  name: UM-AT-07 Pengajuan pending memiliki kontak dan belum memiliki tenant
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+tests {
+  test("Pengajuan pending memiliki kontak dan belum memiliki tenant", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.storeName).to.equal("umb-review-" + bru.getVar("suffix"));
+    expect(data.phoneNumber).to.equal("+628000000000");
+    expect(data.proposedDomain).to.equal("pending-" + bru.getVar("suffix") + ".example.test");
+    expect(data.status).to.equal("IN_REVIEW");
+    expect(data.tenantId).to.equal(null);
+  });
+}

@@ -1,0 +1,29 @@
+meta {
+  name: UM-AT-03 Izin users.create tidak memberi izin menetapkan role pada akun baru
+  type: http
+  seq: 56
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{delegateToken}}
+}
+
+body:json {
+  {
+    "username": "denied-no-assign-{{suffix}}",
+    "roleId": "{{emptyRole}}"
+  }
+}
+
+tests {
+  test("UM-AT-03 Izin users.create tidak memberi izin menetapkan role pada akun baru", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

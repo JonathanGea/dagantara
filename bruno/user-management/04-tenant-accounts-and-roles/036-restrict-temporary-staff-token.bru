@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-01 Sesi sementara dibatasi untuk mengganti password
+  type: http
+  seq: 36
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{staffSetup}}
+}
+
+tests {
+  test("UM-AT-01 Sesi sementara dibatasi untuk mengganti password", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("PASSWORD_CHANGE_REQUIRED");
+  });
+}

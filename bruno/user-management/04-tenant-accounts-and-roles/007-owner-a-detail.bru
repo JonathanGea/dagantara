@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-04 UM-AT-12 Pemilik dapat membaca akun tenant
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{ownerAId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+tests {
+  test("UM-AT-04 UM-AT-12 Pemilik dapat membaca akun tenant", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("ownerAId"));
+    expect(data.tenantId).to.equal(bru.getVar("tenantAId"));
+    expect(data.owner).to.equal(true);
+    expect(data.roleCode).to.equal("TENANT_ADMIN");
+    bru.setVar("adminARole", data.roleId);
+    expect(data.status).to.equal("ACTIVE");
+  });
+}

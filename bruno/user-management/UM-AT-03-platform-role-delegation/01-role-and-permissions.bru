@@ -1,0 +1,71 @@
+meta {
+  name: UM-AT-03 Pembuatan role, perubahan permission, dan penetapan role platform
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Izin pengelolaan role terpisah dan sesi berjalan mengikuti role serta permission terkini", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const creatorRole = await fx.role("role-creator", ["roles.create"]);
+    const creator = await fx.operator("creator", creatorRole);
+    const editorRole = await fx.role("permission-editor", ["roles.permissions.update", "users.read"]);
+    const editor = await fx.operator("editor", editorRole);
+
+    const code = fx.name("delegated-role");
+    const creation = await fx.api("POST", "/roles", {
+      token: creator.token, body: { code, name: code }, status: 201
+    });
+    const roleId = creation.data.data.id;
+    expect(creation.data.data.permissionCodes).to.deep.equal([]);
+    const target = await fx.operator("role-target", roleId);
+    await fx.api("GET", "/users", { token: target.token, status: 403, error: "FORBIDDEN" });
+
+    const updatedRole = await fx.role("role-for-assignment", ["users.read"]);
+    await fx.api("PUT", `/roles/${roleId}/permissions`, {
+      token: creator.token, body: { permissionCodes: [] }, status: 403, error: "FORBIDDEN"
+    });
+    await fx.api("PUT", `/users/${target.id}/role`, {
+      token: creator.token, body: { roleId: updatedRole }, status: 403, error: "FORBIDDEN"
+    });
+    expect((await fx.detail(target.id)).roleId).to.equal(roleId);
+    expect((await fx.roles()).find(role => role.id === roleId).permissionCodes).to.deep.equal([]);
+
+    const deniedCode = fx.name("denied-role");
+    await fx.api("POST", "/roles", {
+      token: editor.token, body: { code: deniedCode, name: deniedCode }, status: 403, error: "FORBIDDEN"
+    });
+    expect((await fx.roles()).some(role => role.code === deniedCode)).to.equal(false);
+    const grant = await fx.api("PUT", `/roles/${roleId}/permissions`, {
+      token: editor.token, body: { permissionCodes: ["users.read"] }
+    });
+    expect(grant.data.data.permissionCodes).to.deep.equal(["users.read"]);
+    expect((await fx.detail(target.id, target.token)).roleId).to.equal(roleId);
+
+    await fx.api("PUT", `/users/${target.id}/role`, {
+      token: editor.token, body: { roleId: updatedRole }, status: 403, error: "FORBIDDEN"
+    });
+    expect((await fx.detail(target.id)).roleId).to.equal(roleId);
+    const assignment = await fx.api("PUT", `/users/${target.id}/role`, { body: { roleId: updatedRole } });
+    expect(assignment.data.data).to.include({ id: target.id, roleId: updatedRole });
+    expect((await fx.detail(target.id, target.token)).roleId).to.equal(updatedRole);
+    await fx.api("PUT", `/roles/${updatedRole}/permissions`, { body: { permissionCodes: [] } });
+    expect((await fx.roles()).find(role => role.id === updatedRole).permissionCodes).to.deep.equal([]);
+    await fx.api("GET", "/users", { token: target.token, status: 403, error: "FORBIDDEN" });
+  });
+}

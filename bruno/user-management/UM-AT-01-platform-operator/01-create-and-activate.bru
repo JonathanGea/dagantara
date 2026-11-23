@@ -1,0 +1,40 @@
+meta {
+  name: UM-AT-01 Pembuatan operator dan login pertama
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_USERNAME");
+  const password = bru.getProcessEnv("DAGANTARA_TEST_ADMIN_PASSWORD");
+  if (!username || !password) throw new Error("Configure the isolated platform admin fixture");
+  req.setBody({ username, password });
+}
+
+tests {
+  const { platformFixture } = require("./user-management/platform-operator-fixture.js");
+
+  test("Akun tersimpan dengan satu role dan akses sementara hanya dapat mengganti password", async function () {
+    const fx = platformFixture(bru, expect, res);
+    const roleId = await fx.role("reader", ["users.read"]);
+    const created = await fx.create(fx.name("new-operator"), roleId);
+    const saved = await fx.detail(created.id);
+    expect(saved).to.include({ id: created.id, username: created.username, roleId, status: "ACTIVE" });
+    expect(saved).to.not.have.property("temporaryPassword");
+
+    const temporary = await fx.login(created.username, created.temporaryPassword, true);
+    await fx.api("GET", `/users/${created.id}`, {
+      token: temporary, status: 403, error: "PASSWORD_CHANGE_REQUIRED"
+    });
+    const user = await fx.activate(created);
+    await fx.rejectLogin(user.username, user.temporaryPassword);
+    await fx.api("GET", `/users/${user.id}`, { token: temporary, status: 401, error: "UNAUTHORIZED" });
+    expect((await fx.detail(user.id, user.token)).roleId).to.equal(roleId);
+  });
+}

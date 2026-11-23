@@ -1,0 +1,30 @@
+meta {
+  name: UM-AT-13 Pengajuan tertutup ditolak saat diprovisioning
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenant-applications/{{applicationId}}/provision
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{operator}}
+}
+
+body:json {
+  {
+    "ownerUsername": "{{owner}}",
+    "loginUrl": "https://closed-{{suffix}}.example.test",
+    "loginUrlReady": true
+  }
+}
+
+tests {
+  test("Pengajuan tertutup ditolak saat diprovisioning", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("APPLICATION_NOT_IN_REVIEW");
+  });
+}

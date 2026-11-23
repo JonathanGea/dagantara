@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-11 Staf kembali dapat login setelah mengganti password
+  type: http
+  seq: 106
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{staffUsername}}",
+    "password": "{{resetPassword}}"
+  }
+}
+
+tests {
+  test("UM-AT-11 Staf kembali dapat login setelah mengganti password", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(false);
+    expect(data.accessToken).to.be.a("string");
+    bru.setVar("staffToken", data.accessToken);
+  });
+}

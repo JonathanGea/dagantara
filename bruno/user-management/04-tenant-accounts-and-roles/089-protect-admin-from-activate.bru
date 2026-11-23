@@ -1,0 +1,22 @@
+meta {
+  name: UM-AT-12 Akun Admin Tenant terlindungi dari activate
+  type: http
+  seq: 89
+}
+
+post {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{assistantId}}/activate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+  test("UM-AT-12 Akun Admin Tenant terlindungi dari activate", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("PROTECTED_ACCOUNT");
+  });
+}

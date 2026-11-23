@@ -1,0 +1,28 @@
+meta {
+  name: UM-AT-09 Pemilik A login sementara pada jalur A
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/shop-a-{{suffix}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{owner}}",
+    "password": "{{aTemporary}}"
+  }
+}
+
+tests {
+  test("Pemilik A login sementara pada jalur A", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.passwordChangeRequired).to.equal(true);
+    expect(data.accessToken).to.be.a("string");
+    bru.setVar("aToken", data.accessToken);
+  });
+}

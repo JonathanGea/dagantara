@@ -1,0 +1,32 @@
+meta {
+  name: UM-AT-12 Pemilik mengangkat staf sebagai admin dengan nomor pemulihan
+  type: http
+  seq: 86
+}
+
+put {
+  url: {{baseUrl}}/um04-a-{{suffix}}/api/v1/tenant/users/{{assistantId}}/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerAToken}}
+}
+
+body:json {
+  {
+    "roleId": "{{adminARole}}",
+    "phoneNumber": "+628000000045"
+  }
+}
+
+tests {
+  test("UM-AT-12 Pemilik mengangkat staf sebagai admin dengan nomor pemulihan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("assistantId"));
+    expect(data.roleId).to.equal(bru.getVar("adminARole"));
+    expect(data.tenantId).to.equal(bru.getVar("tenantAId"));
+  });
+}
