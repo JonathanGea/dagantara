@@ -11,9 +11,9 @@ java -version
 
 ## Scope
 
-Included: OpenAPI/Swagger, success response contract and paged metadata, ProblemDetail exception handling with stable error codes, Jakarta request validation, PostgreSQL/JPA, dev/staging/prod profiles, structured request ID in logs, Spring Security, JWT access tokens and persisted platform login, CORS, pageable/sort allowlist helper, timestamp auditing, Actuator health probes, /api/v1 routing convention, mapper interface, UUID base entity, @Transactional infrastructure, and a multi-stage non-root Dockerfile.
+Included: OpenAPI/Swagger, success response contract and paged metadata, ProblemDetail exception handling with stable error codes, Jakarta request validation, PostgreSQL/JPA, dev/staging/prod profiles, structured request ID in logs, Spring Security, JWT access tokens, platform and tenant user management with RBAC, CORS, pageable/sort allowlist helper, timestamp auditing, Actuator health probes, /api/v1 routing convention, mapper interface, UUID base entity, @Transactional infrastructure, and a multi-stage non-root Dockerfile.
 
-Excluded by decision: database migration tooling, test harness, Redis/cache, rate limiting, file storage, background jobs, multi-tenant context and RBAC. Existing domain specification and agent skill documents remain unchanged and apply to later feature work.
+Excluded by decision: automated database migration tooling, Redis/cache, rate limiting, file storage, and background jobs.
 
 ## Development
 
@@ -42,11 +42,14 @@ For Docker, `DB_URL` must point to a PostgreSQL host reachable from the containe
 
 ## Setup Admin Platform pertama (UM-07)
 
-Jalankan migrasi berikut berurutan dari folder `backend/`. Pada database yang sudah memakai skema tiket 01, jalankan hanya migrasi kedua. Setel host, port, nama database, dan user PostgreSQL ke instance tujuan.
+Jalankan migrasi User Management berikut berurutan dari folder `backend/` sebelum startup. Untuk database yang sudah memiliki sebagian skema, mulai dari migrasi pertama yang belum diterapkan. Setel host, port, nama database, dan user PostgreSQL ke instance tujuan.
 
 ```powershell
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/01-platform-accounts.sql
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/02-tenant-onboarding.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/03-platform-operators.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/04-tenant-accounts.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/05-help-center-recovery.sql
 ```
 
 Untuk setup akun pertama, ekspor `APP_BOOTSTRAP_USERNAME` dan `APP_BOOTSTRAP_PASSWORD_HASH` sebelum startup. Buat hash dengan `htpasswd -nBC 12 bootstrap` dan salin bagian setelah `bootstrap:`. Gunakan kutip tunggal saat memasukkan hash ke shell PowerShell supaya karakter dolar tetap literal. Backend menyimpan akun dengan role `SUPERADMIN`. Startup ulang mempertahankan akun dan password yang sudah tersimpan, termasuk saat nilai konfigurasi setup berubah. Lepas kedua variabel setelah setup berhasil.
@@ -86,6 +89,32 @@ bru run user-management/UM-AT-13-closed-application --env Local --bail
 bru run user-management/UM-AT-09-tenant-login-and-password --env Local --bail
 ```
 
+## Pengelolaan akun dan role (UM-01–UM-05, UM-10, UM-11)
+
+| Cakupan | Akun | Role |
+| --- | --- | --- |
+| Platform | `/api/v1/users` | `/api/v1/roles` |
+| Tenant | `/api/v1/tenant/users` | `/api/v1/tenant/roles` |
+
+Gunakan akses platform untuk rute platform dan URL toko untuk rute tenant. Pada URL bersama, tambahkan awalan `/{shopSlug}` ke rute tenant. Pembuatan akun dengan role awal memerlukan `users.create` dan `users.role.assign`. Kredensial awal yang dikembalikan merupakan password sementara. Setelah penetapan role atau perubahan permission, request berikutnya memakai izin efektif terbaru.
+
+Pada kedua cakupan, gunakan `PUT /{id}/role` pada rute akun untuk mengganti role dan `PUT /{id}/permissions` pada rute role untuk mengganti permission. Gunakan `POST /{id}/reset-password` dan `POST /{id}/deactivate` untuk reset dan penonaktifan. Aktivasi ulang menggunakan `POST /{id}/reactivate` di platform dan `POST /{id}/activate` di tenant. `DELETE /{id}` mengarsipkan akun dan mempertahankan riwayatnya.
+
+## Pemulihan admin tenant (UM-09)
+
+Operator Help Center masuk melalui akses platform dengan permission `tenants.admins.password.reset`. Alur ini menggunakan lookup admin dan konfirmasi cara operator memeriksa pemohon. Reset menghasilkan password sementara, mencabut sesi lama, dan mencatat operator, target, metode verifikasi, serta waktu. Ikuti kontrak pada [tiket 05](../docs/tickets/user-management/05-pemulihan-help-center.md#alur-help-center).
+
 ## Verification
 
 Untuk membuat JAR, jalankan `./mvnw clean package` dari folder `backend` (atau `.\mvnw.cmd clean package` di PowerShell).
+
+Untuk regresi gabungan User Management, pakai database fixture terisolasi dengan migrasi 01–05. Selain fixture onboarding, atur `DAGANTARA_TEST_PLATFORM_ROLE_ID` ke ID role `SUPERADMIN`. Jalankan `bruno/user-management/UM-AT-05-platform-scope/fixture.sql` dengan `psql -X -v ON_ERROR_STOP=1` sebelum tes.
+
+Jalankan perintah berikut dari `bruno/`. Sesuaikan `baseUrl` di environment `Local` dengan backend uji jika memakai port lain.
+
+```powershell
+bru run smoke --env Local --bail --noproxy --sandbox developer
+bru run user-management -r --env Local --bail --noproxy --sandbox developer
+```
+
+Setelah rangkaian HTTP selesai, jalankan `user-management/verify-platform-operators.sql` dan `user-management/05-help-center-recovery/verify-audit.sql` dengan `psql -X -v ON_ERROR_STOP=1` pada database fixture yang sama.
