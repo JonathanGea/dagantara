@@ -64,7 +64,7 @@ $readme = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'README.md'), $
 $indexHtml = Set-OfflineBlock $indexHtml 'offline-readme' $readme
 $skillGuide = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'skill-guide.md'), $utf8)
 $indexHtml = Set-OfflineBlock $indexHtml 'offline-skill-guide' $skillGuide
-foreach ($module in @('product-management', 'inventory-management')) {
+foreach ($module in @('product-management', 'inventory-management', 'store-settings')) {
     $markdown = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot ($module + '.md')), $utf8)
     $indexHtml = Set-OfflineBlock $indexHtml ('offline-' + $module) $markdown
 }

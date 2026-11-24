@@ -16,6 +16,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 - [User Management — Akses Platform dan Tenant](user-management.md)
 - [Product Management](product-management.md)
 - [Inventory Management](inventory-management.md)
+- [Store Settings — Identitas Publik Toko](store-settings.md)
 
 ## Aturan Membaca untuk AI Developer
 
@@ -54,4 +55,4 @@ Gunakan `$implement-from-spec product-management` atau `$implement-from-spec inv
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, indeks ini, atau spec Product dan Inventory Management, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html` untuk akses saat viewer dibuka langsung.
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, indeks ini, atau spec Product Management, Inventory Management, dan Store Settings, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html` untuk akses saat viewer dibuka langsung.
