@@ -18,6 +18,8 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
 
+Draf spec untuk modul yang menunggu pembahasan ditautkan dari [Progres Modul](planning/progress.md).
+
 ## Penggunaan dalam Pengembangan
 
 - [Aturan kerja repository](../AGENTS.md) memuat sumber requirement, invarian domain, dan alur verifikasi.
@@ -25,4 +27,4 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 ## Regenerasi viewer
 
-Setelah mengubah skill, dokumen yang tampil di viewer, atau daftar dan judul tiket, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/`, daftar tiket dari `docs/tickets/`, dan salinan dokumen di `index.html`. Menu **Tiket Implementasi** membuka isi dari file Markdown tiket. Untuk halaman dokumentasi baru di luar tiket, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
+Setelah mengubah skill, dokumen yang tampil di viewer, atau daftar dan judul tiket, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/`, daftar tiket dari `docs/tickets/`, dan salinan dokumen di `index.html`. Viewer membaca tiket dan draf spec dari file Markdown masing-masing. Untuk halaman baru yang akan tampil di indeks, tambahkan tautan di sini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.

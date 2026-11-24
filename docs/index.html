@@ -736,6 +736,8 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
 
+Draf spec untuk modul yang menunggu pembahasan ditautkan dari [Progres Modul](planning/progress.md).
+
 ## Penggunaan dalam Pengembangan
 
 - [Aturan kerja repository](../AGENTS.md) memuat sumber requirement, invarian domain, dan alur verifikasi.
@@ -743,7 +745,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 ## Regenerasi viewer
 
-Setelah mengubah skill, dokumen yang tampil di viewer, atau daftar dan judul tiket, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/`, daftar tiket dari `docs/tickets/`, dan salinan dokumen di `index.html`. Menu **Tiket Implementasi** membuka isi dari file Markdown tiket. Untuk halaman dokumentasi baru di luar tiket, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
+Setelah mengubah skill, dokumen yang tampil di viewer, atau daftar dan judul tiket, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/`, daftar tiket dari `docs/tickets/`, dan salinan dokumen di `index.html`. Viewer membaca tiket dan draf spec dari file Markdown masing-masing. Untuk halaman baru yang akan tampil di indeks, tambahkan tautan di sini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
 </script>
   <script id="offline-user-management" type="text/plain" data-doc="specs/user-management.md">
 # User Management — Akses Platform dan Tenant
@@ -1291,7 +1293,7 @@ Lihat [roadmap](module-roadmap.md#module-matrix) untuk cakupan dan prioritas mod
 
 Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#regenerasi-viewer) agar salinan yang tertanam ikut diperbarui.
 
-Buka **Prompt** di entri modul untuk menyalin prompt awal. Tambahkan atau perjelas detail sesuai hasil pembahasan.
+Buka **Draf spec** untuk melihat kerangka awal. Buka **Prompt** di entri modul untuk menyalin prompt awal. Tambahkan atau perjelas detail sesuai hasil pembahasan.
 
 ## MVP
 
@@ -1329,7 +1331,7 @@ Bahas perubahan berikutnya untuk Product Management. Baca docs/specs/product-man
 
 ### Tenant Management
 
-- [ ] Spec selesai — onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
+- [ ] Spec selesai — [Draf spec](../specs/tenant-management.md). Onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
 - [ ] Kode selesai
 
 <details>
@@ -1361,7 +1363,7 @@ Lanjutkan Store Settings dari docs/specs/store-settings.md. Tinjau usulan tiket 
 
 ### Storefront Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/storefront-management.md)
 - [ ] Kode selesai — [daftar dan detail publik dasar](../tickets/product-management/03-publikasi-dan-storefront.md) sudah tersedia.
 
 <details>
@@ -1411,7 +1413,7 @@ Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product
 
 **Berikutnya dibahas.** Apakah pembeli bisa checkout sebagai tamu atau perlu login? [DEP-04](development-dependencies.md#open-decisions--blockers)
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/customer-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1427,7 +1429,7 @@ Bahas Customer Management dari DEP-04. Jika pengunjung baru ingin membeli Kopi A
 
 ### Cart Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/cart-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1443,7 +1445,7 @@ Bahas Cart Management dengan merujuk keputusan Customer Management dan DEP-02. M
 
 ### Checkout Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/checkout-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1459,7 +1461,7 @@ Bahas Checkout Management dengan merujuk keputusan Customer, Cart, Payment, dan 
 
 ### Order Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/order-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1475,7 +1477,7 @@ Bahas Order Management dari DEP-06 dan alur Checkout. Mulai dari satu keputusan.
 
 ### Payment Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/payment-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1491,7 +1493,7 @@ Bahas Payment Management versi transfer bank manual dengan merujuk status Order.
 
 ### Shipping Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/shipping-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1507,7 +1509,7 @@ Bahas Shipping Management dari DEP-05. Mulai dari satu keputusan. Bagaimana toko
 
 ### Address & Location Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/address-location-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1525,7 +1527,7 @@ Bahas Address & Location Management dengan merujuk kebutuhan Customer dan Shippi
 
 ### Pricing & Promotion
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/pricing-promotion.md)
 - [ ] Kode selesai
 
 <details>
@@ -1541,7 +1543,7 @@ Bahas Pricing & Promotion dengan merujuk DEP-07 dan kontrak harga pada pesanan. 
 
 ### Notification Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/notification-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1557,7 +1559,7 @@ Bahas Notification Management dengan merujuk alur Order dan Payment. Mulai dari 
 
 ### Reporting & Analytics
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/reporting-analytics.md)
 - [ ] Kode selesai
 
 <details>
@@ -1573,7 +1575,7 @@ Bahas Reporting & Analytics dengan melihat data pesanan, pembayaran, dan stok ya
 
 ### Tax Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/tax-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1589,7 +1591,7 @@ Bahas Tax Management dari DEP-07. Mulai dari satu keputusan desain. Pada tahap m
 
 ### Platform Configuration
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/platform-configuration.md)
 - [ ] Kode selesai
 
 <details>
@@ -1605,7 +1607,7 @@ Bahas Platform Configuration dengan merujuk aturan akun dan izin platform. Mulai
 
 ### Return & Refund
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/return-refund.md)
 - [ ] Kode selesai
 
 <details>
@@ -1621,7 +1623,7 @@ Bahas Return & Refund dengan merujuk status Order dan Payment. Mulai dari satu k
 
 ### POS Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/pos-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -1637,7 +1639,7 @@ Bahas POS Management dengan merujuk katalog dan Inventory per tenant. Mulai dari
 
 ### Review & Rating
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/review-rating.md)
 - [ ] Kode selesai
 
 <details>
@@ -1653,7 +1655,7 @@ Bahas Review & Rating dengan merujuk identitas pembeli dan riwayat pesanan. Mula
 
 ### Audit & Activity Log
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/audit-activity-log.md)
 - [ ] Kode selesai
 
 <details>
@@ -1669,7 +1671,7 @@ Bahas Audit & Activity Log dengan melihat audit yang sudah ada pada User Managem
 
 ### Subscription & Billing
 
-- [ ] Spec selesai — bersyarat pada keputusan monetisasi SaaS.
+- [ ] Spec selesai — [Draf spec](../specs/subscription-billing.md). Bersyarat pada keputusan monetisasi SaaS.
 - [ ] Kode selesai
 
 <details>
@@ -1706,6 +1708,11 @@ Bahas prasyarat Subscription & Billing. Mulai dari satu keputusan. Apakah Dagant
       let requestSeq = 0;
       const offlineFiles = Object.fromEntries(Array.from(document.querySelectorAll('script[data-doc]'),
         block => [block.dataset.doc, block.textContent.trim()]));
+      const progress = offlineFiles['planning/progress.md'] ?? '';
+      const draftPaths = new Set(Array.from(
+        progress.matchAll(/^- \[ \] Spec selesai — \[Draf spec\]\(\.\.\/(specs\/[\w-]+\.md)\)/gm),
+        match => match[1]
+      ));
       function parseDocPages(readme) {
         const result = [];
         const re = /\[([^\]]+)\]\(([^)]+\.md)\)/gi;
@@ -1715,6 +1722,10 @@ Bahas prasyarat Subscription & Billing. Mulai dari satu keputusan. Apakah Dagant
           if (!result.some(p => p.path === path)) result.push({title:match[1].trim(),path});
         }
         return result;
+      }
+      function isDocumentPath(path) {
+        return path === 'README.md' || docPages.some(page => page.path === path)
+          || draftPaths.has(path) || ticketPaths.has(path);
       }
       function createSidebarItem(item, title, icon) {
         item.className = 'side-link';
@@ -2117,7 +2128,7 @@ Bahas prasyarat Subscription & Billing. Mulai dari satu keputusan. Apakah Dagant
       }
       async function loadDocument(path, {keepUrl=false, hash=''}={}) {
         const skill = skillPages.find(page => page.path === path);
-        if (!skill && path !== 'README.md' && !docPages.some(page => page.path === path) && !ticketPaths.has(path)) return;
+        if (!skill && !isDocumentPath(path)) return;
         const seq=++requestSeq;
         byId('loading-state').classList.remove('hidden');
         root.classList.add('hidden');
@@ -2197,7 +2208,7 @@ Bahas prasyarat Subscription & Billing. Mulai dari satu keputusan. Apakah Dagant
             ? skillPages.find(page => page.id === params.get('skill'))?.path
             : params.get('doc');
         }
-        if(path==='README.md'||docPages.some(p=>p.path===path)||skillPages.some(p=>p.path===path)||ticketPaths.has(path)) {
+        if (isDocumentPath(path) || skillPages.some(page => page.path === path)) {
           event.preventDefault();
           loadDocument(path, {hash: link.hash});
         }

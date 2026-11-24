@@ -6,7 +6,7 @@ Lihat [roadmap](module-roadmap.md#module-matrix) untuk cakupan dan prioritas mod
 
 Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#regenerasi-viewer) agar salinan yang tertanam ikut diperbarui.
 
-Buka **Prompt** di entri modul untuk menyalin prompt awal. Tambahkan atau perjelas detail sesuai hasil pembahasan.
+Buka **Draf spec** untuk melihat kerangka awal. Buka **Prompt** di entri modul untuk menyalin prompt awal. Tambahkan atau perjelas detail sesuai hasil pembahasan.
 
 ## MVP
 
@@ -44,7 +44,7 @@ Bahas perubahan berikutnya untuk Product Management. Baca docs/specs/product-man
 
 ### Tenant Management
 
-- [ ] Spec selesai — onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
+- [ ] Spec selesai — [Draf spec](../specs/tenant-management.md). Onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
 - [ ] Kode selesai
 
 <details>
@@ -76,7 +76,7 @@ Lanjutkan Store Settings dari docs/specs/store-settings.md. Tinjau usulan tiket 
 
 ### Storefront Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/storefront-management.md)
 - [ ] Kode selesai — [daftar dan detail publik dasar](../tickets/product-management/03-publikasi-dan-storefront.md) sudah tersedia.
 
 <details>
@@ -126,7 +126,7 @@ Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product
 
 **Berikutnya dibahas.** Apakah pembeli bisa checkout sebagai tamu atau perlu login? [DEP-04](development-dependencies.md#open-decisions--blockers)
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/customer-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -142,7 +142,7 @@ Bahas Customer Management dari DEP-04. Jika pengunjung baru ingin membeli Kopi A
 
 ### Cart Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/cart-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -158,7 +158,7 @@ Bahas Cart Management dengan merujuk keputusan Customer Management dan DEP-02. M
 
 ### Checkout Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/checkout-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -174,7 +174,7 @@ Bahas Checkout Management dengan merujuk keputusan Customer, Cart, Payment, dan 
 
 ### Order Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/order-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -190,7 +190,7 @@ Bahas Order Management dari DEP-06 dan alur Checkout. Mulai dari satu keputusan.
 
 ### Payment Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/payment-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -206,7 +206,7 @@ Bahas Payment Management versi transfer bank manual dengan merujuk status Order.
 
 ### Shipping Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/shipping-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -222,7 +222,7 @@ Bahas Shipping Management dari DEP-05. Mulai dari satu keputusan. Bagaimana toko
 
 ### Address & Location Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/address-location-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -240,7 +240,7 @@ Bahas Address & Location Management dengan merujuk kebutuhan Customer dan Shippi
 
 ### Pricing & Promotion
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/pricing-promotion.md)
 - [ ] Kode selesai
 
 <details>
@@ -256,7 +256,7 @@ Bahas Pricing & Promotion dengan merujuk DEP-07 dan kontrak harga pada pesanan. 
 
 ### Notification Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/notification-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -272,7 +272,7 @@ Bahas Notification Management dengan merujuk alur Order dan Payment. Mulai dari 
 
 ### Reporting & Analytics
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/reporting-analytics.md)
 - [ ] Kode selesai
 
 <details>
@@ -288,7 +288,7 @@ Bahas Reporting & Analytics dengan melihat data pesanan, pembayaran, dan stok ya
 
 ### Tax Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/tax-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -304,7 +304,7 @@ Bahas Tax Management dari DEP-07. Mulai dari satu keputusan desain. Pada tahap m
 
 ### Platform Configuration
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/platform-configuration.md)
 - [ ] Kode selesai
 
 <details>
@@ -320,7 +320,7 @@ Bahas Platform Configuration dengan merujuk aturan akun dan izin platform. Mulai
 
 ### Return & Refund
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/return-refund.md)
 - [ ] Kode selesai
 
 <details>
@@ -336,7 +336,7 @@ Bahas Return & Refund dengan merujuk status Order dan Payment. Mulai dari satu k
 
 ### POS Management
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/pos-management.md)
 - [ ] Kode selesai
 
 <details>
@@ -352,7 +352,7 @@ Bahas POS Management dengan merujuk katalog dan Inventory per tenant. Mulai dari
 
 ### Review & Rating
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/review-rating.md)
 - [ ] Kode selesai
 
 <details>
@@ -368,7 +368,7 @@ Bahas Review & Rating dengan merujuk identitas pembeli dan riwayat pesanan. Mula
 
 ### Audit & Activity Log
 
-- [ ] Spec selesai
+- [ ] Spec selesai — [Draf spec](../specs/audit-activity-log.md)
 - [ ] Kode selesai
 
 <details>
@@ -384,7 +384,7 @@ Bahas Audit & Activity Log dengan melihat audit yang sudah ada pada User Managem
 
 ### Subscription & Billing
 
-- [ ] Spec selesai — bersyarat pada keputusan monetisasi SaaS.
+- [ ] Spec selesai — [Draf spec](../specs/subscription-billing.md). Bersyarat pada keputusan monetisasi SaaS.
 - [ ] Kode selesai
 
 <details>
