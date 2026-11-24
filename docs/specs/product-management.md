@@ -124,7 +124,7 @@ Jalankan skenario HTTP dengan Bruno melalui `bru run --env Local` dari `bruno/`.
 ## Out of Scope
 
 - Pembuatan UI admin, unggah file, Brands, Collections, Option Library, dan pengaturan tema storefront.
-- Harga per varian, promosi, pencarian dan filter katalog, keranjang, checkout, dan pemesanan.
+- Harga per varian, promosi, keranjang, checkout, dan pemesanan. Pencarian dan filter katalog diatur di [Product Discovery](product-discovery.md).
 - Pengelolaan stok, penerimaan, koreksi, dan multi-gudang. Pengelolaan stok versi pertama ditetapkan di [Inventory Management](inventory-management.md).
 
 ## Further Notes
@@ -133,6 +133,6 @@ Integrasi admin membutuhkan identitas tenant, login, dan evaluasi permission ses
 
 ## Implementation Tickets
 
-- [Product 01 — Katalog Draft, kategori, opsi, dan SKU](tickets/product-management/01-katalog-draft-dan-sku.md)
-- [Product 02 — Media dan tautan nilai opsi](tickets/product-management/02-media-dan-tautan-opsi.md)
-- [Product 03 — Publikasi dan storefront tenant](tickets/product-management/03-publikasi-dan-storefront.md)
+- [Product 01 — Katalog Draft, kategori, opsi, dan SKU](../tickets/product-management/01-katalog-draft-dan-sku.md)
+- [Product 02 — Media dan tautan nilai opsi](../tickets/product-management/02-media-dan-tautan-opsi.md)
+- [Product 03 — Publikasi dan storefront tenant](../tickets/product-management/03-publikasi-dan-storefront.md)

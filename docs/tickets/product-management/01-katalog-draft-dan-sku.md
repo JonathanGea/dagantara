@@ -1,6 +1,6 @@
 # Product 01 — Katalog Draft, kategori, opsi, dan SKU
 
-Spec induk: [Product Management](../../product-management.md)
+Spec induk: [Product Management](../../specs/product-management.md)
 
 Status: done
 
@@ -52,4 +52,4 @@ Maven menjalankan enam tes PostgreSQL. Bruno CLI 4.3.0 menjalankan Product 01 de
 
 ## Blocked By
 
-- [User Management](../../user-management.md#implementation-tickets) untuk login, identitas tenant, dan permission role aktif.
+- [User Management](../../specs/user-management.md#implementation-tickets) untuk login, identitas tenant, dan permission role aktif.

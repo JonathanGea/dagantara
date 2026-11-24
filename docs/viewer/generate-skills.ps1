@@ -1,13 +1,13 @@
 $ErrorActionPreference = 'Stop'
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$docsRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent $docsRoot
 $skillsRoot = Join-Path $repoRoot '.agents\skills'
-$manifestPath = Join-Path $PSScriptRoot 'skills.json'
 $publicSkillsPath = Join-Path $PSScriptRoot 'skills'
-$indexPath = Join-Path $PSScriptRoot 'index.html'
+$indexPath = Join-Path $docsRoot 'index.html'
 
 function Set-OfflineBlock($html, $id, $content) {
-    $pattern = '(?s)(<script id="' + [regex]::Escape($id) + '" type="[^"]+">).*?(</script>)'
+    $pattern = '(?s)(<script id="' + [regex]::Escape($id) + '" type="[^"]+"(?: data-doc="[^"]+")?>).*?(</script>)'
     $block = [regex]::new($pattern)
     if (-not $block.IsMatch($html)) {
         throw "Could not find the $id data block in docs/index.html."
@@ -23,6 +23,7 @@ function Set-OfflineBlock($html, $id, $content) {
 }
 
 New-Item -ItemType Directory -Path $publicSkillsPath -Force | Out-Null
+$utf8 = [System.Text.UTF8Encoding]::new($false)
 $skills = @()
 foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
     $skillPath = Join-Path $directory.FullName 'SKILL.md'
@@ -42,32 +43,31 @@ foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
         ''
     }
 
+    # Published skill files share a directory and retain the source files' depth.
+    $publicContent = $content -replace '(?<=\]\()\.\./([\w-]+)/SKILL\.md(?=[#)])', '$1.md'
+    # Keep the embedded JSON stable across checkouts with different line endings.
     $skills += [pscustomobject]@{
         id = $directory.Name
         title = $title
         description = $description
-        markdown = $content
+        markdown = $publicContent -replace '\r?\n', "`r`n"
     }
 
-    Copy-Item -LiteralPath $skillPath -Destination (Join-Path $publicSkillsPath ($directory.Name + '.md')) -Force
+    $publicPath = Join-Path $publicSkillsPath ($directory.Name + '.md')
+    [System.IO.File]::WriteAllText($publicPath, $publicContent, $utf8)
 }
 $skills = @($skills | Sort-Object id)
 
 $json = ConvertTo-Json -InputObject $skills -Depth 3
-$utf8 = [System.Text.UTF8Encoding]::new($false)
-[System.IO.File]::WriteAllText($manifestPath, $json + [Environment]::NewLine, $utf8)
 
 $indexHtml = [System.IO.File]::ReadAllText($indexPath, $utf8)
 $offlineJson = $json.Replace('<', '\u003c').Replace('>', '\u003e').Replace('&', '\u0026')
 $indexHtml = Set-OfflineBlock $indexHtml 'offline-skills' $offlineJson
-$readme = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'README.md'), $utf8)
-$indexHtml = Set-OfflineBlock $indexHtml 'offline-readme' $readme
-$skillGuide = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'skill-guide.md'), $utf8)
-$indexHtml = Set-OfflineBlock $indexHtml 'offline-skill-guide' $skillGuide
-foreach ($module in @('product-management', 'inventory-management', 'store-settings')) {
-    $markdown = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot ($module + '.md')), $utf8)
-    $indexHtml = Set-OfflineBlock $indexHtml ('offline-' + $module) $markdown
+$documentBlocks = [regex]::Matches($indexHtml, '<script id="(?<id>offline-[\w-]+)" type="text/(?:plain|markdown)" data-doc="(?<path>(?:[\w-]+/)*[\w-]+\.md)">')
+foreach ($block in $documentBlocks) {
+    $markdown = [System.IO.File]::ReadAllText((Join-Path $docsRoot $block.Groups['path'].Value), $utf8)
+    $indexHtml = Set-OfflineBlock $indexHtml $block.Groups['id'].Value $markdown
 }
-[System.IO.File]::WriteAllText($indexPath, $indexHtml, $utf8)
+[System.IO.File]::WriteAllText($indexPath, ($indexHtml -replace '\r?\n', [Environment]::NewLine), $utf8)
 
-Write-Output "Generated manifest, $($skills.Count) public skill pages, and viewer fallback data."
+Write-Output "Generated $($skills.Count) public skill pages and embedded viewer data."

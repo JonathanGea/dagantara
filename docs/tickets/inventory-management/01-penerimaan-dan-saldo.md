@@ -1,6 +1,6 @@
 # Inventory 01 — Penerimaan beberapa SKU dan saldo
 
-Spec induk: [Inventory Management](../../inventory-management.md)
+Spec induk: [Inventory Management](../../specs/inventory-management.md)
 
 Status: done
 
@@ -58,4 +58,4 @@ Maven lulus 16 tes PostgreSQL, terdiri dari 10 tes Inventory 01 dan 6 regresi Pr
 ## Blocked By
 
 - [Product 01](../product-management/01-katalog-draft-dan-sku.md) untuk UUID varian, lookup SKU, dan mekanisme koordinasi transaksi yang menyentuh varian.
-- [User Management](../../user-management.md#implementation-tickets) untuk login, identitas tenant, dan permission role aktif.
+- [User Management](../../specs/user-management.md#implementation-tickets) untuk login, identitas tenant, dan permission role aktif.

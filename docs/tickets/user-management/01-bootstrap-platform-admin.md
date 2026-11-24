@@ -1,6 +1,6 @@
 # 01 — Setup dan login Admin Platform pertama
 
-[Spesifikasi User Management](../../user-management.md)
+[Spesifikasi User Management](../../specs/user-management.md)
 
 Status: done
 

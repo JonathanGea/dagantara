@@ -1,6 +1,6 @@
 # Inventory 02 — Koreksi penerimaan dan agregat stok
 
-Spec induk: [Inventory Management](../../inventory-management.md)
+Spec induk: [Inventory Management](../../specs/inventory-management.md)
 
 Status: done
 

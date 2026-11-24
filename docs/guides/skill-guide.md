@@ -10,7 +10,7 @@ Buka chat Codex di root proyek. Tekan **Copy** pada blok prompt yang sesuai, lal
 
 ## $write-module-spec
 
-Gunakan saat ide atau perubahan perilaku masih perlu dibahas. Skill ini merangkum keputusan untuk dikonfirmasi, lalu menulis spesifikasi dan mengusulkan pembagian tiket jika perlu. [Instruksi skill](skills/write-module-spec.md)
+Gunakan saat ide atau perubahan perilaku masih perlu dibahas. Skill ini merangkum keputusan untuk dikonfirmasi, lalu menulis spesifikasi dan mengusulkan pembagian tiket jika perlu. [Instruksi skill](../viewer/skills/write-module-spec.md)
 
 ```text
 $write-module-spec Bahas fitur undangan pengguna lewat email untuk Dagantara.
@@ -21,7 +21,7 @@ keputusan dan rangkum skenario uji sebelum meminta konfirmasi untuk menulis spec
 
 ## $design-ui
 
-Gunakan untuk merancang layout, halaman, atau alur yang akan ditinjau. Mulai dari brief, aplikasi yang berjalan, atau spec. Untuk memakai skill ini di proyek lain, salin folder `.agents/skills/design-ui` ke lokasi skill yang dipakai proyek atau akun Codex kamu. [Instruksi skill](skills/design-ui.md)
+Gunakan untuk merancang layout, halaman, atau alur yang akan ditinjau. Mulai dari brief, aplikasi yang berjalan, atau spec. Untuk memakai skill ini di proyek lain, salin folder `.agents/skills/design-ui` ke lokasi skill yang dipakai proyek atau akun Codex kamu. [Instruksi skill](../viewer/skills/design-ui.md)
 
 **Contoh layout dasar tanpa spec**
 
@@ -49,10 +49,10 @@ wireframe untuk pencarian, hasil, dan kondisi tanpa hasil untuk saya tinjau.
 
 ## $implement-from-spec
 
-Gunakan untuk membangun dan memverifikasi cakupan yang disepakati. Pilih spec lewat slug, tiket lewat slug dan nomor, atau cakupan modul lewat path dan ID requirement. Untuk tiket, pastikan statusnya `ready-for-agent` dan prasyaratnya sudah tersedia di branch dasar. Pengujian API HTTP dalam cakupan dijalankan dengan `$bruno-api-testing` sebagai bagian dari verifikasi. [Instruksi skill](skills/implement-from-spec.md)
+Gunakan untuk membangun dan memverifikasi cakupan yang disepakati. Pilih spec lewat slug, tiket lewat slug dan nomor, atau cakupan modul lewat path dan ID requirement. Untuk tiket, pastikan statusnya `ready-for-agent` dan prasyaratnya sudah tersedia di branch dasar. Pengujian API HTTP dalam cakupan dijalankan dengan `$bruno-api-testing` sebagai bagian dari verifikasi. [Instruksi skill](../viewer/skills/implement-from-spec.md)
 
 ```text
-$implement-from-spec @docs/user-management.md UM-01 UM-02
+$implement-from-spec @docs/specs/user-management.md UM-01 UM-02
 Fokus pada pembuatan pengguna dan penetapan tenant serta role. Verifikasi
 UM-AT-01 dan UM-AT-02. Laporkan keputusan yang masih menghalangi implementasi
 atau pengujian, lalu lanjutkan bagian yang cakupannya sudah jelas.
@@ -61,12 +61,12 @@ atau pengujian, lalu lanjutkan bagian yang cakupannya sudah jelas.
 Di sesi Orca, panggil spec yang menautkan tiket yang sudah disetujui untuk mengoordinasikan seluruh tiket. Koordinator membaca kondisi branch dan worktree untuk melanjutkan pekerjaan yang sudah ada. Ia menjalankan satu worker Codex CLI per child. GPT-6.2 Sol adalah default, dengan effort `medium` untuk tiket rutin atau `high` untuk perubahan berisiko tinggi. GPT-6 Luna dengan `high` bisa dipakai untuk tiket kecil dengan kriteria penerimaan yang jelas dan mudah diverifikasi. Tiket independen berjalan paralel. Tambahkan nomor tiket untuk mengerjakan satu tiket saja.
 
 ```text
-$implement-from-spec @docs/user-management.md
+$implement-from-spec @docs/specs/user-management.md
 ```
 
 ## $spring-boot-api
 
-Gunakan untuk mengerjakan atau meninjau controller, DTO, validasi input, serta kontrak respons dan error. Contoh ini meminta peninjauan kontrak yang tersedia. [Instruksi skill](skills/spring-boot-api.md)
+Gunakan untuk mengerjakan atau meninjau controller, DTO, validasi input, serta kontrak respons dan error. Contoh ini meminta peninjauan kontrak yang tersedia. [Instruksi skill](../viewer/skills/spring-boot-api.md)
 
 ```text
 $spring-boot-api Tinjau kontrak REST untuk pembuatan pengguna pada UM-01 dan UM-02.
@@ -76,7 +76,7 @@ Laporkan yang sesuai dengan spec dan tunjukkan keputusan kontrak yang masih terb
 
 ## $spring-boot-database
 
-Gunakan untuk merancang atau mengubah migration, entity, relasi, query, dan transaksi. Hubungkan perubahan data dengan aturan dan skenario yang sudah diputuskan. [Instruksi skill](skills/spring-boot-database.md)
+Gunakan untuk merancang atau mengubah migration, entity, relasi, query, dan transaksi. Hubungkan perubahan data dengan aturan dan skenario yang sudah diputuskan. [Instruksi skill](../viewer/skills/spring-boot-database.md)
 
 ```text
 $spring-boot-database Rancang perubahan PostgreSQL dan JPA untuk PM-03 dan PM-04.
@@ -87,7 +87,7 @@ PM-AT-03 dan PM-AT-04.
 
 ## $spring-boot-security
 
-Gunakan untuk autentikasi, pemetaan role dan permission, serta isolasi tenant. Contoh ini meninjau keamanan alur tambah pengguna. [Instruksi skill](skills/spring-boot-security.md)
+Gunakan untuk autentikasi, pemetaan role dan permission, serta isolasi tenant. Contoh ini meninjau keamanan alur tambah pengguna. [Instruksi skill](../viewer/skills/spring-boot-security.md)
 
 ```text
 $spring-boot-security Tinjau izin pada alur tambah pengguna berdasarkan UM-01,
@@ -98,7 +98,7 @@ dan bagian yang masih tergantung pada keputusan domain.
 
 ## $create-postgres-database
 
-Gunakan untuk menyiapkan PostgreSQL pengembangan Dagantara di Windows. Contoh ini memakai instance lokal bawaan dan meminta verifikasi koneksi dengan akun aplikasi. [Instruksi skill](skills/create-postgres-database.md)
+Gunakan untuk menyiapkan PostgreSQL pengembangan Dagantara di Windows. Contoh ini memakai instance lokal bawaan dan meminta verifikasi koneksi dengan akun aplikasi. [Instruksi skill](../viewer/skills/create-postgres-database.md)
 
 ```text
 $create-postgres-database Siapkan PostgreSQL lokal Dagantara di Windows dengan
@@ -109,7 +109,7 @@ tanpa menampilkan kata sandi.
 
 ## $spring-boot-run
 
-Gunakan untuk menyalakan atau memeriksa backend lokal. Prompt ini meminta alamat untuk pengujian berikutnya dan membiarkan proses tetap berjalan. [Instruksi skill](skills/spring-boot-run.md)
+Gunakan untuk menyalakan atau memeriksa backend lokal. Prompt ini meminta alamat untuk pengujian berikutnya dan membiarkan proses tetap berjalan. [Instruksi skill](../viewer/skills/spring-boot-run.md)
 
 ```text
 $spring-boot-run Jalankan backend Dagantara secara lokal untuk pengujian Bruno.
@@ -119,7 +119,7 @@ health jika tersedia, lalu biarkan backend tetap berjalan.
 
 ## $spring-boot-testing
 
-Gunakan untuk menulis atau menjalankan unit, MVC, integration, repository, dan security test Spring Boot. [Instruksi skill](skills/spring-boot-testing.md)
+Gunakan untuk menulis atau menjalankan unit, MVC, integration, repository, dan security test Spring Boot. [Instruksi skill](../viewer/skills/spring-boot-testing.md)
 
 ```text
 $spring-boot-testing Jalankan tes Spring Boot untuk perubahan yang sedang
@@ -128,7 +128,7 @@ dikerjakan. Laporkan perintah, hasil, dan kriteria penerimaan yang dibuktikan.
 
 ## $bruno-api-testing
 
-Gunakan untuk menulis atau menjalankan smoke test dan skenario penerimaan API HTTP. Periksa status, isi respons yang dijanjikan, dan keadaan data sesudah aksi bila relevan. [Instruksi skill](skills/bruno-api-testing.md)
+Gunakan untuk menulis atau menjalankan smoke test dan skenario penerimaan API HTTP. Periksa status, isi respons yang dijanjikan, dan keadaan data sesudah aksi bila relevan. [Instruksi skill](../viewer/skills/bruno-api-testing.md)
 
 ```text
 $bruno-api-testing Jalankan smoke test Dagantara dengan environment Local.

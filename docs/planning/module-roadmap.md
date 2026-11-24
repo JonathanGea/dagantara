@@ -1,14 +1,13 @@
 # Module Roadmap & Ownership
 
-> **Status:** planning / discussion. This roadmap is not an implementation specification. **Discussed** means previously discussed, not implemented or fully finalized.
+This planning document proposes module scope and priorities. See [Module Progress](progress.md) for spec and implementation status.
 
 ## Module Overview
 
-Master checklist for Dagantara modules, their surfaces and proposed implementation priorities. A module is not necessarily a backend service or a navigation menu.
+The matrix records module ownership and proposed priorities. Module specifications define requirements, navigation, data models, and acceptance criteria.
 
 ## Priority Definitions
 
-- **Discussed:** previous design discussions exist; refer to the dedicated module specification for binding decisions.
 - **P0:** proposed MVP scope required to operate a tenant storefront and process an online order.
 - **P1:** post-MVP improvements.
 - **P2:** later-stage or conditional capabilities.
@@ -17,13 +16,13 @@ Master checklist for Dagantara modules, their surfaces and proposed implementati
 
 | No. | Module | Surface | Priority | Scope / notes |
 | --- | --- | --- | --- | --- |
-| 1 | User Management | Platform Admin / Tenant Admin | Discussed | Identity, role, permission; tenant-scoped access |
-| 2 | Product Management | Tenant Admin | Discussed | Independent catalog, variants, categories, media |
+| 1 | User Management | Platform Admin / Tenant Admin | P0 | Identity, roles, permissions, and tenant-scoped access |
+| 2 | Product Management | Tenant Admin | P0 | Independent catalog, variants, categories, and media |
 | 3 | Tenant Management | Platform Admin | P0 | Tenant lifecycle, domain mapping, isolation |
 | 4 | Store Settings | Tenant Admin | P0 | Store identity, contact, basic operational settings |
 | 5 | Storefront Management | Tenant Admin | P0/P1 | P0 basic layout/navigation; P1 advanced customization |
-| 6 | Inventory Management | Tenant Admin | P0 | Variant stock, adjustments, reservations |
-| 7 | Product Catalog / Discovery | Storefront | P0 | Public listing, detail, search, filter, collection |
+| 6 | Inventory Management | Tenant Admin | P0 | Stock receipts, corrections, and variant availability in [v1](../specs/inventory-management.md). Reservation rules are tracked in [DEP-03](development-dependencies.md#open-decisions--blockers). |
+| 7 | Product Catalog / Discovery | Storefront | P0 | Public listing and detail are available. [Discovery v1](../specs/product-discovery.md) adds name search and one category filter. Collections remain a future discussion. |
 | 8 | Customer Management | Tenant Admin / Storefront | P0 | Customer identity, guest/registered decisions |
 | 9 | Cart Management | Storefront | P0 | Cart items and quantity |
 | 10 | Checkout Management | Storefront | P0 | Checkout validation and order submission |
@@ -66,26 +65,4 @@ For technical sequencing and safe parallel work, see [Development Dependencies &
 
 ## Suggested Discussion Order
 
-Tenant Management → Store Settings → Inventory Management → Product Catalog / Discovery → Customer → Cart → Checkout → Order → Payment → Shipping. Reorder implementation based on dependencies once module specifications are finalized.
-
-## Admin UI Structure
-
-This matrix records **surfaces**, not finalized menus or actions. Define actual navigation, submenu and actions in each module's own specification before implementation.
-
-## Functional Specification
-
-No new functional requirements are approved by this roadmap. Use dedicated module specifications with stable requirement IDs.
-
-## Business Rules
-
-Tenant isolation applies across all tenant-owned data. No feature is considered approved solely because it is listed here.
-
-## Data Model
-
-No tables or columns are introduced by this roadmap. ERDs and constraints belong to dedicated module documents.
-
-## Acceptance Scenarios
-
-- The documentation index exposes this roadmap as a navigable page.
-- The roadmap distinguishes surface, priority, discussed status and unresolved decisions.
-- No implementation task should infer a new database table or Admin menu solely from a roadmap row.
+Tenant Management → Store Settings → Inventory Management → Product Catalog / Discovery → Customer → Cart → Checkout → Order → Payment → Shipping. See [Module Progress](progress.md) for the next discussion. Implementation order follows technical dependencies and approved scope.

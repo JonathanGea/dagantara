@@ -7,9 +7,9 @@ description: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity
 
 ## Source of truth
 
-- `docs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.
-- `docs/product-management.md`: model data, Primary Category, relasi media, dan identitas varian.
-- `docs/inventory-management.md`: gudang, penerimaan, koreksi, dan saldo per varian.
+- `docs/specs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.
+- `docs/specs/product-management.md`: model data, Primary Category, relasi media, dan identitas varian.
+- `docs/specs/inventory-management.md`: gudang, penerimaan, koreksi, dan saldo per varian.
 - Detail yang tidak dicantumkan sebagai keputusan final **jangan** diisi dengan asumsi tanpa persetujuan.
 
 ## Workflow

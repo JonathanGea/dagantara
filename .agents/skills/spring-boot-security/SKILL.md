@@ -7,7 +7,7 @@ description: Gunakan untuk autentikasi Spring Security/JWT, authorization role-p
 
 ## Tujuan
 
-Menegakkan authentication, authorization, dan tenant isolation pada semua jalur akses data, sesuai `docs/user-management.md` dan kontrak modul terkait.
+Menegakkan authentication, authorization, dan tenant isolation pada semua jalur akses data, sesuai `docs/specs/user-management.md` dan kontrak modul terkait.
 
 ## Sebelum implementasi
 

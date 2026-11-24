@@ -16,7 +16,7 @@ Terima ide, masalah, atau usulan revisi. Baca `AGENTS.md`, `docs/README.md`, spe
 
 ## Tulis satu spec per perubahan
 
-Simpan sebagai `docs/<slug>.md` dan tautkan dari `docs/README.md`. Pilih judul yang menyatakan hasil dan slug yang unik. Rujuk aturan domain yang sudah ada. Jika pengguna menyetujui perubahan aturan, perbarui juga bagian dokumen sumber yang terdampak dalam cakupan yang sama. Simpan istilah domain baru yang perlu dipakai ulang di `GLOSSARY.md`. Gunakan ADR di `docs/adr/` ketika sebuah keputusan sulit dibalik, membutuhkan konteks, dan lahir dari pertukaran yang nyata.
+Simpan sebagai `docs/specs/<slug>.md` dan tautkan dari `docs/README.md`. Pilih judul yang menyatakan hasil dan slug yang unik. Rujuk aturan domain yang sudah ada. Jika pengguna menyetujui perubahan aturan, perbarui juga bagian dokumen sumber yang terdampak dalam cakupan yang sama. Simpan istilah domain baru yang perlu dipakai ulang di `GLOSSARY.md`. Gunakan ADR di `docs/adr/` ketika sebuah keputusan sulit dibalik, membutuhkan konteks, dan lahir dari pertukaran yang nyata.
 
 - **Problem Statement** — Masalah dari sudut pandang pengguna.
 - **Solution** — Hasil yang akan dialami pengguna.
@@ -27,6 +27,8 @@ Simpan sebagai `docs/<slug>.md` dan tautkan dari `docs/README.md`. Pilih judul y
 - **Further Notes** — Konteks atau referensi tambahan jika diperlukan.
 
 Periksa kesiapan dari sudut pandang sesi baru. Spec dan rujukannya harus cukup untuk menentukan hasil yang dibangun, keputusan yang wajib diikuti, dan cara membuktikan hasil tanpa menggali riwayat percakapan.
+
+Setelah spec versi yang dilacak disetujui dan ditulis, centang **Spec selesai** di `docs/planning/progress.md` dan tautkan spec. Jika modul itu bertanda **Berikutnya dibahas**, pindahkan penanda ke satu modul sesuai urutan roadmap, keputusan penundaan, dan dependensi yang tercatat. Sebutkan modul berikutnya dan satu keputusan pembuka di ringkasan akhir. Ikuti petunjuk regenerasi viewer di `docs/README.md` untuk halaman baru.
 
 ## Serahkan ke implementasi
 

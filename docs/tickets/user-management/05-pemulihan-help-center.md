@@ -1,6 +1,6 @@
 # 05 — Pemulihan admin tenant melalui Help Center
 
-[Spesifikasi User Management](../../user-management.md)
+[Spesifikasi User Management](../../specs/user-management.md)
 
 Status: done
 

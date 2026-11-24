@@ -4,7 +4,7 @@
 
 ## Module Overview
 
-Define dependency types, safe parallel development, interface contracts, and integration gates for Dagantara's multi-tenant commerce MVP.
+This plan records interface contracts, integration gates, and workstream ownership. Approved module specifications define business behavior, UI navigation, and data models. Tenant isolation and server-side validation apply across workstreams.
 
 ## Dependency Semantics
 
@@ -23,7 +23,7 @@ Define dependency types, safe parallel development, interface contracts, and int
 | Product Management | Tenant isolation and product/variant identity contract | Categories/collections UI polish | Can advance alongside tenant setup using agreed tenant ID |
 | Store Settings | Tenant identity | Storefront advanced theme editor | Contract for tenant settings and publication |
 | Storefront Management (basic) | Tenant resolution, public settings contract | Advanced customization | Static UI and mock data can begin immediately |
-| Inventory Management | Tenant, product/variant IDs | Warehouse/multi-location | Variant identity and reservation contract agreed |
+| Inventory Management | Tenant, product/variant IDs | Warehouse/multi-location | Variant identity for stock in v1. Reservation integration follows DEP-03. |
 | Product Catalog / Discovery | Tenant resolution, published product/variant read contract | Live inventory badge, advanced filtering | Mock public catalog contract; final gate requires real product data |
 | Customer Management | Tenant context, customer identity/guest policy | Loyalty | Customer identity and guest-order decision |
 | Address & Location | Tenant/customer ownership contract | External geocoding | Shipping address and origin schema agreed |
@@ -109,28 +109,14 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 
 | ID | Decision needed | Blocks |
 | --- | --- | --- |
-| DEP-01 | Tenant/domain lifecycle and inactive-tenant behavior | Tenant routing and public storefront gate |
-| DEP-02 | Product publication and variant availability rules | Discovery/Cart integration |
+| DEP-01 | Tenant/domain lifecycle and inactive-tenant behavior. The URL mapping used by the current storefront is defined in [Product Management](../specs/product-management.md#publikasi-dan-storefront). | Tenant lifecycle changes and how they affect public storefront access |
+| DEP-02 | Cart rules for adding or updating items when a product is withdrawn, a variant is unavailable, or stock changes. | Cart integration |
 | DEP-03 | Reservation duration, expiration and payment verification timing | Inventory/Order/Payment integration |
 | DEP-04 | Guest checkout and customer identity policy | Customer/Cart/Checkout |
 | DEP-05 | Shipping fee calculation, origin and delivery methods for MVP | Checkout/Shipping |
 | DEP-06 | Order/payment/shipping state machine and cancellation rules | Order/Payment/Shipping |
 | DEP-07 | Money, price snapshots, discount/tax treatment | Cart/Checkout/Order |
 
-Do not infer decisions from this plan. Resolve blockers in their module specifications and link stable requirement IDs before implementation.
+Discovery already has the publication and availability rules it needs through [PM-07 and PM-08](../specs/product-management.md#publikasi-dan-storefront) and [IM-05](../specs/inventory-management.md#ketersediaan-untuk-storefront). [Product Discovery](../specs/product-discovery.md#tenant-publikasi-dan-stok) applies those rules to public search and filters.
 
-## Admin UI Structure
-
-Workstream labels are engineering ownership only, **not** Admin menus or submenu requirements.
-
-## Functional Specification
-
-This plan coordinates implementation; it does not add business features beyond dedicated module specifications.
-
-## Business Rules
-
-Tenant isolation and server-side validation remain cross-cutting requirements. Hard dependencies are integration requirements; mocks are acceptable only during isolated development.
-
-## Data Model
-
-No new database tables or columns are authorized by this document. Data contracts are conceptual until module ERDs are finalized.
+Resolve blockers in their module specifications and link stable requirement IDs before implementation.

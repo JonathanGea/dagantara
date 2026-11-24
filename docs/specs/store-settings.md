@@ -79,8 +79,8 @@ Jalankan skenario HTTP dengan Bruno dari `bruno/` memakai `bru run --env Local`.
 
 ## Further Notes
 
-- Store Settings menentukan identitas yang dipakai storefront dasar. Pemetaan URL toko tetap mengikuti aturan User Management dan Product Management. Isolasi diuji melalui gate **IG-01**. Siklus hidup tenant dan domain tetap berada pada **DEP-01**. [Roadmap](module-roadmap.md#module-matrix) · [Development Dependencies](development-dependencies.md#integration-gates--acceptance-scenarios)
-- Penyimpanan file lokal dalam spesifikasi ini dikhususkan untuk logo Store Settings. [Backend Foundation](../backend/README.md#scope)
+- Store Settings menentukan identitas yang dipakai storefront dasar. Pemetaan URL toko tetap mengikuti aturan User Management dan Product Management. Isolasi diuji melalui gate **IG-01**. Siklus hidup tenant dan domain tetap berada pada **DEP-01**. [Roadmap](../planning/module-roadmap.md#module-matrix) · [Development Dependencies](../planning/development-dependencies.md#integration-gates--acceptance-scenarios)
+- Penyimpanan file lokal dalam spesifikasi ini dikhususkan untuk logo Store Settings. [Backend Foundation](../../backend/README.md#scope)
 
 ## Implementation Tickets
 

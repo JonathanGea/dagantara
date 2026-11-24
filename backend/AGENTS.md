@@ -30,7 +30,7 @@ Buat subpackage yang dibutuhkan modul. Tempatkan tipe request dan response di `d
 
 - Tenant untuk operasi tenant-scoped harus berasal dari konteks terautentikasi/terverifikasi, bukan sekadar `tenantId` yang dikirim client.
 - Validasi kepemilikan tenant pada read, create, update, delete, relasi antar-entitas, dan query teragregasi.
-- Role/permission mengikuti `docs/user-management.md`: user memiliki satu role aktif, permission diambil lewat relasi role. Jangan mengandalkan nama role sebagai pengganti permission.
+- Role/permission mengikuti `docs/specs/user-management.md`: user memiliki satu role aktif, permission diambil lewat relasi role. Jangan mengandalkan nama role sebagai pengganti permission.
 - Akun platform dan role sistem dapat mempunyai `tenant_id = NULL`; akses lintas tenant tetap memerlukan aturan otorisasi yang eksplisit.
 - Jangan menambahkan bypass keamanan, hardcoded secret, atau logging data sensitif.
 
@@ -39,12 +39,12 @@ Buat subpackage yang dibutuhkan modul. Tempatkan tipe request dan response di `d
 - Produk adalah milik satu tenant (Independent Catalog).
 - Hubungan Product–Category many-to-many. Gunakan `products.primary_category_id` dan constraint ke relasi `product_categories` sesuai PM-02.
 - Media harus dimiliki produk dan asosiasinya dengan nilai opsi adalah many-to-many (PM-03/PM-04).
-- Penerimaan dan koreksi stok memakai UUID varian, gudang dan tenant yang sesuai, serta satu transaksi untuk seluruh perubahan saldo. Ikuti `../docs/inventory-management.md`.
+- Penerimaan dan koreksi stok memakai UUID varian, gudang dan tenant yang sesuai, serta satu transaksi untuk seluruh perubahan saldo. Ikuti `../docs/specs/inventory-management.md`.
 - Struktur tabel yang belum ditetapkan detailnya tidak boleh dianggap final hanya dari gambar referensi.
 
 ## Checklist pengerjaan
 
-1. Petakan task ke ID di `../docs/user-management.md`, `../docs/product-management.md`, atau `../docs/inventory-management.md`.
+1. Petakan task ke ID di `../docs/specs/user-management.md`, `../docs/specs/product-management.md`, atau `../docs/specs/inventory-management.md`.
 2. Pilih skill yang sesuai di `../.agents/skills/`; security dan testing sering juga berlaku pada tugas API/database.
 3. Baca kode yang terdampak dan tes yang sudah ada.
 4. Implementasikan change set kecil dengan validasi tenant, permission, dan integritas data.

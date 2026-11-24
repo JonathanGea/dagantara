@@ -9,7 +9,7 @@ Dagantara adalah platform e-commerce multi-tenant. Backend direncanakan memakai 
 ## Source of truth
 
 1. Baca `docs/README.md` serta spesifikasi perubahan dan dokumen domain yang relevan sebelum membuat perubahan.
-2. Spesifikasi perubahan yang disetujui menetapkan hasil dan cakupan pekerjaan. Dokumen domain seperti `docs/user-management.md` dan `docs/product-management.md` menyimpan aturan modul yang berlaku.
+2. Spesifikasi perubahan yang disetujui menetapkan hasil dan cakupan pekerjaan. Dokumen domain seperti `docs/specs/user-management.md` dan `docs/specs/product-management.md` menyimpan aturan modul yang berlaku.
 3. `docs/index.html` adalah viewer dokumentasi, **bukan** sumber requirement mandiri.
 4. Instruksi tugas yang eksplisit dapat mengubah cakupan; bila bertentangan dengan keputusan terdokumentasi, sebutkan konfliknya dan jangan diam-diam mengubah keputusan domain.
 5. Hal yang belum final tetap menjadi implementation dependency. Jangan menyamakan contoh, navigasi admin, atau usulan dengan fitur yang sudah disetujui.

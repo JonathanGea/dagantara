@@ -1,6 +1,6 @@
 # 04 — Akun dan role tenant
 
-[Spesifikasi User Management](../../user-management.md)
+[Spesifikasi User Management](../../specs/user-management.md)
 
 Status: done
 

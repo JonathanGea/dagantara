@@ -111,9 +111,9 @@ Gunakan Bruno dengan `bru run --env Local` dari direktori `bruno/`. Untuk alur p
 
 ## Further Notes
 
-Implementasi penerimaan membutuhkan kontrak varian dan SKU yang stabil dari Product Management serta tenant dan permission dari User Management. Dukungan reservasi dapat dirancang bersama Cart, Checkout, dan Order ketika aturan pemesanan sudah dibahas. [Development Dependencies](development-dependencies.md)
+Implementasi penerimaan membutuhkan kontrak varian dan SKU yang stabil dari Product Management serta tenant dan permission dari User Management. Dukungan reservasi dapat dirancang bersama Cart, Checkout, dan Order ketika aturan pemesanan sudah dibahas. [Development Dependencies](../planning/development-dependencies.md)
 
 ## Implementation Tickets
 
-- [Inventory 01 — Penerimaan beberapa SKU dan saldo](tickets/inventory-management/01-penerimaan-dan-saldo.md)
-- [Inventory 02 — Koreksi penerimaan dan agregat stok](tickets/inventory-management/02-koreksi-dan-agregat.md)
+- [Inventory 01 — Penerimaan beberapa SKU dan saldo](../tickets/inventory-management/01-penerimaan-dan-saldo.md)
+- [Inventory 02 — Koreksi penerimaan dan agregat stok](../tickets/inventory-management/02-koreksi-dan-agregat.md)

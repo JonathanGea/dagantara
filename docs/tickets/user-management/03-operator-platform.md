@@ -1,6 +1,6 @@
 # 03 — Akun, role, dan delegasi operator platform
 
-[Spesifikasi User Management](../../user-management.md)
+[Spesifikasi User Management](../../specs/user-management.md)
 
 Status: done
 

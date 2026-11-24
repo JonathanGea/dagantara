@@ -1,6 +1,6 @@
 # Product 03 — Publikasi dan storefront tenant
 
-Spec induk: [Product Management](../../product-management.md)
+Spec induk: [Product Management](../../specs/product-management.md)
 
 Status: done
 
@@ -21,7 +21,7 @@ Implementasikan PM-07 dan PM-08. Admin mengubah status publikasi melalui API. Pe
 
 - [Product 01](01-katalog-draft-dan-sku.md) dan [Product 02](02-media-dan-tautan-opsi.md) untuk katalog, detail, dan galeri.
 - [Inventory 01](../inventory-management/01-penerimaan-dan-saldo.md) untuk kontrak status per varian.
-- Pemetaan URL toko aktif dari [User Management](../../user-management.md#login-dan-konteks-tenant), tersedia melalui pemetaan hostname dan jalur toko yang diprovisikan. Verifikasi prasyarat sebelum dispatch.
+- Pemetaan URL toko aktif dari [User Management](../../specs/user-management.md#login-dan-konteks-tenant), tersedia melalui pemetaan hostname dan jalur toko yang diprovisikan. Verifikasi prasyarat sebelum dispatch.
 
 ## Verifikasi lokal
 

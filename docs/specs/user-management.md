@@ -22,7 +22,7 @@ Akun internal platform dan tenant menggunakan satu role aktif. Backend memeriksa
 8. **UM-08** — Sebagai calon admin, saya bisa mengajukan toko dan menyepakati URL dengan operator. Sebagai operator berizin, saya juga bisa memulai onboarding langsung dan memberikan akses kepada pemilik pertama setelah URL siap.
 9. **UM-09** — Sebagai admin tenant yang lupa password, saya bisa menghubungi Help Center agar operator berizin memulihkan akses setelah memeriksa identitas saya.
 10. **UM-10** — Sebagai pengelola akun yang berizin, saya bisa melihat daftar dan detail, mereset, menonaktifkan, mengaktifkan kembali, atau mengarsipkan akun dalam cakupan saya.
-11. **UM-11** — Sebagai [Pemilik Tenant](../GLOSSARY.md#pemilik-tenant), saya bisa memberi dan mencabut role Admin Tenant pada akun lain. Sebagai Admin Platform pertama, saya memiliki kewenangan setara untuk role Admin Platform.
+11. **UM-11** — Sebagai [Pemilik Tenant](../../GLOSSARY.md#pemilik-tenant), saya bisa memberi dan mencabut role Admin Tenant pada akun lain. Sebagai Admin Platform pertama, saya memiliki kewenangan setara untuk role Admin Platform.
 
 ## Implementation Decisions
 
@@ -89,16 +89,15 @@ Gunakan API HTTP melalui Bruno untuk menguji alur pemohon, operator platform, da
 
 ## Further Notes
 
-- Backend saat ini memiliki login `POST /api/v1/auth/login`, provisioning `POST /api/v1/tenants`, serta jalur pengelolaan akun dan role pada `/api/v1/users` dan `/api/v1/roles`. Gunakan jalur tersebut sebagai titik awal saat perilakunya sesuai.
-- Implementasi perlu mengganti ketergantungan form login dari `tenantCode` ke pemetaan URL dan menghilangkan email sebagai syarat pendaftaran atau provisioning. Siapkan pemetaan URL bagi tenant yang sudah ada sebelum mengalihkan login mereka. Kode role sistem `SUPERADMIN` yang sudah tersimpan merepresentasikan Admin Platform.
-- Skema yang ada menampung domain berdasarkan hostname. Alamat Dagantara yang berbagi hostname membutuhkan pemetaan jalur per toko. Keputusan di spesifikasi ini menetapkan identitas dan keunikan pemetaan yang harus dijaga saat menyesuaikan skema.
+- `POST /api/v1/auth/login` menerima username dan password. Backend menentukan tenant dari hostname dan prefiks toko yang tersimpan sebagai pasangan unik. Detail alur tersedia di [tiket onboarding](../tickets/user-management/02-onboarding-tenant.md) dan [panduan backend](../../backend/README.md#pengajuan-dan-onboarding-tenant-um-02-um-06-um-08-um-11).
+- Saat memigrasikan tenant lama, siapkan pemetaan URL sebelum mengalihkan login mereka. Kode role sistem `SUPERADMIN` merepresentasikan Admin Platform.
 
 ## Implementation Tickets
 
 | No. | Hasil yang bisa didemokan | Prasyarat |
 | --- | --- | --- |
-| [01](tickets/user-management/01-bootstrap-platform-admin.md) | Admin Platform pertama bisa disiapkan ulang tanpa duplikasi dan login dengan username serta password. | Bisa langsung dimulai. |
-| [02](tickets/user-management/02-onboarding-tenant.md) | Operator menyelesaikan pengajuan atau onboarding langsung. Pemilik masuk dari URL toko dan mengganti password sementara. | 01 untuk autentikasi operator provisioning. |
-| [03](tickets/user-management/03-operator-platform.md) | Admin Platform membuat operator dan role, mendelegasikan permission, dan mengelola siklus akun operator. | 01 untuk akun Admin Platform pertama. |
-| [04](tickets/user-management/04-akun-dan-role-tenant.md) | Pemilik dan staf mengelola akun serta role tenant sesuai izin, dengan perlindungan akun pemilik dan admin. | 02 untuk identitas tenant, akun pemilik, dan konteks login. |
-| [05](tickets/user-management/05-pemulihan-help-center.md) | Operator Help Center yang berizin memulihkan akun admin awal atau tambahan dengan verifikasi, password sementara, dan audit. | 02 untuk akun pemilik, 03 untuk role operator Help Center, dan 04 untuk admin tambahan. |
+| [01](../tickets/user-management/01-bootstrap-platform-admin.md) | Admin Platform pertama bisa disiapkan ulang tanpa duplikasi dan login dengan username serta password. | Bisa langsung dimulai. |
+| [02](../tickets/user-management/02-onboarding-tenant.md) | Operator menyelesaikan pengajuan atau onboarding langsung. Pemilik masuk dari URL toko dan mengganti password sementara. | 01 untuk autentikasi operator provisioning. |
+| [03](../tickets/user-management/03-operator-platform.md) | Admin Platform membuat operator dan role, mendelegasikan permission, dan mengelola siklus akun operator. | 01 untuk akun Admin Platform pertama. |
+| [04](../tickets/user-management/04-akun-dan-role-tenant.md) | Pemilik dan staf mengelola akun serta role tenant sesuai izin, dengan perlindungan akun pemilik dan admin. | 02 untuk identitas tenant, akun pemilik, dan konteks login. |
+| [05](../tickets/user-management/05-pemulihan-help-center.md) | Operator Help Center yang berizin memulihkan akun admin awal atau tambahan dengan verifikasi, password sementara, dan audit. | 02 untuk akun pemilik, 03 untuk role operator Help Center, dan 04 untuk admin tambahan. |

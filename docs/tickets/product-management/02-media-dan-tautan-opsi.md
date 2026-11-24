@@ -1,6 +1,6 @@
 # Product 02 — Media dan tautan nilai opsi
 
-Spec induk: [Product Management](../../product-management.md)
+Spec induk: [Product Management](../../specs/product-management.md)
 
 Status: done
 
