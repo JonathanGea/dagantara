@@ -151,6 +151,7 @@ Terapkan migrasi berikut dari folder `backend/` setelah migrasi User Management 
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/06-product-catalog.sql
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/07-product-media.sql
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/08-inventory-receipts.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/09-inventory-corrections.sql
 ```
 
 Migrasi mendaftarkan izin katalog dan Inventory serta memberikannya kepada role Admin Tenant yang sudah ada. Provisioning tenant baru memakai katalog permission yang sama. Ikuti [Product Management](../docs/product-management.md) dan [Inventory Management](../docs/inventory-management.md) untuk kontrak API dan skenario Bruno.
