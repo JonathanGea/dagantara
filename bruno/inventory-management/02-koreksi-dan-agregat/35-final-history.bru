@@ -1,0 +1,25 @@
+meta {
+  name: IM-AT-08 Riwayat asli dan koreksi ke nol tetap dapat dibaca
+  type: http
+  seq: 35
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("IM-AT-08 Riwayat asli dan koreksi ke nol tetap dapat dibaca", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.corrections).to.have.length(5);
+    expect(data.corrections[4]).to.deep.equal(bru.getVar("zeroCorrection"));
+    expect(data.lines.find(line => line.sku === "DEFAULT")).to.include({ originalQuantity: 3, effectiveQuantity: 0 });
+  });
+}

@@ -1,0 +1,60 @@
+meta {
+  name: IM-AT-04 dan IM-AT-06 Terima saldo awal
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: recount-six
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": "H-M",
+        "quantity": 8
+      },
+      {
+        "sku": "H-L",
+        "quantity": 2
+      },
+      {
+        "sku": "P-L",
+        "quantity": 5
+      },
+      {
+        "sku": "DEFAULT",
+        "quantity": 3
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-04 dan IM-AT-06 Terima saldo awal", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.be.a("string");
+    expect(data.receivedBy).to.equal(bru.getVar("ownerAId"));
+    expect(data.lines).to.have.length(4);
+    for (const [sku, quantity] of [["H-M", 8], ["H-L", 2], ["P-L", 5], ["DEFAULT", 3]]) {
+      const line = data.lines.find(line => line.sku === sku);
+      expect(line.id).to.be.a("string");
+      expect(line.quantity).to.equal(quantity);
+      if (sku !== "DEFAULT") expect(line.variantId).to.equal(bru.getVar("variant-" + sku));
+      bru.setVar("line-" + sku, line.id);
+    }
+    bru.setVar("receipt", data.id);
+  });
+}

@@ -1,0 +1,32 @@
+meta {
+  name: IM-AT-04 dan IM-AT-05 Saldo H-M tetap tujuh unit setelah penolakan
+  type: http
+  seq: 29
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/products/{{optionProduct}}/stock
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("IM-AT-04 dan IM-AT-05 Saldo H-M tetap tujuh unit setelah penolakan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.productId).to.equal(bru.getVar("optionProduct"));
+    expect(data.totalQuantity).to.equal(14);
+    expect(Object.fromEntries(data.variants.map(variant => [variant.sku, variant.quantity])))
+      .to.deep.equal({ "H-M": 7, "H-L": 2, "P-L": 5 });
+    expect(data.optionTotals.map(option => option.optionName)).to.deep.equal(["Warna", "Ukuran"]);
+    for (const [option, expected] of [[data.optionTotals[0], { Hitam: 9, Putih: 5 }], [data.optionTotals[1], { M: 7, L: 7 }]]) {
+      expect(option.optionId).to.equal(bru.getVar(option.optionName));
+      expect(Object.fromEntries(option.values.map(value => [value.label, value.totalQuantity]))).to.deep.equal(expected);
+      for (const value of option.values) expect(value.valueId).to.equal(bru.getVar(value.label));
+    }
+  });
+}

@@ -1,0 +1,38 @@
+meta {
+  name: IM-AT-07 Tenant B berizin mendapat 404 untuk penerimaan A
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{baseUrl}}/{{shopB}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerB}}
+}
+
+headers {
+  Idempotency-Key: foreign-receipt
+}
+
+body:json {
+  {
+    "reason": "Hitung lagi",
+    "lines": [
+      {
+        "receiptLineId": "{{line-H-M}}",
+        "quantity": 6
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-07 Tenant B berizin mendapat 404 untuk penerimaan A", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+  });
+}

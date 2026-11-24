@@ -1,0 +1,27 @@
+meta {
+  name: Fixture penerimaan untuk konflik saldo
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+tests {
+  test("Fixture penerimaan untuk konflik saldo", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data).to.have.length(1);
+    expect(data[0].id).to.be.a("string");
+    expect(data[0].receivedBy).to.be.a("string");
+    bru.setVar("guardReceipt", data[0].id);
+    bru.setVar("ownerAId", data[0].receivedBy);
+  });
+}

@@ -1,0 +1,22 @@
+meta {
+  name: IM-AT-05 dan IM-AT-07 Penolakan tidak mengubah riwayat penerimaan A
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("IM-AT-05 dan IM-AT-07 Penolakan tidak mengubah riwayat penerimaan A", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data).to.deep.equal(bru.getVar("afterSecondCorrection"));
+  });
+}

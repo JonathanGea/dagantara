@@ -1,0 +1,38 @@
+meta {
+  name: IM-AT-05 Baris penerimaan lain memberi 400
+  type: http
+  seq: 22
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: unrelated-line
+}
+
+body:json {
+  {
+    "reason": "Rujukan salah",
+    "lines": [
+      {
+        "receiptLineId": "{{guardLine}}",
+        "quantity": 0
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-05 Baris penerimaan lain memberi 400", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_RECEIPT_LINE");
+  });
+}

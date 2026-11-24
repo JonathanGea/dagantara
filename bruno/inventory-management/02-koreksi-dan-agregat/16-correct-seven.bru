@@ -1,0 +1,47 @@
+meta {
+  name: IM-AT-04 Koreksi 6 menjadi 7
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: recount-seven
+}
+
+body:json {
+  {
+    "reason": "Satu unit ditemukan",
+    "lines": [
+      {
+        "receiptLineId": "{{line-H-M}}",
+        "quantity": 7
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-04 Koreksi 6 menjadi 7", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.receiptId).to.equal(bru.getVar("receipt"));
+    expect(data.correctedBy).to.equal(bru.getVar("ownerAId"));
+    expect(data.reason).to.equal("Satu unit ditemukan");
+    expect(Number.isNaN(Date.parse(data.createdAt))).to.equal(false);
+    expect(data.lines).to.deep.equal([{
+      receiptLineId: bru.getVar("line-H-M"), previousQuantity: 6, quantity: 7, delta: 1
+    }]);
+    bru.setVar("secondCorrection", data);
+  });
+}

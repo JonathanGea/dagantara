@@ -1,0 +1,38 @@
+meta {
+  name: IM-AT-04 Retry mengembalikan koreksi pertama
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: recount-six
+}
+
+body:json {
+  {
+    "reason": "Jumlah terhitung enam",
+    "lines": [
+      {
+        "receiptLineId": "{{line-H-M}}",
+        "quantity": 6
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-04 Retry mengembalikan koreksi pertama", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().data).to.deep.equal(bru.getVar("firstCorrection"));
+  });
+}

@@ -1,0 +1,38 @@
+meta {
+  name: IM-AT-05 Koreksi yang membuat saldo negatif memberi 409
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{guardReceipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: negative-stock
+}
+
+body:json {
+  {
+    "reason": "Kurangi delapan dari saldo tiga",
+    "lines": [
+      {
+        "receiptLineId": "{{guardLine}}",
+        "quantity": 0
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-05 Koreksi yang membuat saldo negatif memberi 409", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("STOCK_BALANCE_CONFLICT");
+  });
+}

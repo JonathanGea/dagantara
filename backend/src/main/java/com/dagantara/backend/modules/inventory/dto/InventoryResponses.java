@@ -1,5 +1,6 @@
 package com.dagantara.backend.modules.inventory.dto;
 
+import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -26,19 +27,26 @@ public final class InventoryResponses {
                                     long effectiveQuantity) {
     }
 
-    public record Correction(UUID id, UUID correctedBy, OffsetDateTime createdAt, String reason,
+    public record Correction(UUID id, UUID receiptId, UUID correctedBy, OffsetDateTime createdAt, String reason,
                              List<CorrectionLine> lines) {
     }
 
     public record CorrectionLine(UUID receiptLineId, long previousQuantity, long quantity, long delta) {
     }
 
-    public record ProductStock(UUID productId, List<VariantStock> variants) {
+    public record ProductStock(UUID productId, List<VariantStock> variants, BigInteger totalQuantity,
+                               List<OptionStock> optionTotals) {
     }
 
     public record VariantStock(UUID variantId, String sku, List<StockOptionValue> optionValues, long quantity) {
     }
 
     public record StockOptionValue(UUID optionId, String optionName, UUID valueId, String label) {
+    }
+
+    public record OptionStock(UUID optionId, String optionName, List<ValueStock> values) {
+    }
+
+    public record ValueStock(UUID valueId, String label, BigInteger totalQuantity) {
     }
 }
