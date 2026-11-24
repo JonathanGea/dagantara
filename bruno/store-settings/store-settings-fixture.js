@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { Buffer } = require("buffer");
 
 const settingsPath = "/api/v1/store-settings";
 const catalogPath = "/api/v1/catalog";
@@ -22,13 +23,14 @@ async function fixture(bru, expect, res) {
     return body.data.accessToken;
   }
 
-  async function request(store, method, path, { token, body, status = 200, error, contentType } = {}) {
+  async function request(store, method, path, { token, body, status = 200, error, contentType, binary = false } = {}) {
     const headers = {};
     if (token) headers.Authorization = "Bearer " + token;
     if (contentType) headers["Content-Type"] = contentType;
     let response;
     try {
-      response = await axios({ url: store + path, method, data: body, headers, validateStatus: () => true });
+      response = await axios({ url: store + path, method, data: body, headers,
+        responseType: binary ? "arraybuffer" : undefined, validateStatus: () => true });
     } catch {
       throw new Error(method + " " + path + " received no HTTP response");
     }
@@ -40,7 +42,7 @@ async function fixture(bru, expect, res) {
     } else if (response.headers["content-type"]?.includes("application/json")) {
       expect(response.data.success).to.equal(true);
     }
-    return response.data;
+    return binary ? { bytes: Buffer.from(response.data), headers: response.headers } : response.data;
   }
 
   async function login(store, username = "ss01-owner", enteredPassword = password, temporary = false) {
@@ -52,17 +54,24 @@ async function fixture(bru, expect, res) {
     return (await request(store, "GET", settingsPath, { token, ...options })).data;
   }
 
-  async function save(store, token, fields, options) {
+  async function save(store, token, fields, { logos = [], ...options } = {}) {
     const boundary = "dagantara-ss01-" + suffix;
     const payload = JSON.stringify({ logoAction: "KEEP", ...fields });
-    const body = [
+    const parts = [Buffer.from([
       "--" + boundary, 'Content-Disposition: form-data; name="settings"', "Content-Type: application/json",
-      "", payload, "--" + boundary + "--", ""
-    ].join("\r\n");
+      "", payload, ""
+    ].join("\r\n"))];
+    for (const logo of logos) {
+      const header = "--" + boundary + '\r\nContent-Disposition: form-data; name="logo"; filename="fixture.txt"'
+        + "\r\nContent-Type: text/plain\r\n\r\n";
+      parts.push(Buffer.from(header), logo, Buffer.from("\r\n"));
+    }
+    parts.push(Buffer.from("--" + boundary + "--\r\n"));
+    const body = Buffer.concat(parts);
     const result = await request(store, "PUT", settingsPath, {
       token, body, contentType: "multipart/form-data; boundary=" + boundary, ...options
     });
-    return options?.status >= 400 ? result : result.data;
+    return options.status >= 400 ? result : result.data;
   }
 
   function checkSettings(store, result, fields) {
@@ -74,8 +83,8 @@ async function fixture(bru, expect, res) {
     const embedded = html.match(/<script type="application\/json" id="product-data">(.+)<\/script>/);
     expect(Boolean(embedded), "product and store JSON in page").to.equal(true);
     const { store: identity, catalog } = JSON.parse(embedded[1]);
-    const { displayName, ...contact } = fields;
-    expect(identity).to.deep.equal({ name: displayName ?? names[store], ...contact });
+    const { displayName, logoUrl = null, ...contact } = fields;
+    expect(identity).to.deep.equal({ name: displayName ?? names[store], ...contact, logoUrl });
     return catalog.data;
   }
 

@@ -1,0 +1,52 @@
+meta {
+  name: SS-02 Validasi kombinasi aksi dan file serta ganti logo bersamaan
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ss01-b/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set SS01_FIXTURE_PASSWORD");
+  req.setBody({ username: "ss01-owner", password });
+}
+
+tests {
+  const { fixture } = require("./store-settings/store-settings-fixture.js");
+  const logo = require("./store-settings/logo-fixture.js");
+
+  test("SS-02 Validasi kombinasi aksi dan file serta ganti logo bersamaan", async function () {
+    const f = await fixture(bru, expect, res);
+    try {
+      const before = await logo.replace(f, f.a, f.ownerA, logo.aFields, logo.png);
+      for (const [action, logos] of [
+        ["KEEP", [logo.webp]], ["REMOVE", [logo.webp]], ["REPLACE", []], ["REPLACE", [logo.png, logo.webp]]
+      ]) {
+        await f.save(f.a, f.ownerA, { ...logo.aFields, logoAction: action },
+          { logos, status: 400, error: "VALIDATION_ERROR" });
+        expect(await f.read(f.a, f.ownerA)).to.deep.equal(before);
+        await logo.checkImage(f, expect, f.a, before.logoUrl, "image/png", logo.png);
+      }
+
+      const [first, second] = await Promise.all([
+        logo.replace(f, f.a, f.ownerA, logo.aFields, logo.png),
+        logo.replace(f, f.a, f.ownerA, logo.aFields, logo.webp)
+      ]);
+      expect(first.logoUrl).to.not.equal(second.logoUrl);
+      const active = (await f.read(f.a, f.ownerA)).logoUrl;
+      expect([first.logoUrl, second.logoUrl]).to.include(active);
+      const firstActive = active === first.logoUrl;
+      await logo.checkImage(f, expect, f.a, active, firstActive ? "image/png" : "image/webp",
+        firstActive ? logo.png : logo.webp);
+      await logo.missing(f, f.a, before.logoUrl);
+      await logo.missing(f, f.a, firstActive ? second.logoUrl : first.logoUrl);
+    } finally {
+      await f.save(f.a, f.ownerA, { ...f.blank, logoAction: "REMOVE" });
+    }
+  });
+}

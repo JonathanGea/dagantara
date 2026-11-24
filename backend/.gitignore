@@ -4,6 +4,7 @@ target/
 !.env.example
 *.log
 logs/
+store-logos/
 .idea/
 .settings/
 .classpath

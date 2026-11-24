@@ -23,7 +23,9 @@
       padding: 1rem 0;
       overflow-wrap: anywhere;
     }
-    .store-header .store-bar { font-size: 1.25rem; font-weight: 720; }
+    .store-header .store-bar { display: flex; align-items: center; gap: .625rem; font-size: 1.25rem; font-weight: 720; }
+    .store-header .store-logo { flex: none; width: 2.5rem; height: 2.5rem; background: none; }
+    .store-header .store-logo[hidden] { display: none; }
     .store-contact .store-bar { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
     main {
       width: min(72rem, 100% - 3rem);
@@ -96,7 +98,7 @@
   </style>
 </head>
 <body>
-  <header class="store-header"><p class="store-bar" id="store-name"></p></header>
+  <header class="store-header"><p class="store-bar" id="store-brand"><span id="store-name"></span></p></header>
   <main id="storefront">
     <noscript>Aktifkan JavaScript untuk melihat produk dan memilih opsi.</noscript>
   </main>
@@ -124,6 +126,15 @@
 
     function showStoreIdentity() {
       document.querySelector("#store-name").textContent = store.name;
+      if (store.logoUrl) {
+        const logo = element("img", null, "store-logo");
+        logo.alt = "";
+        logo.hidden = true;
+        logo.addEventListener("load", () => { logo.hidden = false; });
+        logo.addEventListener("error", () => logo.remove());
+        logo.src = store.logoUrl;
+        document.querySelector("#store-brand").prepend(logo);
+      }
       const contact = element("div", null, "store-bar");
       if (store.publicWhatsapp) {
         contact.append(link("Hubungi via WhatsApp", "https://wa.me/" + store.publicWhatsapp.slice(1)));

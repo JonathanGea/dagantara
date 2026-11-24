@@ -162,9 +162,10 @@ Setelah migrasi 01–09, jalankan perintah berikut dari folder `backend/`.
 
 ```powershell
 psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/10-store-settings.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/11-store-settings-logo.sql
 ```
 
-Migrasi ini menyiapkan pengaturan publik per tenant dan memberikan izin `store_settings.manage` kepada role Admin Tenant yang sudah ada. Buka `/admin/store-settings` dari URL toko. [Spesifikasi Store Settings](../docs/specs/store-settings.md)
+Migrasi 10 menyiapkan pengaturan publik per tenant dan memberi izin `store_settings.manage` kepada role Admin Tenant yang sudah ada. Migrasi 11 menambahkan referensi logo aktif. Buka `/admin/store-settings` dari URL toko. Untuk penyimpanan logo lokal, setel `APP_STORE_SETTINGS_LOGO_DIRECTORY` ke direktori yang dapat ditulis backend. Default-nya `store-logos/` relatif terhadap direktori kerja backend. Gunakan database dan direktori yang sama saat restart. [Spesifikasi Store Settings](../docs/specs/store-settings.md)
 
 ## Verification
 

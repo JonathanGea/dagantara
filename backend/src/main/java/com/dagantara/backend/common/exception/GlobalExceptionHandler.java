@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -69,6 +70,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMissingRequestPart(HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",
                 "A required form part is missing", request);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ProblemDetail handleUploadSize(HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE",
+                "Uploaded data exceeds the allowed size", request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

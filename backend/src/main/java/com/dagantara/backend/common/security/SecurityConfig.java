@@ -18,6 +18,7 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_API_PRODUCTS;
+import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_LOGO;
 import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_PAGE_PRODUCTS;
 import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_PAGE_PRODUCT_ID;
 import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_SHOP;
@@ -36,6 +37,8 @@ public class SecurityConfig {
             throws Exception {
         var paths = PathPatternRequestMatcher.withDefaults();
         var storefront = new OrRequestMatcher(
+                paths.matcher(HttpMethod.GET, STOREFRONT_LOGO + "/{logoId}"),
+                paths.matcher(HttpMethod.GET, STOREFRONT_SHOP + STOREFRONT_LOGO + "/{logoId}"),
                 paths.matcher(HttpMethod.GET, STOREFRONT_API_PRODUCTS),
                 paths.matcher(HttpMethod.GET, STOREFRONT_API_PRODUCTS + "/{productId}"),
                 paths.matcher(HttpMethod.GET, STOREFRONT_SHOP + STOREFRONT_API_PRODUCTS),

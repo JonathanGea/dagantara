@@ -62,7 +62,7 @@ class StorefrontPostgresTest {
         new ResourceDatabasePopulator(migration("01-platform-accounts"), migration("02-tenant-onboarding"),
                 migration("03-platform-operators"), migration("04-tenant-accounts"), migration("05-help-center-recovery"),
                 migration("06-product-catalog"), migration("07-product-media"), migration("08-inventory-receipts"),
-                migration("09-inventory-corrections"), migration("10-store-settings"))
+                migration("09-inventory-corrections"), migration("10-store-settings"), migration("11-store-settings-logo"))
                 .execute(new DriverManagerDataSource(scopedUrl, user, password));
 
         byte[] key = new byte[32];

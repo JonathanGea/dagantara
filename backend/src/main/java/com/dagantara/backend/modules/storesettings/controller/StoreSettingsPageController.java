@@ -35,7 +35,7 @@ public class StoreSettingsPageController {
         String nonce = UUID.randomUUID().toString();
         return ResponseEntity.ok().contentType(new MediaType("text", "html", StandardCharsets.UTF_8))
                 .cacheControl(CacheControl.noStore())
-                .header("Content-Security-Policy", "default-src 'none'; connect-src 'self'; "
+                .header("Content-Security-Policy", "default-src 'none'; connect-src 'self'; img-src 'self'; "
                         + "script-src 'nonce-" + nonce + "'; style-src 'nonce-" + nonce + "'; "
                         + "base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
                 .body(template.replace("{{nonce}}", nonce));

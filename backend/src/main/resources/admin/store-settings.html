@@ -27,6 +27,11 @@
     }
     label { display: grid; gap: .375rem; font-weight: 620; }
     label span { font-size: .875rem; font-weight: 400; color: #4a5b52; }
+    fieldset { display: grid; gap: .75rem; min-width: 0; margin: 0; border: 1px solid #d9e0d9; border-radius: .5rem; }
+    legend { font-weight: 650; }
+    #current-logo { width: 5rem; height: 5rem; object-fit: contain; }
+    #remove-logo-label { display: flex; align-items: center; gap: .5rem; }
+    #remove-logo { width: 1rem; min-height: 1rem; }
     input, button { min-height: 2.75rem; padding: .5rem .75rem; border-radius: .5rem; font: inherit; }
     input { width: 100%; color: inherit; border: 1px solid #87998e; }
     button {
@@ -69,6 +74,17 @@
         <span id="whatsapp-hint">Gunakan format internasional. Contoh +6281234567890.</span>
       </label>
       <label>Email publik <input name="publicEmail" type="email" autocomplete="email"></label>
+      <fieldset>
+        <legend>Logo toko</legend>
+        <img id="current-logo" alt="Logo toko saat ini" hidden>
+        <label>File logo
+          <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="logo-hint">
+          <span id="logo-hint">PNG, JPEG, atau WebP. Maksimal 2 MiB.</span>
+        </label>
+        <label id="remove-logo-label" hidden>
+          <input id="remove-logo" name="removeLogo" type="checkbox"> Hapus logo
+        </label>
+      </fieldset>
       <button>Simpan</button>
     </form>
   </main>
@@ -78,7 +94,17 @@
     const passwordChange = document.querySelector("#password-change");
     const settings = document.querySelector("#settings");
     const notice = document.querySelector("#notice");
+    const currentLogo = document.querySelector("#current-logo");
+    const fileInput = settings.elements.logo;
+    const removeLogo = settings.elements.removeLogo;
     let token;
+
+    currentLogo.addEventListener("load", () => { currentLogo.hidden = false; });
+    currentLogo.addEventListener("error", () => { currentLogo.hidden = true; });
+    fileInput.addEventListener("change", () => { removeLogo.checked = false; });
+    removeLogo.addEventListener("change", () => {
+      if (removeLogo.checked) fileInput.value = "";
+    });
 
     function showForm(form) {
       for (const candidate of [login, passwordChange, settings]) candidate.hidden = candidate !== form;
@@ -111,6 +137,14 @@
       document.querySelector("#display-name-hint").textContent = "Nama saat isian kosong: " + data.tenantName;
       for (const field of ["displayName", "publicWhatsapp", "publicEmail"]) {
         settings.elements[field].value = data[field] ?? "";
+      }
+      fileInput.value = "";
+      removeLogo.checked = false;
+      document.querySelector("#remove-logo-label").hidden = !data.logoUrl;
+      if (currentLogo.getAttribute("src") !== data.logoUrl) {
+        currentLogo.hidden = true;
+        if (data.logoUrl) currentLogo.src = data.logoUrl;
+        else currentLogo.removeAttribute("src");
       }
       showForm(settings);
     }
@@ -173,9 +207,13 @@
     });
 
     onSubmit(settings, async input => {
+      const {logo, removeLogo: remove, ...fields} = input;
+      const hasFile = Boolean(logo.name);
+      const logoAction = remove ? "REMOVE" : hasFile ? "REPLACE" : "KEEP";
       const data = new FormData();
-      data.append("settings", new Blob([JSON.stringify({...input, logoAction: "KEEP"})],
+      data.append("settings", new Blob([JSON.stringify({...fields, logoAction})],
         {type: "application/json"}));
+      if (hasFile && logoAction === "REPLACE") data.append("logo", logo);
       try {
         render(await request("store-settings", {method: "PUT", headers: credentials(), body: data}));
         announce("Pengaturan toko tersimpan.");
@@ -186,6 +224,10 @@
           publicEmail: "Masukkan satu alamat email yang valid."
         };
         const fields = error.fields?.map(field => fieldMessages[field]).filter(Boolean) ?? [];
+        if (error.status === 413) fields.push("Ukuran logo maksimal 2 MiB.");
+        if (error.status === 400 && hasFile && fields.length === 0) {
+          fields.push("Pilih gambar PNG, JPEG, atau WebP yang dapat dibuka.");
+        }
         if (error.status === 401) {
           token = undefined;
           showForm(login);

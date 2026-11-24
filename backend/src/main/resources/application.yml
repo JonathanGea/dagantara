@@ -20,6 +20,9 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 2MB
   data:
     web:
       pageable:
@@ -45,6 +48,8 @@ springdoc:
     enabled: false
 
 app:
+  store-settings:
+    logo-directory: ${APP_STORE_SETTINGS_LOGO_DIRECTORY:store-logos}
   tenant:
     platform-host: ${APP_PLATFORM_HOST:localhost}
   cors:

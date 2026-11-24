@@ -63,12 +63,13 @@ public class StorefrontController {
             STOREFRONT_PAGE_PRODUCTS + STOREFRONT_PAGE_PRODUCT_ID,
             STOREFRONT_SHOP + STOREFRONT_PAGE_PRODUCTS + STOREFRONT_PAGE_PRODUCT_ID}, produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> page(HttpServletRequest request, Pageable page,
-                                       @PathVariable(required = false) String productId) throws JsonProcessingException {
+                                       @PathVariable(required = false) String productId,
+                                       @PathVariable(required = false) String shopSlug) throws JsonProcessingException {
         UUID tenant = tenantId(request);
         ApiResponse<?> catalog = productId == null
                 ? ApiResponse.paged("Products", storefront.list(tenant, page))
                 : ApiResponse.success("Product detail", storefront.detail(tenant, parseId(productId)));
-        var data = new PageData(settings.publicIdentity(tenant), catalog);
+        var data = new PageData(settings.publicIdentity(tenant, shopSlug), catalog);
         String nonce = UUID.randomUUID().toString();
         String json = pageWriter.writeValueAsString(data).replace("<", "\\u003c");
         String html = template.replace("{{nonce}}", nonce).replace("{{data}}", json);
