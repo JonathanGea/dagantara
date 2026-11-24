@@ -44,29 +44,8 @@ Bahas perubahan berikutnya untuk Product Management. Baca docs/specs/product-man
 
 ### Tenant Management
 
-- [ ] Spec selesai — [Draf spec](../specs/tenant-management.md). Onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
+- [x] Spec selesai — [Penonaktifan dan Aktivasi Kembali Tenant](../specs/tenant-management.md). [Penggantian URL toko](../specs/tenant-management.md#further-notes) dicatat sebagai enhancement.
 - [ ] Kode selesai
-
-<details>
-<summary>Prompt spec Tenant Management</summary>
-
-```text
-$write-module-spec
-
-Gunakan docs/specs/tenant-management.md sebagai kerangka awal.
-Bahas Tenant Management dari DEP-01 dan alur onboarding di docs/specs/user-management.md.
-Mulai dari satu keputusan. Saat tenant dinonaktifkan, apa yang harus terjadi pada URL toko
-publiknya?
-
-Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
-saya sebelum lanjut dan catat tambahan yang disepakati.
-
-Rangkum cakupan dan kriteria penerimaan untuk saya konfirmasi. Setelah saya setuju,
-lengkapi draf yang sama sesuai template skill, tautkan spec dari docs/README.md, dan
-perbarui Progres Modul.
-```
-
-</details>
 
 <details>
 <summary>Prompt implementasi Tenant Management</summary>
@@ -74,13 +53,9 @@ perbarui Progres Modul.
 ```text
 $implement-from-spec tenant-management
 
-Baca docs/specs/tenant-management.md dan cek status modul di docs/planning/progress.md.
-Mulai implementasi setelah spec dan cakupan pengerjaan disetujui. Jika spec masih draf
-atau tiket masih menunggu persetujuan, laporkan prasyarat yang tertahan.
-
-Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
-ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
-dilacak terverifikasi.
+Implementasikan Tenant Management v1 sesuai docs/specs/tenant-management.md.
+Verifikasi TM-AT-01 sampai TM-AT-04 dengan Bruno dan TM-AT-05 dengan browser.
+Perbarui Kode selesai di Progres Modul setelah seluruh cakupan terverifikasi.
 ```
 
 </details>

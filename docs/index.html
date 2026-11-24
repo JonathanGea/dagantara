@@ -494,7 +494,6 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 
 | ID | Decision needed | Blocks |
 | --- | --- | --- |
-| DEP-01 | Tenant/domain lifecycle and inactive-tenant behavior. The URL mapping used by the current storefront is defined in [Product Management](../specs/product-management.md#publikasi-dan-storefront). | Tenant lifecycle changes and how they affect public storefront access |
 | DEP-02 | Cart rules for adding or updating items when a product is withdrawn, a variant is unavailable, or stock changes. | Cart integration |
 | DEP-03 | Reservation duration, expiration and payment verification timing | Inventory/Order/Payment integration |
 | DEP-04 | Guest checkout and customer identity policy | Customer/Cart/Checkout |
@@ -505,6 +504,12 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 Discovery already has the publication and availability rules it needs through [PM-07 and PM-08](../specs/product-management.md#publikasi-dan-storefront) and [IM-05](../specs/inventory-management.md#ketersediaan-untuk-storefront). [Product Discovery](../specs/product-discovery.md#tenant-publikasi-dan-stok) applies those rules to public search and filters.
 
 Resolve blockers in their module specifications and link stable requirement IDs before implementation.
+
+## Resolved Decisions
+
+### DEP-01 Tenant lifecycle
+
+[Tenant Management v1](../specs/tenant-management.md#implementation-decisions) defines how operators change tenant status, how inactive tenants retain their store address, and how storefront and internal access are suspended and restored. [Changing the store URL](../specs/tenant-management.md#further-notes) is a deferred enhancement.
 </script>
   <script id="offline-module-roadmap" type="text/markdown" data-doc="planning/module-roadmap.md">
 # Module Roadmap & Ownership
@@ -732,6 +737,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 - [User Management — Akses Platform dan Tenant](specs/user-management.md)
 - [Product Management](specs/product-management.md)
+- [Tenant Management — Penonaktifan dan Aktivasi Kembali Tenant](specs/tenant-management.md)
 - [Inventory Management](specs/inventory-management.md)
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
@@ -783,11 +789,13 @@ Akun internal platform dan tenant menggunakan satu role aktif. Backend memeriksa
 - Operator juga bisa memulai onboarding langsung. Kedua jalur menghasilkan tenant melalui proses provisioning yang sama setelah operator dan calon pemilik menyepakati URL final dan URL siap digunakan.
 - Pilihan utama adalah domain toko. Alamat Dagantara dengan jalur khusus, misalnya `toko.dagantara/nama-toko`, bisa digunakan berdasarkan kesepakatan. Satu alamat login yang aktif harus memetakan secara unik ke satu tenant. Pada alamat Dagantara, hostname dan jalur toko bersama-sama mengidentifikasi tenant.
 - Penyelesaian provisioning menyimpan tenant, pemetaan URL login, role bawaan `TENANT_ADMIN`, akun pemilik dengan nomor HP, serta hubungan pemilik ke tenant secara atomik. Untuk jalur pengajuan, penyelesaian juga menandai pengajuan sebagai selesai. Persetujuan ulang atau kegagalan di tengah proses tidak menghasilkan tenant atau akun ganda.
+- Tenant yang berhasil diprovisioning mulai berstatus `ACTIVE`. Alamat yang sudah dipetakan tetap dicadangkan selama tenant nonaktif. [Tenant Management](tenant-management.md#status-tenant-dan-pemetaan-url)
 - Sistem menghasilkan password sementara. Operator memberikan URL final, username, dan password sementara kepada pemilik. Detail pembuatan domain dan penyiapan frontend merupakan tanggung jawab alur terpisah.
 
 ### Login dan konteks tenant
 
 - Pada URL toko, form login menerima username dan password. Backend menentukan tenant kandidat dari pemetaan URL yang sudah disiapkan, lalu mencocokkan username dan password dengan akun yang terdaftar di tenant tersebut. Username unik per tenant. Akun platform memakai username yang unik di lingkup platform dan masuk melalui akses platform.
+- Tenant nonaktif menolak login internal dan mencabut sesi tenant yang sudah berjalan. Aktivasi tenant kembali mengizinkan akun yang memenuhi syarat untuk login ulang. [Tenant Management](tenant-management.md#akses-internal-tenant-nonaktif)
 - Setelah login, konteks akses berasal dari akun terautentikasi dan `users.tenant_id`. Jika request memakai URL yang memetakan tenant, pemetaan itu juga harus cocok dengan tenant akun. Nilai tenant dari body, query, atau header yang dikirim klien tidak memberi hak akses atas tenant tersebut.
 - Untuk operasi tenant, backend memeriksa permission dan membatasi pencarian, perubahan, penghapusan, relasi, dan daftar berdasarkan tenant akun. Filter tenant berlaku sebelum pagination dan penghitungan total. Untuk produk, keputusan [PM-01](product-management.md#functional-specification) menetapkan `products.tenant_id` sebagai pemilik. Akses sumber daya memakai ID dan tenant secara bersamaan.
 - Pada operasi yang dilindungi, respons `401` berlaku saat autentikasi tidak valid dan `403` saat akun terautentikasi kurang izin. Pencarian objek di luar cakupan tenant memberikan `404` seperti objek yang tidak ditemukan di tenant sendiri.
@@ -1132,6 +1140,7 @@ Referensi Tenant Admin menempatkan Products, Categories, Brands, Collections, da
 
 - Status tersimpan adalah `DRAFT` dan `PUBLISHED`. Buat produk sebagai `DRAFT`. Penerbitan memerlukan harga yang sah dan setidaknya satu varian. Menarik produk mengubahnya kembali ke `DRAFT`. Produk Draft juga dapat menerima stok. Pengiriman ulang status yang sudah aktif bersifat idempoten.
 - Pemetaan domain aktif atau pasangan hostname dan jalur toko menentukan tenant publik. Gunakan pemetaan yang diverifikasi server. Identitas tenant dari parameter klien tidak memberi akses ke katalog lain. Tenant atau target publik yang tidak tersedia, produk Draft, dan produk milik tenant lain menghasilkan `404` yang setara.
+- Tenant nonaktif mempertahankan alamat tokonya. API publik mengembalikan `404`, dan halaman katalog menampilkan “Toko tidak tersedia” sampai tenant diaktifkan kembali. [Tenant Management](tenant-management.md#url-publik-tenant-nonaktif)
 - Daftar publik menampilkan kartu dengan nama, harga rupiah, dan foto pertama bila tersedia. Detail menampilkan nama, harga, deskripsi bila tersedia, kategori, galeri, serta opsi dan kombinasi varian yang terdaftar. ID produk dan varian pada respons publik cukup untuk resolusi dan tampilan.
 - Galeri awal menampilkan media produk dalam urutan tetap. Saat ada nilai terpilih yang punya media, tampilkan media untuk nilai terpilih pertama menurut urutan opsi. Tampilkan galeri awal bila tidak ada nilai terpilih yang memiliki foto. Pada contoh Warna lalu Ukuran, memilih Hitam menampilkan foto Hitam, dan pemilihan ukuran tidak menggantinya jika foto Hitam tersedia.
 - Untuk produk beropsi, evaluasi stok saat pilihan membentuk satu varian terdaftar. Pilihan yang belum lengkap meminta pengunjung melengkapinya. Kombinasi yang tidak terdaftar ditandai sebagai kombinasi yang tidak disediakan toko. Produk tanpa opsi langsung menggunakan varian bawaan.
@@ -1284,6 +1293,82 @@ Petakan Toko A lewat prefiks di hostname platform dan Toko B lewat hostname lang
 Spec ini memperluas daftar publik yang tersedia melalui [Product 03 — Publikasi dan storefront tenant](../tickets/product-management/03-publikasi-dan-storefront.md). Bukti isolasi dan visibilitas katalog mengikuti IG-01 dan IG-02. [Module Roadmap](../planning/module-roadmap.md#module-matrix) · [Development Dependencies](../planning/development-dependencies.md#integration-gates--acceptance-scenarios)
 </script>
 
+  <script id="offline-tenant-management" type="text/markdown" data-doc="specs/tenant-management.md">
+# Tenant Management — Penonaktifan dan Aktivasi Kembali Tenant
+
+## Problem Statement
+
+Operator platform perlu menemukan toko yang sudah diprovisioning, menghentikan aksesnya, dan memulihkannya tanpa kehilangan alamat atau data toko. Pemilik dan staf perlu mengetahui kapan mereka dapat kembali bekerja. Pengunjung yang membuka tautan saat toko nonaktif perlu mendapat pesan yang jelas tanpa melihat katalog toko.
+
+## Solution
+
+Operator berizin melihat daftar tenant dan mengubah status tenant yang dipilih. Saat tenant nonaktif, storefront dan akses internal ditutup. Saat diaktifkan kembali, storefront tersedia di alamat yang sama, data toko tetap tersedia, dan akun internal yang memenuhi syarat dapat login ulang.
+
+## User Stories
+
+1. **TM-01** — Sebagai operator platform dengan izin baca, saya dapat melihat ID, nama, URL toko, dan status semua tenant yang sudah diprovisioning agar dapat membedakan toko bernama sama dan memilih target yang tepat.
+2. **TM-02** — Sebagai operator platform dengan izin penonaktifan atau aktivasi kembali, saya dapat melakukan tindakan yang diizinkan pada tenant yang dipilih agar dapat menghentikan atau memulihkan aksesnya.
+3. **TM-03** — Sebagai pengunjung, saya mendapat pesan “Toko tidak tersedia” saat membuka halaman katalog tenant nonaktif, dan saya dapat memakai kembali tautan yang sama setelah toko aktif.
+4. **TM-04** — Sebagai pemilik atau staf tenant, akses internal saya berhenti saat tenant nonaktif. Setelah tenant aktif kembali, saya dapat login ulang jika akun saya masih memenuhi syarat.
+
+## Implementation Decisions
+
+### Status tenant dan pemetaan URL
+
+- Simpan status pada `tenants` dengan nilai `ACTIVE` atau `INACTIVE`. Tenant yang sudah ada berstatus `ACTIVE` saat migrasi. Penyelesaian pengajuan dan onboarding langsung membuat tenant `ACTIVE` dalam transaksi provisioning yang sudah berlaku. [User Management](user-management.md#pengajuan-dan-provisioning-tenant)
+- Pertahankan pemetaan unik `(hostname, shop_path)` pada `tenant_domains` untuk domain toko dan alamat Dagantara dengan jalur toko. Penonaktifan tetap mencadangkan alamat itu. Provisioning tenant lain dengan alamat yang sama menghasilkan `409 LOGIN_URL_IN_USE`.
+- Perubahan status berlaku pada tenant yang ditargetkan saja. Pertahankan ID tenant, pemetaan URL, status akun dan role, serta data operasional seperti katalog dan stok. Aktivasi kembali membuka akses melalui pemetaan yang sama.
+
+### URL publik tenant nonaktif
+
+- Tentukan tenant dari pemetaan yang diperiksa server, lalu periksa status aktif sebelum membaca data publik. Pada tenant nonaktif, API storefront mengembalikan `404 NOT_FOUND` seperti alamat toko yang tidak terpetakan. Respons tidak memuat data toko.
+- Halaman daftar `/products` dan detail `/products/{productId}`, relatif terhadap URL toko, mengembalikan HTML `404` dengan pesan umum “Toko tidak tersedia” bagi pengunjung tenant nonaktif. Setelah aktivasi kembali, halaman dan API mengikuti aturan publikasi yang berlaku. [Product Management — PM-08](product-management.md#publikasi-dan-storefront)
+
+### Akses internal tenant nonaktif
+
+- Tolak login pemilik, admin, dan staf tenant nonaktif dengan `401 INVALID_CREDENTIALS`. Permintaan ke rute internal yang dilindungi dengan sesi yang dicabut menghasilkan `401`.
+- Terapkan perubahan status dan pencabutan sesi tenant dalam satu transaksi saat berpindah dari `ACTIVE` ke `INACTIVE`. Setelah transaksi berhasil, permintaan baru dengan sesi terdahulu ditolak. Pertahankan pemeriksaan status tenant di jalur login dan validasi sesi.
+- Setelah aktivasi kembali, sesi yang telah dicabut tetap tidak berlaku. Akun yang masih memenuhi syarat bisa login ulang dengan kredensialnya, termasuk mengikuti kewajiban ganti password sementara jika berlaku. [User Management](user-management.md#login-dan-konteks-tenant)
+
+### API pengelolaan tenant
+
+- Gunakan akses platform dan permission eksplisit dari role efektif. Berikan ketiga permission pada role Admin Platform bawaan dan sediakan melalui mekanisme delegasi platform yang berlaku. Izin `tenants.provision` hanya mencakup provisioning. [User Management](user-management.md#role-permission-dan-akun-yang-dilindungi)
+- Respons daftar dan tindakan memakai `ApiResponse` dengan data `id` (UUID), `name`, `storeAddress`, dan `status`. `storeAddress` menampilkan hostname dan jalur toko yang tersimpan, misalnya `toko.dagantara/kopi-gayo` atau `kopigayo.example`. Nilai ini berlaku juga untuk tenant lama yang hanya menyimpan hostname dan jalur.
+- Daftar berisi tenant aktif dan nonaktif. Gunakan pagination standar API (`page` dan `size`) dengan urutan nama lalu ID agar hasil tetap deterministik untuk toko bernama sama.
+
+| Operasi | Permission platform | Hasil sukses |
+| --- | --- | --- |
+| `GET /api/v1/tenants` | `tenants.read` | `200` dengan daftar tenant dan metadata pagination. |
+| `POST /api/v1/tenants/{tenantId}/deactivate` | `tenants.deactivate` | `200` dengan tenant berstatus `INACTIVE`. |
+| `POST /api/v1/tenants/{tenantId}/reactivate` | `tenants.activate` | `200` dengan tenant berstatus `ACTIVE`. |
+
+- Kembalikan `401` untuk permintaan tanpa autentikasi yang valid, `403` untuk akun terautentikasi tanpa cakupan atau izin yang sesuai, dan `404` untuk ID tenant yang tidak ditemukan setelah pemeriksaan izin.
+- Periksa izin tindakan pada setiap permintaan. Permintaan berizin untuk status yang sudah berlaku mengembalikan status itu tanpa melakukan perubahan tambahan. Serialisasikan perubahan status pada tenant yang sama agar status dan pencabutan sesi konsisten.
+
+## Testing Decisions
+
+Gunakan Bruno untuk pengujian HTTP dengan `bru run --env Local` dari `bruno/`. Gunakan browser untuk memeriksa halaman storefront tanpa login. Siapkan tenant dengan domain toko dan tenant dengan jalur Dagantara, masing-masing dengan produk terbit dan akun internal. Jalankan siklus nonaktif dan aktif kembali untuk kedua jenis alamat secara bergantian agar tenant lainnya menjadi pembanding yang tetap aktif.
+
+| ID | Requirement | Metode | Kriteria penerimaan |
+| --- | --- | --- | --- |
+| **TM-AT-01** | TM-01 | Bruno | Selesaikan provisioning dari pengajuan dan onboarding langsung. Operator dengan `tenants.read` melihat kedua tenant berstatus `ACTIVE` beserta ID, nama, dan alamat masing-masing. Tenant dari data uji sebelum migrasi juga muncul sebagai `ACTIVE` dengan ID dan alamat yang sama. Dua toko bernama sama tetap dapat dibedakan berdasarkan ID dan alamat. Setelah tenant dinonaktifkan, daftar masih memuatnya dengan status `INACTIVE`. |
+| **TM-AT-02** | TM-01, TM-02 | Bruno | Operator dengan izin yang sesuai dapat menonaktifkan dan mengaktifkan kembali tenant. Ulangi tiap tindakan dan pastikan status tetap konsisten. Uji permintaan anonim, akun tenant, operator dengan izin provisioning saja, serta operator yang hanya memiliki izin untuk tindakan sebaliknya. Pastikan daftar atau tindakan ditolak sesuai izin dan periksa kembali status setelah penolakan. Uji juga `404` untuk ID tenant yang tidak dikenal dengan operator berizin. |
+| **TM-AT-03** | TM-02, TM-03 | Bruno | Setelah penonaktifan, API daftar dan detail produk memberi `404` tanpa data toko. Provisioning tenant lain dengan pemetaan yang sama memberi `409`, dan daftar tenant menunjukkan hanya tenant asal memiliki alamat tersebut. Tenant pembanding tetap `ACTIVE` dan katalog publiknya tersedia. Setelah aktivasi kembali, API di alamat asal mengembalikan daftar dan detail produk yang sama. |
+| **TM-AT-04** | TM-02, TM-04 | Bruno | Login sebagai pemilik dan staf aktif sebelum penonaktifan. Setelah penonaktifan, coba login baru dan lakukan permintaan internal dengan sesi lama. Keduanya ditolak dengan `401`. Setelah aktivasi kembali, sesi lama tetap ditolak, akun aktif bisa login ulang, dan akun yang sudah nonaktif sebelumnya tetap ditolak. Baca kembali data katalog atau stok untuk memastikan data tenant tetap tersedia. |
+| **TM-AT-05** | TM-03 | Browser | Buka daftar dan detail produk sebelum penonaktifan. Setelah penonaktifan, muat ulang daftar dan buka tautan langsung ke detail. Keduanya menampilkan “Toko tidak tersedia” tanpa katalog. Setelah aktivasi kembali, tautan yang sama menampilkan katalog dan detail produk. |
+
+## Out of Scope
+
+- Penggantian URL toko setelah provisioning ditunda menjadi enhancement. URL yang disepakati saat onboarding tetap digunakan saat tenant aktif, nonaktif, dan aktif kembali.
+- Otomasi penyiapan domain, penghapusan tenant, pengarsipan tenant, dan UI operator platform.
+
+## Further Notes
+
+**Enhancement — Penggantian URL toko.** Cakup perpindahan yang dilakukan operator setelah alamat tujuan siap. Desain enhancement perlu menetapkan perpindahan pemetaan storefront dan login secara atomik, penanganan konflik alamat, serta perilaku URL lama.
+
+Cakupan ini menyelesaikan keputusan status tenant dan akses storefront pada [DEP-01](../planning/development-dependencies.md#dep-01-tenant-lifecycle). Verifikasi isolasi domain mengikuti [IG-01](../planning/development-dependencies.md#integration-gates--acceptance-scenarios).
+</script>
+
   <script id="offline-progress" type="text/markdown" data-doc="planning/progress.md">
 # Progres Modul Dagantara
 
@@ -1331,29 +1416,8 @@ Bahas perubahan berikutnya untuk Product Management. Baca docs/specs/product-man
 
 ### Tenant Management
 
-- [ ] Spec selesai — [Draf spec](../specs/tenant-management.md). Onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
+- [x] Spec selesai — [Penonaktifan dan Aktivasi Kembali Tenant](../specs/tenant-management.md). [Penggantian URL toko](../specs/tenant-management.md#further-notes) dicatat sebagai enhancement.
 - [ ] Kode selesai
-
-<details>
-<summary>Prompt spec Tenant Management</summary>
-
-```text
-$write-module-spec
-
-Gunakan docs/specs/tenant-management.md sebagai kerangka awal.
-Bahas Tenant Management dari DEP-01 dan alur onboarding di docs/specs/user-management.md.
-Mulai dari satu keputusan. Saat tenant dinonaktifkan, apa yang harus terjadi pada URL toko
-publiknya?
-
-Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
-saya sebelum lanjut dan catat tambahan yang disepakati.
-
-Rangkum cakupan dan kriteria penerimaan untuk saya konfirmasi. Setelah saya setuju,
-lengkapi draf yang sama sesuai template skill, tautkan spec dari docs/README.md, dan
-perbarui Progres Modul.
-```
-
-</details>
 
 <details>
 <summary>Prompt implementasi Tenant Management</summary>
@@ -1361,13 +1425,9 @@ perbarui Progres Modul.
 ```text
 $implement-from-spec tenant-management
 
-Baca docs/specs/tenant-management.md dan cek status modul di docs/planning/progress.md.
-Mulai implementasi setelah spec dan cakupan pengerjaan disetujui. Jika spec masih draf
-atau tiket masih menunggu persetujuan, laporkan prasyarat yang tertahan.
-
-Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
-ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
-dilacak terverifikasi.
+Implementasikan Tenant Management v1 sesuai docs/specs/tenant-management.md.
+Verifikasi TM-AT-01 sampai TM-AT-04 dengan Bruno dan TM-AT-05 dengan browser.
+Perbarui Kode selesai di Progres Modul setelah seluruh cakupan terverifikasi.
 ```
 
 </details>

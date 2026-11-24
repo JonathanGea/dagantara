@@ -109,7 +109,6 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 
 | ID | Decision needed | Blocks |
 | --- | --- | --- |
-| DEP-01 | Tenant/domain lifecycle and inactive-tenant behavior. The URL mapping used by the current storefront is defined in [Product Management](../specs/product-management.md#publikasi-dan-storefront). | Tenant lifecycle changes and how they affect public storefront access |
 | DEP-02 | Cart rules for adding or updating items when a product is withdrawn, a variant is unavailable, or stock changes. | Cart integration |
 | DEP-03 | Reservation duration, expiration and payment verification timing | Inventory/Order/Payment integration |
 | DEP-04 | Guest checkout and customer identity policy | Customer/Cart/Checkout |
@@ -120,3 +119,9 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 Discovery already has the publication and availability rules it needs through [PM-07 and PM-08](../specs/product-management.md#publikasi-dan-storefront) and [IM-05](../specs/inventory-management.md#ketersediaan-untuk-storefront). [Product Discovery](../specs/product-discovery.md#tenant-publikasi-dan-stok) applies those rules to public search and filters.
 
 Resolve blockers in their module specifications and link stable requirement IDs before implementation.
+
+## Resolved Decisions
+
+### DEP-01 Tenant lifecycle
+
+[Tenant Management v1](../specs/tenant-management.md#implementation-decisions) defines how operators change tenant status, how inactive tenants retain their store address, and how storefront and internal access are suspended and restored. [Changing the store URL](../specs/tenant-management.md#further-notes) is a deferred enhancement.
