@@ -3,7 +3,6 @@ $ErrorActionPreference = 'Stop'
 $docsRoot = Split-Path -Parent $PSScriptRoot
 $repoRoot = Split-Path -Parent $docsRoot
 $skillsRoot = Join-Path $repoRoot '.agents\skills'
-$publicSkillsPath = Join-Path $PSScriptRoot 'skills'
 $indexPath = Join-Path $docsRoot 'index.html'
 
 function Set-OfflineBlock($html, $id, $content) {
@@ -22,7 +21,6 @@ function Set-OfflineBlock($html, $id, $content) {
     }, 1)
 }
 
-New-Item -ItemType Directory -Path $publicSkillsPath -Force | Out-Null
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 $skills = @()
 foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
@@ -43,18 +41,15 @@ foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
         ''
     }
 
-    # Published skill files share a directory and retain the source files' depth.
-    $publicContent = $content -replace '(?<=\]\()\.\./([\w-]+)/SKILL\.md(?=[#)])', '$1.md'
+    # The viewer resolves skill links from their legacy Markdown paths.
+    $embeddedContent = $content -replace '(?<=\]\()\.\./([\w-]+)/SKILL\.md(?=[#)])', '../../index.html?skill=$1'
     # Keep the embedded JSON stable across checkouts with different line endings.
     $skills += [pscustomobject]@{
         id = $directory.Name
         title = $title
         description = $description
-        markdown = $publicContent -replace '\r?\n', "`r`n"
+        markdown = $embeddedContent -replace '\r?\n', "`r`n"
     }
-
-    $publicPath = Join-Path $publicSkillsPath ($directory.Name + '.md')
-    [System.IO.File]::WriteAllText($publicPath, $publicContent, $utf8)
 }
 $skills = @($skills | Sort-Object id)
 
@@ -70,4 +65,4 @@ foreach ($block in $documentBlocks) {
 }
 [System.IO.File]::WriteAllText($indexPath, ($indexHtml -replace '\r?\n', [Environment]::NewLine), $utf8)
 
-Write-Output "Generated $($skills.Count) public skill pages and embedded viewer data."
+Write-Output "Embedded $($skills.Count) skills and Markdown fallback data in docs/index.html."

@@ -25,4 +25,4 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 ## Regenerasi viewer
 
-Setelah mengubah skill atau dokumen yang tampil di viewer, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip memperbarui salinan publik skill dan data yang tertanam di `index.html`. Untuk halaman Markdown baru, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
+Setelah mengubah skill atau dokumen yang tampil di viewer, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/` dan salinan dokumen di `index.html`. Untuk halaman Markdown baru, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.

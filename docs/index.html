@@ -30,10 +30,14 @@
     .small-icon {width:15px;height:15px;stroke-width:1.8}
     .side-scroll::-webkit-scrollbar,.toc-scroll::-webkit-scrollbar {width:6px}
     .side-scroll::-webkit-scrollbar-thumb,.toc-scroll::-webkit-scrollbar-thumb {background:#d9d9d5;border-radius:8px}
-    .side-link {display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:6px 10px;border-radius:6px;color:#5e5e5b;min-height:32px;font-size:13px;line-height:1.35;transition:background .14s,color .14s}
+    #sidebar {font-size:13px}
+    .side-link {display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:6px 10px;border-radius:6px;color:#5e5e5b;min-height:32px;line-height:1.35;transition:background .14s,color .14s}
     .side-link:hover,.side-link.active {background:#e9e9e7;color:#37352f}
     .side-link.active {font-weight:600}
-    .side-link span:last-child {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sidebar-icon {width:16px;height:16px;flex:none;stroke-width:1.75;color:#777670}
+    .sidebar-label {flex:1;min-width:0;overflow-wrap:anywhere}
+    .sidebar-group-label {margin:0 10px 4px;color:#666560;font-size:11px;font-weight:600;letter-spacing:.035em}
+    .sidebar-brand-mark {display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:6px;background:#242321;color:white}
     .cmd-key {font-size:11px;color:#9a9a97;border:1px solid #dededb;padding:2px 5px;border-radius:4px;line-height:1.1}
     .toc-link {display:block;padding:4px 0 4px 12px;border-left:1px solid transparent;color:#9b9a97;font-size:12px;line-height:1.6;text-decoration:none;transition:color .15s}
     .toc-link:hover {color:#37352f}
@@ -110,6 +114,7 @@
       #sidebar,#main-area,#sidebar-scrim {transition:none!important}
     }
     @media (max-width:639px) {
+      #sidebar .side-link {min-height:40px}
       .doc-content {font-size:14.5px;line-height:1.78}
       .doc-content h1 {font-size:33px;letter-spacing:-1px}
       .doc-content h2 {font-size:21px;margin-top:42px}
@@ -133,53 +138,39 @@
   <div id="sidebar-scrim" class="fixed inset-0 z-50 bg-black/30 lg:hidden" aria-hidden="true"></div>
 
   <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-[264px] bg-[#f7f7f5] border-r border-[#eaeae8] flex flex-col z-40" aria-label="Navigasi dokumentasi">
-    <div class="px-3 pt-3 pb-2 flex items-center gap-1">
-      <button id="workspace-button" class="flex flex-1 min-w-0 items-center gap-2 p-1.5 rounded-md hover:bg-[#efefed] text-left" title="Dagantara Workspace">
-        <span class="w-[29px] h-[29px] bg-[#242321] text-white rounded-[6px] text-[17px] font-bold flex items-center justify-center tracking-[-2px] pr-[2px]" aria-hidden="true">N</span>
-        <span class="flex-1 min-w-0">
-          <span class="block text-[13px] font-semibold text-[#37352f] leading-tight">Dagantara</span>
-          <span class="block text-[11px] text-[#9b9a97] leading-tight mt-[3px]">Engineering workspace</span>
-        </span>
-        <i data-lucide="chevrons-up-down" class="small-icon text-[#a5a5a0]"></i>
+    <div class="px-3 pt-3 pb-2">
+      <button id="workspace-button" type="button" class="side-link font-semibold" title="Dagantara Workspace">
+        <span class="sidebar-brand-mark" aria-hidden="true">D</span>
+        <span class="sidebar-label">Dagantara</span>
       </button>
     </div>
 
     <div class="px-3 mt-2">
-      <button id="search-trigger" class="side-link group" aria-label="Cari dokumentasi">
-        <i data-lucide="search" class="icon text-[#888782]"></i><span class="flex-1">Search</span>
+      <button id="search-trigger" type="button" class="side-link" aria-label="Cari dokumentasi">
+        <i data-lucide="search" class="sidebar-icon" aria-hidden="true"></i><span class="sidebar-label">Search</span>
         <span class="hidden sm:inline cmd-key" aria-hidden="true">Ctrl K</span>
       </button>
-      <button id="overview-trigger" class="side-link" aria-label="Kembali ke atas dokumen">
-        <i data-lucide="house" class="icon text-[#888782]"></i><span>Overview</span>
+      <button id="overview-trigger" type="button" class="side-link" aria-label="Kembali ke atas dokumen">
+        <i data-lucide="house" class="sidebar-icon" aria-hidden="true"></i><span class="sidebar-label">Overview</span>
       </button>
     </div>
 
     <div class="h-px bg-[#eaeae8] mx-4 mt-4 mb-3"></div>
-    <div class="flex items-center justify-between px-[21px] mb-2">
-      <span class="text-[11px] font-semibold tracking-[.03em] text-[#999893]">PRIVATE</span>
-      <i data-lucide="more-horizontal" class="small-icon text-[#aaa9a5]"></i>
-    </div>
     <div class="px-3 mb-1">
+      <div class="sidebar-group-label">DOCUMENTATION</div>
       <button type="button" class="side-link active" id="page-sidebar-root">
-        <i data-lucide="file-text" class="icon text-[#676661]"></i>
-        <span>Developer Documentation</span>
+        <i data-lucide="file-text" class="sidebar-icon" aria-hidden="true"></i>
+        <span class="sidebar-label">Developer Documentation</span>
       </button>
     </div>
     <div class="overflow-y-auto side-scroll flex-1 px-3 pb-7">
       <div id="sidebar-pages" class="space-y-[2px] mb-4"></div>
       <div id="skills-section" class="mb-4">
-        <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">SKILLS</div>
+        <div class="sidebar-group-label">SKILLS</div>
         <div id="sidebar-skills" class="space-y-[2px]"></div>
       </div>
-      <div class="text-[10px] font-semibold tracking-wider text-[#a2a19b] px-3 mb-1">ON THIS PAGE</div>
-      <div id="sidebar-sections" class="pl-[16px] ml-[17px] border-l border-[#e3e3df] space-y-[2px]"></div>
-    </div>
-    <div class="border-t border-[#e9e9e7] p-3">
-      <div class="flex items-center gap-2 px-2 py-2 text-[12px] text-[#969591]">
-        <i data-lucide="book-open-text" class="small-icon"></i>
-        <span>Docs for developers</span>
-        <span class="ml-auto">v0.1</span>
-      </div>
+      <div class="sidebar-group-label">ON THIS PAGE</div>
+      <div id="sidebar-sections" class="space-y-[2px]"></div>
     </div>
   </aside>
 
@@ -283,7 +274,7 @@
         "id":  "create-postgres-database",
         "title":  "Membuat database PostgreSQL Dagantara",
         "description":  "Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.",
-        "markdown":  "---\r\nname: create-postgres-database\r\ndescription: Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.\r\n---\r\n\r\n# Membuat database PostgreSQL Dagantara\r\n\r\nJalankan skrip dari root repo untuk menyiapkan instance lokal dengan PostgreSQL 16 yang sudah terpasang. Skrip menggunakan kredensial Windows terenkripsi di luar repo dan memeriksa koneksi sebagai `dagantara_app`.\r\n\r\n```powershell\r\n$result = \u0026 .\\.agents\\skills\\create-postgres-database\\scripts\\create-database.ps1\r\n$result\r\n```\r\n\r\nDefault-nya adalah `127.0.0.1:5433` dengan data di `%LOCALAPPDATA%\\Dagantara\\postgresql-16`. Skrip memakai ulang instance tersebut, menyalakannya bila berhenti, dan mengisi role atau database yang masih belum ada. Gunakan `-PgBin` jika lokasi binary PostgreSQL 16 berbeda. Untuk instance tambahan yang memang diminta, gunakan nama direktori lokal dan port yang berbeda, misalnya `-StateName Dagantara-Test -Port 15433`. Periksa konflik port sebelum memilih instance tambahan.\r\n\r\nJika pengguna memilih instance PostgreSQL yang sudah ada, gunakan kredensial admin yang sah pada instance tersebut. Ikuti penyiapan database dan konfigurasi koneksi di [README backend](../../../backend/README.md#development), lalu verifikasi koneksi dengan akun aplikasi. Jika instance tersebut meminta password yang tidak tersedia, instance lokal terpisah adalah opsi ketika targetnya belum ditetapkan. Pertahankan konfigurasi, kredensial, dan data instance yang sudah ada.\r\n\r\nLaporkan URL JDBC, nama akun aplikasi, status verifikasi, dan lokasi berkas kredensial tanpa menampilkan password. Untuk menjalankan backend, muat nilai yang dikembalikan skrip ke terminal yang sama.\r\n\r\n```powershell\r\n$db = Import-Clixml -LiteralPath $result.CredentialPath\r\n$env:SPRING_DATASOURCE_URL = $result.JdbcUrl\r\n$env:SPRING_DATASOURCE_USERNAME = $db.UserName\r\n$env:SPRING_DATASOURCE_PASSWORD = $db.GetNetworkCredential().Password\r\n```\r\n\r\nJika backend juga diminta berjalan, ikuti panduan [spring-boot-run](spring-boot-run.md) dan cek `/actuator/health/db` dengan pengaturan Actuator lokal di README backend. Untuk membuat tabel atau migrasi, gunakan [spring-boot-database](spring-boot-database.md).\r\n"
+        "markdown":  "---\r\nname: create-postgres-database\r\ndescription: Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.\r\n---\r\n\r\n# Membuat database PostgreSQL Dagantara\r\n\r\nJalankan skrip dari root repo untuk menyiapkan instance lokal dengan PostgreSQL 16 yang sudah terpasang. Skrip menggunakan kredensial Windows terenkripsi di luar repo dan memeriksa koneksi sebagai `dagantara_app`.\r\n\r\n```powershell\r\n$result = \u0026 .\\.agents\\skills\\create-postgres-database\\scripts\\create-database.ps1\r\n$result\r\n```\r\n\r\nDefault-nya adalah `127.0.0.1:5433` dengan data di `%LOCALAPPDATA%\\Dagantara\\postgresql-16`. Skrip memakai ulang instance tersebut, menyalakannya bila berhenti, dan mengisi role atau database yang masih belum ada. Gunakan `-PgBin` jika lokasi binary PostgreSQL 16 berbeda. Untuk instance tambahan yang memang diminta, gunakan nama direktori lokal dan port yang berbeda, misalnya `-StateName Dagantara-Test -Port 15433`. Periksa konflik port sebelum memilih instance tambahan.\r\n\r\nJika pengguna memilih instance PostgreSQL yang sudah ada, gunakan kredensial admin yang sah pada instance tersebut. Ikuti penyiapan database dan konfigurasi koneksi di [README backend](../../../backend/README.md#development), lalu verifikasi koneksi dengan akun aplikasi. Jika instance tersebut meminta password yang tidak tersedia, instance lokal terpisah adalah opsi ketika targetnya belum ditetapkan. Pertahankan konfigurasi, kredensial, dan data instance yang sudah ada.\r\n\r\nLaporkan URL JDBC, nama akun aplikasi, status verifikasi, dan lokasi berkas kredensial tanpa menampilkan password. Untuk menjalankan backend, muat nilai yang dikembalikan skrip ke terminal yang sama.\r\n\r\n```powershell\r\n$db = Import-Clixml -LiteralPath $result.CredentialPath\r\n$env:SPRING_DATASOURCE_URL = $result.JdbcUrl\r\n$env:SPRING_DATASOURCE_USERNAME = $db.UserName\r\n$env:SPRING_DATASOURCE_PASSWORD = $db.GetNetworkCredential().Password\r\n```\r\n\r\nJika backend juga diminta berjalan, ikuti panduan [spring-boot-run](../../index.html?skill=spring-boot-run) dan cek `/actuator/health/db` dengan pengaturan Actuator lokal di README backend. Untuk membuat tabel atau migrasi, gunakan [spring-boot-database](../../index.html?skill=spring-boot-database).\r\n"
     },
     {
         "id":  "design-ui",
@@ -542,7 +533,7 @@ Buka chat Codex di root proyek. Tekan **Copy** pada blok prompt yang sesuai, lal
 
 ## $write-module-spec
 
-Gunakan saat ide atau perubahan perilaku masih perlu dibahas. Skill ini merangkum keputusan untuk dikonfirmasi, lalu menulis spesifikasi dan mengusulkan pembagian tiket jika perlu. [Instruksi skill](../viewer/skills/write-module-spec.md)
+Gunakan saat ide atau perubahan perilaku masih perlu dibahas. Skill ini merangkum keputusan untuk dikonfirmasi, lalu menulis spesifikasi dan mengusulkan pembagian tiket jika perlu. [Instruksi skill](../index.html?skill=write-module-spec)
 
 ```text
 $write-module-spec Bahas fitur undangan pengguna lewat email untuk Dagantara.
@@ -553,7 +544,7 @@ keputusan dan rangkum skenario uji sebelum meminta konfirmasi untuk menulis spec
 
 ## $design-ui
 
-Gunakan untuk merancang layout, halaman, atau alur yang akan ditinjau. Mulai dari brief, aplikasi yang berjalan, atau spec. Untuk memakai skill ini di proyek lain, salin folder `.agents/skills/design-ui` ke lokasi skill yang dipakai proyek atau akun Codex kamu. [Instruksi skill](../viewer/skills/design-ui.md)
+Gunakan untuk merancang layout, halaman, atau alur yang akan ditinjau. Mulai dari brief, aplikasi yang berjalan, atau spec. Untuk memakai skill ini di proyek lain, salin folder `.agents/skills/design-ui` ke lokasi skill yang dipakai proyek atau akun Codex kamu. [Instruksi skill](../index.html?skill=design-ui)
 
 **Contoh layout dasar tanpa spec**
 
@@ -581,7 +572,7 @@ wireframe untuk pencarian, hasil, dan kondisi tanpa hasil untuk saya tinjau.
 
 ## $implement-from-spec
 
-Gunakan untuk membangun dan memverifikasi cakupan yang disepakati. Pilih spec lewat slug, tiket lewat slug dan nomor, atau cakupan modul lewat path dan ID requirement. Untuk tiket, pastikan statusnya `ready-for-agent` dan prasyaratnya sudah tersedia di branch dasar. Pengujian API HTTP dalam cakupan dijalankan dengan `$bruno-api-testing` sebagai bagian dari verifikasi. [Instruksi skill](../viewer/skills/implement-from-spec.md)
+Gunakan untuk membangun dan memverifikasi cakupan yang disepakati. Pilih spec lewat slug, tiket lewat slug dan nomor, atau cakupan modul lewat path dan ID requirement. Untuk tiket, pastikan statusnya `ready-for-agent` dan prasyaratnya sudah tersedia di branch dasar. Pengujian API HTTP dalam cakupan dijalankan dengan `$bruno-api-testing` sebagai bagian dari verifikasi. [Instruksi skill](../index.html?skill=implement-from-spec)
 
 ```text
 $implement-from-spec @docs/specs/user-management.md UM-01 UM-02
@@ -598,7 +589,7 @@ $implement-from-spec @docs/specs/user-management.md
 
 ## $spring-boot-api
 
-Gunakan untuk mengerjakan atau meninjau controller, DTO, validasi input, serta kontrak respons dan error. Contoh ini meminta peninjauan kontrak yang tersedia. [Instruksi skill](../viewer/skills/spring-boot-api.md)
+Gunakan untuk mengerjakan atau meninjau controller, DTO, validasi input, serta kontrak respons dan error. Contoh ini meminta peninjauan kontrak yang tersedia. [Instruksi skill](../index.html?skill=spring-boot-api)
 
 ```text
 $spring-boot-api Tinjau kontrak REST untuk pembuatan pengguna pada UM-01 dan UM-02.
@@ -608,7 +599,7 @@ Laporkan yang sesuai dengan spec dan tunjukkan keputusan kontrak yang masih terb
 
 ## $spring-boot-database
 
-Gunakan untuk merancang atau mengubah migration, entity, relasi, query, dan transaksi. Hubungkan perubahan data dengan aturan dan skenario yang sudah diputuskan. [Instruksi skill](../viewer/skills/spring-boot-database.md)
+Gunakan untuk merancang atau mengubah migration, entity, relasi, query, dan transaksi. Hubungkan perubahan data dengan aturan dan skenario yang sudah diputuskan. [Instruksi skill](../index.html?skill=spring-boot-database)
 
 ```text
 $spring-boot-database Rancang perubahan PostgreSQL dan JPA untuk PM-03 dan PM-04.
@@ -619,7 +610,7 @@ PM-AT-03 dan PM-AT-04.
 
 ## $spring-boot-security
 
-Gunakan untuk autentikasi, pemetaan role dan permission, serta isolasi tenant. Contoh ini meninjau keamanan alur tambah pengguna. [Instruksi skill](../viewer/skills/spring-boot-security.md)
+Gunakan untuk autentikasi, pemetaan role dan permission, serta isolasi tenant. Contoh ini meninjau keamanan alur tambah pengguna. [Instruksi skill](../index.html?skill=spring-boot-security)
 
 ```text
 $spring-boot-security Tinjau izin pada alur tambah pengguna berdasarkan UM-01,
@@ -630,7 +621,7 @@ dan bagian yang masih tergantung pada keputusan domain.
 
 ## $create-postgres-database
 
-Gunakan untuk menyiapkan PostgreSQL pengembangan Dagantara di Windows. Contoh ini memakai instance lokal bawaan dan meminta verifikasi koneksi dengan akun aplikasi. [Instruksi skill](../viewer/skills/create-postgres-database.md)
+Gunakan untuk menyiapkan PostgreSQL pengembangan Dagantara di Windows. Contoh ini memakai instance lokal bawaan dan meminta verifikasi koneksi dengan akun aplikasi. [Instruksi skill](../index.html?skill=create-postgres-database)
 
 ```text
 $create-postgres-database Siapkan PostgreSQL lokal Dagantara di Windows dengan
@@ -641,7 +632,7 @@ tanpa menampilkan kata sandi.
 
 ## $spring-boot-run
 
-Gunakan untuk menyalakan atau memeriksa backend lokal. Prompt ini meminta alamat untuk pengujian berikutnya dan membiarkan proses tetap berjalan. [Instruksi skill](../viewer/skills/spring-boot-run.md)
+Gunakan untuk menyalakan atau memeriksa backend lokal. Prompt ini meminta alamat untuk pengujian berikutnya dan membiarkan proses tetap berjalan. [Instruksi skill](../index.html?skill=spring-boot-run)
 
 ```text
 $spring-boot-run Jalankan backend Dagantara secara lokal untuk pengujian Bruno.
@@ -651,7 +642,7 @@ health jika tersedia, lalu biarkan backend tetap berjalan.
 
 ## $spring-boot-testing
 
-Gunakan untuk menulis atau menjalankan unit, MVC, integration, repository, dan security test Spring Boot. [Instruksi skill](../viewer/skills/spring-boot-testing.md)
+Gunakan untuk menulis atau menjalankan unit, MVC, integration, repository, dan security test Spring Boot. [Instruksi skill](../index.html?skill=spring-boot-testing)
 
 ```text
 $spring-boot-testing Jalankan tes Spring Boot untuk perubahan yang sedang
@@ -660,7 +651,7 @@ dikerjakan. Laporkan perintah, hasil, dan kriteria penerimaan yang dibuktikan.
 
 ## $bruno-api-testing
 
-Gunakan untuk menulis atau menjalankan smoke test dan skenario penerimaan API HTTP. Periksa status, isi respons yang dijanjikan, dan keadaan data sesudah aksi bila relevan. [Instruksi skill](../viewer/skills/bruno-api-testing.md)
+Gunakan untuk menulis atau menjalankan smoke test dan skenario penerimaan API HTTP. Periksa status, isi respons yang dijanjikan, dan keadaan data sesudah aksi bila relevan. [Instruksi skill](../index.html?skill=bruno-api-testing)
 
 ```text
 $bruno-api-testing Jalankan smoke test Dagantara dengan environment Local.
@@ -696,7 +687,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 ## Regenerasi viewer
 
-Setelah mengubah skill atau dokumen yang tampil di viewer, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip memperbarui salinan publik skill dan data yang tertanam di `index.html`. Untuk halaman Markdown baru, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
+Setelah mengubah skill atau dokumen yang tampil di viewer, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/` dan salinan dokumen di `index.html`. Untuk halaman Markdown baru, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
 </script>
   <script id="offline-user-management" type="text/plain" data-doc="specs/user-management.md">
 # User Management — Akses Platform dan Tenant
@@ -1402,15 +1393,28 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         }
         return result;
       }
+      function createSidebarButton(title, icon) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'side-link';
+        button.title = title;
+        const glyph = document.createElement('i');
+        glyph.className = 'sidebar-icon';
+        glyph.dataset.lucide = icon;
+        glyph.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span');
+        label.className = 'sidebar-label';
+        label.textContent = title;
+        button.append(glyph, label);
+        return button;
+      }
       function drawPageList() {
         const target=byId('sidebar-pages');
         target.replaceChildren();
         byId('page-sidebar-root').classList.toggle('active',currentFile==='README.md');
         for(const page of docPages) {
-          const button=document.createElement('button');
-          button.type='button';
-          button.className='side-link text-[12px]'+(currentFile===page.path?' active':'');
-          button.innerHTML=iconMarkup('file-text','w-[14px] h-[14px] text-[#999893]')+'<span>'+escapeHtml(page.title)+'</span>';
+          const button = createSidebarButton(page.title, 'file-text');
+          button.classList.toggle('active', currentFile === page.path);
           button.onclick=()=>loadDocument(page.path);
           target.append(button);
         }
@@ -1432,11 +1436,9 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
           .map(skill=>({id:skill.id,title:skill.title,description:skill.description,markdown:skill.markdown,path:'viewer/skills/'+skill.id+'.md'}));
         target.replaceChildren();
         for(const skill of skillPages) {
-          const button=document.createElement('button');
-          button.type='button';
-          button.className='side-link text-[12px]'+(currentFile===skill.path?' active':'');
+          const button = createSidebarButton(skill.title, 'sparkles');
+          button.classList.toggle('active', currentFile === skill.path);
           button.title=typeof skill.description==='string' ? skill.description : skill.title;
-          button.innerHTML=iconMarkup('sparkles','w-[14px] h-[14px] text-[#999893]')+'<span>'+escapeHtml(skill.title)+'</span>';
           button.onclick=()=>loadDocument(skill.path);
           target.append(button);
         }
@@ -1457,8 +1459,6 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
           return {markdown,source:'live'};
         } catch(error) {
           if (offlineFiles[path]) return {markdown:offlineFiles[path],source:'fallback'};
-          const offlineSkill=skillPages.find(skill=>skill.path===path);
-          if (offlineSkill?.markdown) return {markdown:offlineSkill.markdown,source:'fallback'};
           throw error;
         }
       }
@@ -1551,11 +1551,8 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         side.textContent = '';
         toc.textContent = '';
         for (const section of sections) {
-          const link = document.createElement('button');
-          link.className = 'side-link text-[12px]';
-          link.type = 'button';
+          const link = createSidebarButton(niceTitle(section.title), getSectionIcon(section.title));
           link.dataset.target = section.id;
-          link.innerHTML = iconMarkup(getSectionIcon(section.title), 'w-[14px] h-[14px] shrink-0 text-[#999893]') + `<span>${escapeHtml(niceTitle(section.title))}</span>`;
           link.onclick = () => navigateTo(section.id);
           side.append(link);
           const tocLink = document.createElement('a');
@@ -1740,31 +1737,42 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         byId('readme-error').classList.add('hidden');
         root.classList.remove('hidden');
         byId('page-footer').classList.remove('hidden');
-        byId('source-note').classList.toggle('hidden',source==='live');
-        byId('source-note').classList.toggle('flex',source!=='live');
+        const showSourceNote = source === 'fallback' || source === 'uploaded';
+        byId('source-note').classList.toggle('hidden', !showSourceNote);
+        byId('source-note').classList.toggle('flex', showSourceNote);
         byId('current-doc-footer').textContent=currentFile;
         icons();
         return renderMermaid();
       }
       async function loadDocument(path, {keepUrl=false, hash=''}={}) {
-        if (path !== 'README.md' && !docPages.some(p=>p.path===path) && !skillPages.some(p=>p.path===path)) return;
+        const skill = skillPages.find(page => page.path === path);
+        if (!skill && path !== 'README.md' && !docPages.some(page => page.path === path)) return;
         const seq=++requestSeq;
         byId('loading-state').classList.remove('hidden');
         root.classList.add('hidden');
         if (!keepUrl) {
           const url=new URL(location.href);
-          if (path==='README.md') url.searchParams.delete('doc');
-          else url.searchParams.set('doc',path);
+          if (skill) {
+            url.searchParams.delete('doc');
+            url.searchParams.set('skill', skill.id);
+          } else {
+            url.searchParams.delete('skill');
+            if (path==='README.md') url.searchParams.delete('doc');
+            else url.searchParams.set('doc',path);
+          }
           url.hash=hash;
           history.replaceState(null,'',url);
         }
         try {
-          const {markdown,source}=await readMarkdownFile(path);
+          const {markdown,source} = skill
+            ? {markdown: skill.markdown, source: 'embedded'}
+            : await readMarkdownFile(path);
           if (seq!==requestSeq) return;
           currentFile=path;
           if(path==='README.md') docPages=parseDocPages(markdown);
           const diagrams = renderMarkdown(markdown,source);
-          if(source!=='live') {
+          if (skill) byId('current-doc-footer').textContent = `.agents/skills/${skill.id}/SKILL.md`;
+          if (source === 'fallback') {
             byId('source-note-text').textContent='Pratinjau offline '+path+'. Untuk membaca perubahan terbaru, jalankan server HTTP atau pilih file Markdown.';
           }
           closeSidebar();
@@ -1785,11 +1793,17 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         drawSkillList();
         const url = new URL(location.href);
         const initial = url.searchParams.get('doc');
-        await loadDocument('README.md', {keepUrl: true, hash: initial ? '' : url.hash});
+        const skillId = url.searchParams.get('skill');
+        const skill = skillPages.find(page => page.id === skillId)
+          ?? skillPages.find(page => page.path === initial || `skills/${page.id}.md` === initial);
+        await loadDocument('README.md', {keepUrl: true, hash: initial || skill ? '' : url.hash});
+        if (skill) {
+          await loadDocument(skill.path, {keepUrl: skill.id === skillId && !initial, hash: url.hash});
+          return;
+        }
         if (!initial) return;
-        const pages = [...docPages, ...skillPages];
-        const exact = pages.find(page => page.path === initial);
-        const legacy = exact ?? pages.find(page => page.path.endsWith('/' + initial));
+        const exact = docPages.find(page => page.path === initial);
+        const legacy = exact ?? docPages.find(page => page.path.endsWith('/' + initial));
         const path = legacy?.path ?? initial;
         await loadDocument(path, {keepUrl: path === initial, hash: url.hash});
       }
@@ -1804,7 +1818,11 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
           return;
         }
         if (!link.href.startsWith(docsBase.href)) return;
-        const path = link.pathname.slice(docsBase.pathname.length);
+        let path = link.pathname.slice(docsBase.pathname.length);
+        if (path === 'index.html') {
+          const skillId = new URLSearchParams(link.search).get('skill');
+          path = skillPages.find(page => page.id === skillId)?.path;
+        }
         if(path==='README.md'||docPages.some(p=>p.path===path)||skillPages.some(p=>p.path===path)) {
           event.preventDefault();
           loadDocument(path, {hash: link.hash});
