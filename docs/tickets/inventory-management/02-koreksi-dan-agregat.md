@@ -14,7 +14,7 @@ Implementasikan IM-03 dan lengkapi IM-04. Catat koreksi sebagai transaksi yang m
 - [x] IM-AT-05 — Tolak alasan kosong atau baris dari penerimaan lain dengan `400`, akun tanpa `inventory.correct` dengan `403`, dan saldo negatif dengan `409`. Riwayat dan saldo tetap sama sesudah penolakan.
 - [x] IM-AT-06 — Dari saldo 8, 2, dan 5, verifikasi total produk 15, warna 10/5, dan ukuran 8/7. Setelah koreksi 8 menjadi 6, hasilnya 13, 8/5, dan 6/7. Produk tanpa opsi menampilkan rincian opsi kosong.
 - [x] Bagian koreksi IM-AT-07 — Koreksi lintas tenant memberi `404` dan data tenant pemilik tetap sama.
-- [x] Bagian Inventory dari IM-AT-08 — Koreksi ke nol mengubah hasil kontrak ketersediaan menjadi `OUT_OF_STOCK` setelah commit dan mempertahankan riwayat transaksi. Efek publik diperiksa oleh koordinator setelah integrasi Product 03.
+- [x] Bagian Inventory dari IM-AT-08 — Koreksi ke nol mengubah hasil kontrak ketersediaan menjadi `OUT_OF_STOCK` setelah commit dan mempertahankan riwayat transaksi. Efek publik lulus dalam [verifikasi gabungan di browser](../product-management/03-publikasi-dan-storefront.md#verifikasi-gabungan-product-dan-inventory).
 - [x] Bagian koreksi IM-AT-09 — Dua koreksi bersamaan berangkat dari jumlah efektif terakhir tanpa kehilangan delta.
 - [x] Jalankan skenario Bruno yang relevan dan uji transaksi PostgreSQL.
 
