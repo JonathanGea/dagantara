@@ -14,6 +14,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 - [User Management — Akses Platform dan Tenant](specs/user-management.md)
 - [Product Management](specs/product-management.md)
+- [Tenant Management — Penonaktifan dan Aktivasi Kembali Tenant](specs/tenant-management.md)
 - [Inventory Management](specs/inventory-management.md)
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
