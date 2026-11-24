@@ -1,0 +1,47 @@
+meta {
+  name: SS-AT-02 Simpan nama dan kontak, kosongkan pengaturan, dan baca kedua halaman
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ss01-b/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set SS01_FIXTURE_PASSWORD");
+  req.setBody({ username: "ss01-owner", password });
+}
+
+tests {
+  const { fixture } = require("./store-settings/store-settings-fixture.js");
+
+  test("Simpan nama dan kontak, kosongkan pengaturan, dan baca kedua halaman", async function () {
+    const f = await fixture(bru, expect, res);
+    const product = await f.publish(f.a, f.ownerA, "Kopi Kemasan SS02");
+    const fields = { displayName: "Kopi Pagi", publicWhatsapp: "+6281234567890", publicEmail: "kopi@example.test" };
+    try {
+      const saved = await f.save(f.a, f.ownerA, {
+        displayName: "  Kopi Pagi  ", publicWhatsapp: " +6281234567890 ", publicEmail: " kopi@example.test "
+      });
+      f.checkSettings(f.a, saved, fields);
+      f.checkSettings(f.a, await f.read(f.a, f.ownerA), fields);
+      await f.pages(f.a, fields, product);
+
+      const whatsappOnly = { ...f.blank, publicWhatsapp: fields.publicWhatsapp };
+      const cleared = await f.save(f.a, f.ownerA, { ...whatsappOnly, displayName: " ", publicEmail: "" });
+      f.checkSettings(f.a, cleared, whatsappOnly);
+      await f.pages(f.a, whatsappOnly, product);
+
+      const empty = await f.save(f.a, f.ownerA, { ...f.blank, publicWhatsapp: " " });
+      f.checkSettings(f.a, empty, f.blank);
+      await f.pages(f.a, f.blank, product);
+    } finally {
+      await f.save(f.a, f.ownerA, f.blank);
+      await f.publication(f.a, f.ownerA, product, "DRAFT");
+    }
+  });
+}

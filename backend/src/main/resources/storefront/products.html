@@ -13,11 +13,23 @@
       line-height: 1.5;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; }
+    body { min-height: 100vh; margin: 0; display: flex; flex-direction: column; }
+    .store-header, .store-contact { background: #ebefe8; }
+    .store-header { border-bottom: 1px solid #d9e0d9; }
+    .store-contact { border-top: 1px solid #d9e0d9; }
+    .store-bar {
+      width: min(72rem, 100% - 3rem);
+      margin: 0 auto;
+      padding: 1rem 0;
+      overflow-wrap: anywhere;
+    }
+    .store-header .store-bar { font-size: 1.25rem; font-weight: 720; }
+    .store-contact .store-bar { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
     main {
       width: min(72rem, 100% - 3rem);
       margin: 0 auto;
       padding: clamp(2rem, 6vw, 5rem) 0;
+      flex: 1;
     }
     h1, h2, p { margin: 0; overflow-wrap: anywhere; }
     h1 { font-size: clamp(2rem, 5vw, 3.75rem); line-height: 1.05; letter-spacing: -.04em; }
@@ -78,19 +90,21 @@
     .stock[data-state="IN_STOCK"] { color: #236048; }
     .stock[data-state="OUT_OF_STOCK"] { color: #a13524; }
     @media (max-width: 46rem) {
-      main { width: calc(100% - 2rem); }
+      main, .store-bar { width: calc(100% - 2rem); }
       .detail { grid-template-columns: minmax(0, 1fr); }
     }
   </style>
 </head>
 <body>
+  <header class="store-header"><p class="store-bar" id="store-name"></p></header>
   <main id="storefront">
     <noscript>Aktifkan JavaScript untuk melihat produk dan memilih opsi.</noscript>
   </main>
+  <footer id="store-contact" class="store-contact" hidden></footer>
   <script type="application/json" id="product-data">{{data}}</script>
   <script nonce="{{nonce}}" type="module">
     const main = document.querySelector("#storefront");
-    const {data, meta} = JSON.parse(document.querySelector("#product-data").textContent);
+    const {store, catalog: {data, meta}} = JSON.parse(document.querySelector("#product-data").textContent);
     const rupiah = new Intl.NumberFormat("id-ID", {
       style: "currency", currency: "IDR", maximumFractionDigits: 0, minimumFractionDigits: 0
     });
@@ -106,6 +120,25 @@
       const anchor = element("a", text);
       anchor.href = href;
       return anchor;
+    }
+
+    function showStoreIdentity() {
+      document.querySelector("#store-name").textContent = store.name;
+      const contact = element("div", null, "store-bar");
+      if (store.publicWhatsapp) {
+        contact.append(link("Hubungi via WhatsApp", "https://wa.me/" + store.publicWhatsapp.slice(1)));
+      }
+      if (store.publicEmail) {
+        const separator = store.publicEmail.lastIndexOf("@");
+        const email = encodeURIComponent(store.publicEmail.slice(0, separator)) + "@"
+          + encodeURIComponent(store.publicEmail.slice(separator + 1));
+        contact.append(link(store.publicEmail, "mailto:" + email));
+      }
+      if (contact.childElementCount) {
+        const footer = document.querySelector("#store-contact");
+        footer.append(contact);
+        footer.hidden = false;
+      }
     }
 
     function photo(url, alt) {
@@ -191,6 +224,7 @@
       renderSelection();
     }
 
+    showStoreIdentity();
     if (meta) showList(data, meta);
     else showDetail(data);
   </script>

@@ -1,4 +1,4 @@
--- Apply after migrations 01–08 on an isolated database. The platform host is localhost.
+-- Apply after migrations 01–10 on an isolated database. The platform host is localhost.
 \getenv fixture_password PRODUCT03_FIXTURE_PASSWORD
 
 BEGIN;

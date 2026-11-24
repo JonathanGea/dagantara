@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
@@ -62,6 +63,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleInvalidJson(HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",
                 "Malformed or missing JSON request body", request);
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ProblemDetail handleMissingRequestPart(HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",
+                "A required form part is missing", request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
