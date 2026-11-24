@@ -16,6 +16,7 @@ import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductCategor
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductDetail;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductStatus;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductSummary;
+import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Publication;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
 import com.dagantara.backend.modules.catalog.repository.CatalogMediaRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogRepository;
@@ -108,13 +109,31 @@ public class CatalogService {
         UUID tenantId = access.require(actor, MANAGE_CATALOG);
         Product stored = lockProduct(tenantId, productId);
         Product updated = productDetails(productId, stored.status(), stored.primaryCategoryId(), request);
-        if (updated.status() == ProductStatus.PUBLISHED
-                && (updated.priceIdr() == null || variants.listForProduct(tenantId, productId).isEmpty())) {
-            throw conflict("PRODUCT_NOT_READY", "A published product requires a price and at least one variant");
+        if (updated.status() == ProductStatus.PUBLISHED) {
+            requirePublishable(tenantId, productId, updated.priceIdr());
         }
         catalog.updateDetails(tenantId, productId, updated.name(), updated.description(),
                 updated.priceIdr(), updated.productCode());
         return detail(tenantId, updated);
+    }
+
+    @Transactional
+    public Publication updatePublication(AccountSession actor, UUID productId, ProductStatus status) {
+        UUID tenantId = access.require(actor, MANAGE_CATALOG);
+        Product product = lockProduct(tenantId, productId);
+        if (product.status() != status) {
+            if (status == ProductStatus.PUBLISHED) {
+                requirePublishable(tenantId, productId, product.priceIdr());
+            }
+            catalog.updatePublication(tenantId, productId, status);
+        }
+        return new Publication(status);
+    }
+
+    private void requirePublishable(UUID tenantId, UUID productId, Long priceIdr) {
+        if (priceIdr == null || !variants.existsForProduct(tenantId, productId)) {
+            throw conflict("PRODUCT_NOT_READY", "A published product requires a price and at least one variant");
+        }
     }
 
     @Transactional

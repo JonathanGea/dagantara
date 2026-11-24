@@ -12,7 +12,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+
+import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_API_PRODUCTS;
+import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_PAGE_PRODUCTS;
+import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_PAGE_PRODUCT_ID;
+import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_SHOP;
 
 @Configuration
 public class SecurityConfig {
@@ -25,6 +33,17 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http, SecurityErrorHandler errorHandler,
                                     AccountRepository accounts, TenantRequestContext contexts)
             throws Exception {
+        var paths = PathPatternRequestMatcher.withDefaults();
+        var storefront = new OrRequestMatcher(
+                paths.matcher(HttpMethod.GET, STOREFRONT_API_PRODUCTS),
+                paths.matcher(HttpMethod.GET, STOREFRONT_API_PRODUCTS + "/{productId}"),
+                paths.matcher(HttpMethod.GET, STOREFRONT_SHOP + STOREFRONT_API_PRODUCTS),
+                paths.matcher(HttpMethod.GET, STOREFRONT_SHOP + STOREFRONT_API_PRODUCTS + "/{productId}"),
+                paths.matcher(HttpMethod.GET, STOREFRONT_PAGE_PRODUCTS),
+                paths.matcher(HttpMethod.GET, STOREFRONT_PAGE_PRODUCTS + STOREFRONT_PAGE_PRODUCT_ID),
+                paths.matcher(HttpMethod.GET, STOREFRONT_SHOP + STOREFRONT_PAGE_PRODUCTS),
+                paths.matcher(HttpMethod.GET, STOREFRONT_SHOP + STOREFRONT_PAGE_PRODUCTS + STOREFRONT_PAGE_PRODUCT_ID));
+        var bearer = new DefaultBearerTokenResolver();
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -37,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login",
                                 "/*/api/v1/auth/login", "/api/v1/tenant-applications").permitAll()
+                        .requestMatchers(storefront).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                         .permitAll()
                         .anyRequest().authenticated())
@@ -44,6 +64,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(errorHandler)
                         .accessDeniedHandler(errorHandler))
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenResolver(request -> storefront.matches(request) ? null : bearer.resolve(request))
                         .jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(errorHandler)
                         .accessDeniedHandler(errorHandler));
