@@ -19,13 +19,21 @@ public class TenantRequestContext {
 
     public Optional<Scope> resolve(HttpServletRequest request) {
         String hostname = TenantLoginAddress.normalizeHost(request.getServerName());
-        RequestPath path = addresses.splitRequestPath(
-                request.getRequestURI().substring(request.getContextPath().length()));
+        RequestPath path = requestPath(request);
         if (addresses.isPlatformHost(hostname) && path.shopPath().isEmpty()) {
             return Optional.of(new Scope(null, path.apiPath()));
         }
         return tenants.findTenantAt(hostname, path.shopPath())
                 .map(tenantId -> new Scope(tenantId, path.apiPath()));
+    }
+
+    public Optional<UUID> resolveActiveTenant(HttpServletRequest request) {
+        String hostname = TenantLoginAddress.normalizeHost(request.getServerName());
+        return tenants.findActiveTenantAt(hostname, requestPath(request).shopPath());
+    }
+
+    private RequestPath requestPath(HttpServletRequest request) {
+        return addresses.splitRequestPath(request.getRequestURI().substring(request.getContextPath().length()));
     }
 
     public record Scope(UUID tenantId, String apiPath) {

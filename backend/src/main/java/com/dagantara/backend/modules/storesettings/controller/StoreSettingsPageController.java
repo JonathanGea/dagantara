@@ -2,7 +2,6 @@ package com.dagantara.backend.modules.storesettings.controller;
 
 import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.modules.tenants.service.TenantRequestContext;
-import com.dagantara.backend.modules.tenants.service.TenantRequestContext.Scope;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +29,7 @@ public class StoreSettingsPageController {
 
     @GetMapping(value = {STORE_SETTINGS_PAGE, STOREFRONT_SHOP + STORE_SETTINGS_PAGE}, produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> page(HttpServletRequest request) {
-        contexts.resolve(request).map(Scope::tenantId).orElseThrow(() ->
+        contexts.resolveActiveTenant(request).orElseThrow(() ->
                 new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found"));
         String nonce = UUID.randomUUID().toString();
         return ResponseEntity.ok().contentType(new MediaType("text", "html", StandardCharsets.UTF_8))

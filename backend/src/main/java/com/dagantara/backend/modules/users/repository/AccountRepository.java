@@ -14,8 +14,10 @@ public class AccountRepository {
             "u.id, u.tenant_id, u.session_version, u.password_change_required";
     private static final String ACCOUNT_FROM = """
             FROM users u JOIN roles r ON r.id = u.role_id
+            LEFT JOIN tenants t ON t.id = u.tenant_id
             WHERE r.tenant_id IS NOT DISTINCT FROM u.tenant_id
               AND u.status = 'ACTIVE'
+              AND (u.tenant_id IS NULL OR t.status = 'ACTIVE')
             """;
 
     private final JdbcClient jdbc;
@@ -63,6 +65,11 @@ public class AccountRepository {
     public Optional<AccountSession> findSession(UUID id) {
         return jdbc.sql("SELECT " + SESSION_COLUMNS + " " + ACCOUNT_FROM + " AND u.id = :id").param("id", id)
                 .query((row, index) -> readSession(row)).optional();
+    }
+
+    public void revokeTenantSessions(UUID tenantId) {
+        jdbc.sql("UPDATE users SET session_version = session_version + 1 WHERE tenant_id = :tenantId")
+                .param("tenantId", tenantId).update();
     }
 
     public Optional<String> lockTemporaryPassword(AccountSession session) {

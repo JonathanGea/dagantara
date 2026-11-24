@@ -1384,7 +1384,6 @@ Selesaikan spesifikasi alur bisnis dan kode backend terlebih dahulu. Setelah fas
 
 | Status | Pekerjaan | Langkah berikutnya atau prasyarat |
 | --- | --- | --- |
-| **Siap dikerjakan** | [Tenant Management v1](#tenant-management) | Implementasikan penonaktifan dan aktivasi kembali. Verifikasi `TM-AT-01` sampai `TM-AT-04` dengan Bruno dan `TM-AT-05` pada halaman katalog yang sudah ada. |
 | **Siap dikerjakan** | [API Product Discovery v1](#product-catalog--discovery) | Implementasikan pencarian dan filter kategori dengan kontrak publikasi dan stok yang tersedia. Verifikasi `PD-AT-01` sampai `PD-AT-06` dengan Bruno. |
 | **Diskusi selanjutnya** | [Customer Management](#customer-management) | Putuskan checkout tamu atau wajib login ([DEP-04](development-dependencies.md#open-decisions--blockers)). Catat hasilnya untuk Cart dan Checkout. |
 | **Menunggu keputusan identitas** | [Cart Management](#cart-management) | Setelah DEP-04 disepakati, bahas cara mengenali keranjang yang dibuka kembali dan aturan item saat produk, varian, atau stok berubah (DEP-02). |
@@ -1392,7 +1391,7 @@ Selesaikan spesifikasi alur bisnis dan kode backend terlebih dahulu. Setelah fas
 | **Menunggu kontrak Order** | [Payment](#payment-management) dan [Shipping](#shipping-management) | Setelah identitas dan status Order disepakati (DEP-06), implementasi transfer manual dan pemenuhan bisa maju paralel sesuai kontrak masing-masing. |
 | **Menunggu konteks alamat** | [Address & Location](#address--location-management) | Bahas data minimum alamat dan asal kirim bersama Shipping setelah identitas pembeli serta kepemilikan alamat jelas (DEP-04 dan DEP-05). |
 
-Tenant Management dan API Product Discovery bisa dikerjakan bersamaan dengan diskusi Customer Management. Cart bisa lanjut setelah keputusan identitas tercatat. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
+API Product Discovery bisa dikerjakan bersamaan dengan diskusi Customer Management. Cart bisa lanjut setelah keputusan identitas tercatat. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
 
 Pada tahap backend, bahas kebutuhan pembeli dan admin yang menentukan data, izin, validasi, status, atau respons sistem. Contohnya, data wajib untuk membuat pesanan dibahas di Checkout. Susunan form dan jumlah layar dibahas di sesi desain UI.
 
@@ -1440,7 +1439,7 @@ Bahas perubahan berikutnya untuk Product Management. Baca docs/specs/product-man
 ### Tenant Management
 
 - [x] Spec selesai — [Penonaktifan dan Aktivasi Kembali Tenant](../specs/tenant-management.md). [Penggantian URL toko](../specs/tenant-management.md#further-notes) dicatat sebagai enhancement.
-- [ ] Kode selesai
+- [x] Kode selesai — [TM-AT-01 sampai TM-AT-05 lulus di Bruno dan browser](../../bruno/tenant-management/README.md#hasil-verifikasi).
 
 <details>
 <summary>Prompt implementasi Tenant Management</summary>
