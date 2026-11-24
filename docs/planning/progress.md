@@ -88,7 +88,7 @@ dilacak terverifikasi.
 ### Store Settings
 
 - [x] Spec selesai — [Identitas Publik Toko](../specs/store-settings.md)
-- [ ] Kode selesai — [pembagian tiket menunggu persetujuan](../specs/store-settings.md#implementation-tickets)
+- [ ] Kode selesai — [dua tiket implementasi](../specs/store-settings.md#implementation-tickets)
 
 <details>
 <summary>Prompt Store Settings</summary>
