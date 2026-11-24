@@ -24,7 +24,7 @@
     html {scroll-behavior:smooth}
     body {font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);background:white;font-size:14px;-webkit-font-smoothing:antialiased}
     button,input {font:inherit}
-    button:focus-visible,a:focus-visible,input:focus-visible {outline:2px solid #2383e2;outline-offset:2px}
+    button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible {outline:2px solid #2383e2;outline-offset:2px}
     ::selection {background:#d3e5ef;color:#1e4867}
     .icon {width:17px;height:17px;stroke-width:1.75}
     .small-icon {width:15px;height:15px;stroke-width:1.8}
@@ -38,6 +38,10 @@
     .sidebar-label {flex:1;min-width:0;overflow-wrap:anywhere}
     .sidebar-group-label {margin:0 10px 4px;color:#666560;font-size:11px;font-weight:600;letter-spacing:.035em}
     .sidebar-brand-mark {display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:6px;background:#242321;color:white}
+    .sidebar-disclosure {cursor:pointer}
+    .sidebar-disclosure::-webkit-details-marker {display:none}
+    .sidebar-disclosure::after {content:"";flex:none;width:7px;height:7px;margin:0 2px 3px 0;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg)}
+    details[open] > .sidebar-disclosure::after {margin-bottom:0;transform:rotate(225deg)}
     .cmd-key {font-size:11px;color:#9a9a97;border:1px solid #dededb;padding:2px 5px;border-radius:4px;line-height:1.1}
     .toc-link {display:block;padding:4px 0 4px 12px;border-left:1px solid transparent;color:#9b9a97;font-size:12px;line-height:1.6;text-decoration:none;transition:color .15s}
     .toc-link:hover {color:#37352f}
@@ -165,6 +169,13 @@
     </div>
     <div class="overflow-y-auto side-scroll flex-1 px-3 pb-7">
       <div id="sidebar-pages" class="space-y-[2px] mb-4"></div>
+      <details id="tickets-section" class="mb-4" hidden>
+        <summary class="side-link sidebar-disclosure">
+          <i data-lucide="clipboard-list" class="sidebar-icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Tiket Implementasi</span>
+        </summary>
+        <div id="sidebar-tickets"></div>
+      </details>
       <div id="skills-section" class="mb-4">
         <div class="sidebar-group-label">SKILLS</div>
         <div id="sidebar-skills" class="space-y-[2px]"></div>
@@ -262,6 +273,51 @@
   </dialog>
 
   <!-- Offline snapshots; live Markdown files take precedence. -->
+  <script id="ticket-index" type="application/json">
+[
+    {
+        "path":  "tickets/inventory-management/01-penerimaan-dan-saldo.md",
+        "title":  "Inventory 01 — Penerimaan beberapa SKU dan saldo"
+    },
+    {
+        "path":  "tickets/inventory-management/02-koreksi-dan-agregat.md",
+        "title":  "Inventory 02 — Koreksi penerimaan dan agregat stok"
+    },
+    {
+        "path":  "tickets/product-management/01-katalog-draft-dan-sku.md",
+        "title":  "Product 01 — Katalog Draft, kategori, opsi, dan SKU"
+    },
+    {
+        "path":  "tickets/product-management/02-media-dan-tautan-opsi.md",
+        "title":  "Product 02 — Media dan tautan nilai opsi"
+    },
+    {
+        "path":  "tickets/product-management/03-publikasi-dan-storefront.md",
+        "title":  "Product 03 — Publikasi dan storefront tenant"
+    },
+    {
+        "path":  "tickets/user-management/01-bootstrap-platform-admin.md",
+        "title":  "01 — Setup dan login Admin Platform pertama"
+    },
+    {
+        "path":  "tickets/user-management/02-onboarding-tenant.md",
+        "title":  "02 — Pengajuan, provisioning, dan login tenant"
+    },
+    {
+        "path":  "tickets/user-management/03-operator-platform.md",
+        "title":  "03 — Akun, role, dan delegasi operator platform"
+    },
+    {
+        "path":  "tickets/user-management/04-akun-dan-role-tenant.md",
+        "title":  "04 — Akun dan role tenant"
+    },
+    {
+        "path":  "tickets/user-management/05-pemulihan-help-center.md",
+        "title":  "05 — Pemulihan admin tenant melalui Help Center"
+    }
+]
+</script>
+
   <script id="offline-skills" type="application/json">
 [
     {
@@ -687,7 +743,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 
 ## Regenerasi viewer
 
-Setelah mengubah skill atau dokumen yang tampil di viewer, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/` dan salinan dokumen di `index.html`. Untuk halaman Markdown baru, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
+Setelah mengubah skill, dokumen yang tampil di viewer, atau daftar dan judul tiket, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\viewer\generate-skills.ps1` dari root repository. Skrip menanamkan skill dari `.agents/skills/`, daftar tiket dari `docs/tickets/`, dan salinan dokumen di `index.html`. Menu **Tiket Implementasi** membuka isi dari file Markdown tiket. Untuk halaman dokumentasi baru di luar tiket, tambahkan entri di indeks ini dan blok `data-doc` di viewer agar halaman juga tersedia saat HTML dibuka langsung.
 </script>
   <script id="offline-user-management" type="text/plain" data-doc="specs/user-management.md">
 # User Management — Akses Platform dan Tenant
@@ -1235,6 +1291,8 @@ Lihat [roadmap](module-roadmap.md#module-matrix) untuk cakupan dan prioritas mod
 
 Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#regenerasi-viewer) agar salinan yang tertanam ikut diperbarui.
 
+Buka **Prompt** di entri modul untuk menyalin prompt awal. Tambahkan atau perjelas detail sesuai hasil pembahasan.
+
 ## MVP
 
 ### User Management
@@ -1242,35 +1300,112 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
 - [x] Spec selesai — [Akses Platform dan Tenant](../specs/user-management.md)
 - [x] Kode selesai — [lima tiket implementasi](../specs/user-management.md#implementation-tickets)
 
+<details>
+<summary>Prompt User Management</summary>
+
+```text
+$write-module-spec
+
+Bahas perubahan berikutnya untuk User Management. Baca docs/specs/user-management.md dan tiket terkait. Mulai dari kebutuhan yang ingin saya bahas serta dampaknya pada akun internal, role, dan izin.
+```
+
+</details>
+
 ### Product Management
 
 - [x] Spec selesai — [Product Management](../specs/product-management.md)
 - [x] Kode selesai — [tiga tiket implementasi](../specs/product-management.md#implementation-tickets)
+
+<details>
+<summary>Prompt Product Management</summary>
+
+```text
+$write-module-spec
+
+Bahas perubahan berikutnya untuk Product Management. Baca docs/specs/product-management.md. Mulai dari kasus pengelolaan katalog yang ingin saya perbaiki dan cek aturan kategori, varian, serta SKU yang terdampak.
+```
+
+</details>
 
 ### Tenant Management
 
 - [ ] Spec selesai — onboarding dan pemetaan URL sudah dicakup oleh [User Management](../specs/user-management.md#pengajuan-dan-provisioning-tenant). Siklus hidup tenant dan domain masih perlu dibahas.
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Tenant Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Tenant Management dari DEP-01 dan alur onboarding di docs/specs/user-management.md. Mulai dari satu keputusan. Saat tenant dinonaktifkan, apa yang harus terjadi pada URL toko publiknya?
+```
+
+</details>
+
 ### Store Settings
 
 - [x] Spec selesai — [Identitas Publik Toko](../specs/store-settings.md)
 - [ ] Kode selesai — [pembagian tiket menunggu persetujuan](../specs/store-settings.md#implementation-tickets)
+
+<details>
+<summary>Prompt Store Settings</summary>
+
+```text
+$write-module-spec
+
+Lanjutkan Store Settings dari docs/specs/store-settings.md. Tinjau usulan tiket 01 dan 02. Bantu saya menentukan apakah pembagian itu sudah bisa disetujui, lalu tunggu jawaban saya sebelum menulis tiket.
+```
+
+</details>
 
 ### Storefront Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai — [daftar dan detail publik dasar](../tickets/product-management/03-publikasi-dan-storefront.md) sudah tersedia.
 
+<details>
+<summary>Prompt Storefront Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Storefront Management versi dasar dengan melihat daftar dan detail publik yang sudah ada. Mulai dari satu keputusan. Navigasi apa yang perlu tersedia bagi pengunjung saat membuka toko? Rujuk Store Settings untuk identitas toko dan Product Discovery untuk pencarian.
+```
+
+</details>
+
 ### Inventory Management
 
 - [x] Spec selesai — [Inventory Management](../specs/inventory-management.md)
 - [x] Kode selesai — [dua tiket implementasi](../specs/inventory-management.md#implementation-tickets)
 
+<details>
+<summary>Prompt Inventory Management</summary>
+
+```text
+$write-module-spec
+
+Bahas lanjutan Inventory Management untuk reservasi stok. Baca docs/specs/inventory-management.md dan DEP-03. Mulai dari satu keputusan. Pada langkah apa stok mulai ditahan untuk sebuah pesanan?
+```
+
+</details>
+
 ### Product Catalog / Discovery
 
 - [x] Spec selesai — [Pencarian dan Filter Produk Publik](../specs/product-discovery.md)
 - [ ] Kode selesai — API dan verifikasi Bruno. [Frontend dan uji browser](../specs/product-discovery.md#perilaku-tahap-frontend) menyusul.
+
+<details>
+<summary>Prompt Product Catalog / Discovery</summary>
+
+```text
+$implement-from-spec product-discovery
+
+Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product-discovery.md. Verifikasi PD-AT-01 sampai PD-AT-06 melalui Bruno. Pekerjaan frontend dan skenario browser berada pada tahap lanjutan.
+```
+
+</details>
 
 ### Customer Management
 
@@ -1279,35 +1414,112 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Customer Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Customer Management dari DEP-04. Jika pengunjung baru ingin membeli Kopi Arabika Gayo, bolehkah dia checkout sebagai tamu atau perlu login? Beri rekomendasi untuk versi pertama, contoh konkret, dan konsekuensinya bagi keranjang dan checkout. Tunggu jawaban saya.
+```
+
+</details>
+
 ### Cart Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Cart Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Cart Management dengan merujuk keputusan Customer Management dan DEP-02. Mulai dari satu keputusan. Bagaimana toko mengenali keranjang pembeli ketika ia kembali membuka URL toko?
+```
+
+</details>
 
 ### Checkout Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Checkout Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Checkout Management dengan merujuk keputusan Customer, Cart, Payment, dan Shipping yang sudah tersedia. Mulai dari satu keputusan. Data apa yang wajib diisi pembeli sebelum bisa membuat pesanan?
+```
+
+</details>
+
 ### Order Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Order Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Order Management dari DEP-06 dan alur Checkout. Mulai dari satu keputusan. Apa status awal pesanan ketika pembeli berhasil checkout?
+```
+
+</details>
 
 ### Payment Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Payment Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Payment Management versi transfer bank manual dengan merujuk status Order. Mulai dari satu keputusan. Bukti apa yang perlu diberikan pembeli agar admin bisa memverifikasi pembayaran?
+```
+
+</details>
+
 ### Shipping Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Shipping Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Shipping Management dari DEP-05. Mulai dari satu keputusan. Bagaimana toko menghitung ongkir yang ditampilkan sebelum pembeli membuat pesanan?
+```
+
+</details>
+
 ### Address & Location Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Address &amp; Location Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Address & Location Management dengan merujuk kebutuhan Customer dan Shipping. Mulai dari satu keputusan. Data alamat tujuan minimum apa yang diperlukan agar pesanan bisa dikirim?
+```
+
+</details>
 
 ## Pascaversi MVP
 
@@ -1316,50 +1528,160 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Pricing &amp; Promotion</summary>
+
+```text
+$write-module-spec
+
+Bahas Pricing & Promotion dengan merujuk DEP-07 dan kontrak harga pada pesanan. Mulai dari satu keputusan. Jenis promosi apa yang perlu didukung pada versi pertama?
+```
+
+</details>
+
 ### Notification Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Notification Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Notification Management dengan merujuk alur Order dan Payment. Mulai dari satu keputusan. Setelah pesanan dibuat, pemberitahuan apa yang paling perlu diterima pembeli?
+```
+
+</details>
 
 ### Reporting & Analytics
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Reporting &amp; Analytics</summary>
+
+```text
+$write-module-spec
+
+Bahas Reporting & Analytics dengan melihat data pesanan, pembayaran, dan stok yang tersedia per tenant. Mulai dari satu keputusan. Keputusan apa yang ingin dibantu oleh laporan pertama untuk pengelola toko?
+```
+
+</details>
+
 ### Tax Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Tax Management</summary>
+
+```text
+$write-module-spec
+
+Bahas Tax Management dari DEP-07. Mulai dari satu keputusan desain. Pada tahap mana pembeli perlu melihat rincian pajak pada alur checkout?
+```
+
+</details>
 
 ### Platform Configuration
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Platform Configuration</summary>
+
+```text
+$write-module-spec
+
+Bahas Platform Configuration dengan merujuk aturan akun dan izin platform. Mulai dari satu keputusan. Pengaturan global apa yang pertama kali perlu bisa diubah oleh operator platform?
+```
+
+</details>
+
 ### Return & Refund
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Return &amp; Refund</summary>
+
+```text
+$write-module-spec
+
+Bahas Return & Refund dengan merujuk status Order dan Payment. Mulai dari satu keputusan. Dalam kondisi apa pembeli boleh mengajukan pengembalian barang?
+```
+
+</details>
 
 ### POS Management
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt POS Management</summary>
+
+```text
+$write-module-spec
+
+Bahas POS Management dengan merujuk katalog dan Inventory per tenant. Mulai dari satu keputusan. Apa yang harus bisa dilakukan kasir ketika koneksi terputus?
+```
+
+</details>
+
 ### Review & Rating
 
 - [ ] Spec selesai
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Review &amp; Rating</summary>
+
+```text
+$write-module-spec
+
+Bahas Review & Rating dengan merujuk identitas pembeli dan riwayat pesanan. Mulai dari satu keputusan. Siapa yang boleh memberi ulasan pada produk?
+```
+
+</details>
 
 ### Audit & Activity Log
 
 - [ ] Spec selesai
 - [ ] Kode selesai
 
+<details>
+<summary>Prompt Audit &amp; Activity Log</summary>
+
+```text
+$write-module-spec
+
+Bahas Audit & Activity Log dengan melihat audit yang sudah ada pada User Management. Mulai dari satu keputusan. Peristiwa apa yang paling penting untuk dicatat pada versi pertama?
+```
+
+</details>
+
 ### Subscription & Billing
 
 - [ ] Spec selesai — bersyarat pada keputusan monetisasi SaaS.
 - [ ] Kode selesai
+
+<details>
+<summary>Prompt Subscription &amp; Billing</summary>
+
+```text
+$write-module-spec
+
+Bahas prasyarat Subscription & Billing. Mulai dari satu keputusan. Apakah Dagantara akan memakai model langganan SaaS untuk tenant? Gunakan hasil keputusan itu sebagai dasar cakupan billing.
+```
+
+</details>
 </script>
 
   <script>
@@ -1380,6 +1702,7 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
       let currentFile = 'README.md';
       let docPages = [];
       let skillPages = [];
+      const ticketPaths = new Set();
       let requestSeq = 0;
       const offlineFiles = Object.fromEntries(Array.from(document.querySelectorAll('script[data-doc]'),
         block => [block.dataset.doc, block.textContent.trim()]));
@@ -1393,11 +1716,9 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         }
         return result;
       }
-      function createSidebarButton(title, icon) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'side-link';
-        button.title = title;
+      function createSidebarItem(item, title, icon) {
+        item.className = 'side-link';
+        item.title = title;
         const glyph = document.createElement('i');
         glyph.className = 'sidebar-icon';
         glyph.dataset.lucide = icon;
@@ -1405,8 +1726,13 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         const label = document.createElement('span');
         label.className = 'sidebar-label';
         label.textContent = title;
-        button.append(glyph, label);
-        return button;
+        item.append(glyph, label);
+        return item;
+      }
+      function createSidebarButton(title, icon) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        return createSidebarItem(button, title, icon);
       }
       function drawPageList() {
         const target=byId('sidebar-pages');
@@ -1419,6 +1745,51 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
           target.append(button);
         }
         icons();
+      }
+      function drawTicketList() {
+        const section = byId('tickets-section');
+        const target = byId('sidebar-tickets');
+        let tickets;
+        try { tickets = JSON.parse(byId('ticket-index').textContent); }
+        catch (_) { return; }
+        if (!Array.isArray(tickets)) return;
+
+        let currentModule = '';
+        let group;
+        for (const ticket of tickets) {
+          if (typeof ticket?.path !== 'string' || typeof ticket.title !== 'string') continue;
+          const match = /^tickets\/([\w-]+)\/[\w-]+\.md$/.exec(ticket.path);
+          if (!match || ticketPaths.has(ticket.path)) continue;
+          ticketPaths.add(ticket.path);
+          const module = match[1];
+          if (module !== currentModule) {
+            currentModule = module;
+            group = document.createElement('div');
+            group.className = 'mt-3 space-y-[2px]';
+            const heading = document.createElement('div');
+            heading.className = 'sidebar-group-label';
+            heading.textContent = module.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            group.append(heading);
+            target.append(group);
+          }
+          const link = createSidebarItem(document.createElement('a'), ticket.title, 'file-text');
+          const url = new URL('index.html', docsBase);
+          url.searchParams.set('doc', ticket.path);
+          link.href = url.href;
+          link.dataset.ticketPath = ticket.path;
+          group.append(link);
+        }
+        section.hidden = ticketPaths.size === 0;
+        icons();
+      }
+      function syncTicketSelection() {
+        for (const link of byId('sidebar-tickets').querySelectorAll('a[data-ticket-path]')) {
+          const selected = link.dataset.ticketPath === currentFile;
+          link.classList.toggle('active', selected);
+          if (selected) link.setAttribute('aria-current', 'page');
+          else link.removeAttribute('aria-current');
+        }
+        if (ticketPaths.has(currentFile)) byId('tickets-section').open = true;
       }
       function drawSkillList() {
         const section=byId('skills-section');
@@ -1732,7 +2103,7 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
           try { link.href = new URL(href, documentBase).href; }
           catch (_) { /* Leave invalid URLs to the browser. */ }
         }
-        renderCallouts();buildHeadings();renderTables();renderCode();updateSidebar();drawPageList();syncSkillSelection();
+        renderCallouts();buildHeadings();renderTables();renderCode();updateSidebar();drawPageList();syncSkillSelection();syncTicketSelection();
         byId('loading-state').classList.add('hidden');
         byId('readme-error').classList.add('hidden');
         root.classList.remove('hidden');
@@ -1746,7 +2117,7 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
       }
       async function loadDocument(path, {keepUrl=false, hash=''}={}) {
         const skill = skillPages.find(page => page.path === path);
-        if (!skill && path !== 'README.md' && !docPages.some(page => page.path === path)) return;
+        if (!skill && path !== 'README.md' && !docPages.some(page => page.path === path) && !ticketPaths.has(path)) return;
         const seq=++requestSeq;
         byId('loading-state').classList.remove('hidden');
         root.classList.add('hidden');
@@ -1791,6 +2162,7 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
       }
       async function loadReadme() {
         drawSkillList();
+        drawTicketList();
         const url = new URL(location.href);
         const initial = url.searchParams.get('doc');
         const skillId = url.searchParams.get('skill');
@@ -1807,10 +2179,10 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         const path = legacy?.path ?? initial;
         await loadDocument(path, {keepUrl: path === initial, hash: url.hash});
       }
-      root.addEventListener('click',event=>{
+      function openDocumentLink(event) {
         if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         const link = event.target.closest('a[href]');
-        if (!link || !root.contains(link)) return;
+        if (!link || !event.currentTarget.contains(link)) return;
         const href = link.getAttribute('href');
         if (href.startsWith('#')) {
           event.preventDefault();
@@ -1820,14 +2192,18 @@ Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#re
         if (!link.href.startsWith(docsBase.href)) return;
         let path = link.pathname.slice(docsBase.pathname.length);
         if (path === 'index.html') {
-          const skillId = new URLSearchParams(link.search).get('skill');
-          path = skillPages.find(page => page.id === skillId)?.path;
+          const params = new URLSearchParams(link.search);
+          path = params.has('skill')
+            ? skillPages.find(page => page.id === params.get('skill'))?.path
+            : params.get('doc');
         }
-        if(path==='README.md'||docPages.some(p=>p.path===path)||skillPages.some(p=>p.path===path)) {
+        if(path==='README.md'||docPages.some(p=>p.path===path)||skillPages.some(p=>p.path===path)||ticketPaths.has(path)) {
           event.preventDefault();
           loadDocument(path, {hash: link.hash});
         }
-      });
+      }
+      root.addEventListener('click', openDocumentLink);
+      byId('sidebar-tickets').addEventListener('click', openDocumentLink);
       function showToast(text) {
         let el=byId('toast');
         if(!el) {el=document.createElement('div');el.id='toast';el.className='fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-[#37352f] text-white text-[12px] px-4 py-2.5 rounded-md shadow-lg transition-opacity';document.body.append(el);}

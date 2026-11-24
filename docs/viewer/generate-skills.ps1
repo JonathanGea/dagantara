@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $docsRoot = Split-Path -Parent $PSScriptRoot
 $repoRoot = Split-Path -Parent $docsRoot
 $skillsRoot = Join-Path $repoRoot '.agents\skills'
+$ticketsRoot = Join-Path $docsRoot 'tickets'
 $indexPath = Join-Path $docsRoot 'index.html'
 
 function Set-OfflineBlock($html, $id, $content) {
@@ -19,6 +20,11 @@ function Set-OfflineBlock($html, $id, $content) {
         $match.Groups[1].Value + [Environment]::NewLine +
             $content.TrimEnd() + [Environment]::NewLine + $match.Groups[2].Value
     }, 1)
+}
+
+function ConvertTo-EmbeddedJson($data) {
+    $json = ConvertTo-Json -InputObject $data -Depth 3
+    return $json.Replace('<', '\u003c').Replace('>', '\u003e').Replace('&', '\u0026')
 }
 
 $utf8 = [System.Text.UTF8Encoding]::new($false)
@@ -53,11 +59,21 @@ foreach ($directory in Get-ChildItem -LiteralPath $skillsRoot -Directory) {
 }
 $skills = @($skills | Sort-Object id)
 
-$json = ConvertTo-Json -InputObject $skills -Depth 3
+$tickets = @(foreach ($directory in (Get-ChildItem -LiteralPath $ticketsRoot -Directory | Sort-Object Name)) {
+    foreach ($file in (Get-ChildItem -LiteralPath $directory.FullName -File -Filter '*.md' | Sort-Object Name)) {
+        $content = [System.IO.File]::ReadAllText($file.FullName, $utf8)
+        $heading = [regex]::Match($content, '(?m)^#\s+(.+?)\s*$')
+        $title = if ($heading.Success) { $heading.Groups[1].Value.Trim() } else { $file.BaseName }
+        [pscustomobject]@{
+            path = "tickets/$($directory.Name)/$($file.Name)"
+            title = $title
+        }
+    }
+})
 
 $indexHtml = [System.IO.File]::ReadAllText($indexPath, $utf8)
-$offlineJson = $json.Replace('<', '\u003c').Replace('>', '\u003e').Replace('&', '\u0026')
-$indexHtml = Set-OfflineBlock $indexHtml 'offline-skills' $offlineJson
+$indexHtml = Set-OfflineBlock $indexHtml 'offline-skills' (ConvertTo-EmbeddedJson $skills)
+$indexHtml = Set-OfflineBlock $indexHtml 'ticket-index' (ConvertTo-EmbeddedJson $tickets)
 $documentBlocks = [regex]::Matches($indexHtml, '<script id="(?<id>offline-[\w-]+)" type="text/(?:plain|markdown)" data-doc="(?<path>(?:[\w-]+/)*[\w-]+\.md)">')
 foreach ($block in $documentBlocks) {
     $markdown = [System.IO.File]::ReadAllText((Join-Path $docsRoot $block.Groups['path'].Value), $utf8)
@@ -65,4 +81,4 @@ foreach ($block in $documentBlocks) {
 }
 [System.IO.File]::WriteAllText($indexPath, ($indexHtml -replace '\r?\n', [Environment]::NewLine), $utf8)
 
-Write-Output "Embedded $($skills.Count) skills and Markdown fallback data in docs/index.html."
+Write-Output "Embedded $($skills.Count) skills, the index of $($tickets.Count) tickets, and Markdown fallback data in docs/index.html."
