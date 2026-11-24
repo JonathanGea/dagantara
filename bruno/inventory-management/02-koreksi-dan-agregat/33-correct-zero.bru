@@ -1,0 +1,47 @@
+meta {
+  name: IM-AT-08 Koreksi SKU DEFAULT menjadi nol
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: recount-zero
+}
+
+body:json {
+  {
+    "reason": "SKU salah dicatat",
+    "lines": [
+      {
+        "receiptLineId": "{{line-DEFAULT}}",
+        "quantity": 0
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-08 Koreksi SKU DEFAULT menjadi nol", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.match(/^[0-9a-f-]{36}$/);
+    expect(data.receiptId).to.equal(bru.getVar("receipt"));
+    expect(data.correctedBy).to.equal(bru.getVar("ownerAId"));
+    expect(data.reason).to.equal("SKU salah dicatat");
+    expect(Number.isNaN(Date.parse(data.createdAt))).to.equal(false);
+    expect(data.lines).to.deep.equal([{
+      receiptLineId: bru.getVar("line-DEFAULT"), previousQuantity: 3, quantity: 0, delta: -3
+    }]);
+    bru.setVar("zeroCorrection", data);
+  });
+}

@@ -2,6 +2,8 @@ package com.dagantara.backend.modules.inventory.controller;
 
 import com.dagantara.backend.common.api.ApiResponse;
 import com.dagantara.backend.common.api.ApiRoutes;
+import com.dagantara.backend.modules.inventory.dto.CorrectInventoryRequest;
+import com.dagantara.backend.modules.inventory.dto.InventoryResponses.Correction;
 import com.dagantara.backend.modules.inventory.dto.InventoryResponses.ProductStock;
 import com.dagantara.backend.modules.inventory.dto.InventoryResponses.Receipt;
 import com.dagantara.backend.modules.inventory.dto.InventoryResponses.ReceiptDetail;
@@ -47,6 +49,15 @@ public class InventoryController {
     public ApiResponse<List<ReceiptSummary>> listReceipts(
             @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, Pageable page) {
         return ApiResponse.paged("Receipts", inventory.listReceipts(actor, page));
+    }
+
+    @PostMapping("/receipts/{receiptId}/corrections")
+    public ResponseEntity<ApiResponse<Correction>> correct(
+            @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, @PathVariable UUID receiptId,
+            @RequestHeader(name = "Idempotency-Key", required = false) String key,
+            @Valid @RequestBody CorrectInventoryRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Correction recorded", inventory.correct(actor, receiptId, key, request)));
     }
 
     @GetMapping("/receipts/{receiptId}")

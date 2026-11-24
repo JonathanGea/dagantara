@@ -1,0 +1,29 @@
+meta {
+  name: IM-AT-04 Riwayat menyimpan jumlah awal dan dua koreksi
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("IM-AT-04 Riwayat menyimpan jumlah awal dan dua koreksi", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.id).to.equal(bru.getVar("receipt"));
+    expect(data.receivedBy).to.equal(bru.getVar("ownerAId"));
+    expect(Number.isNaN(Date.parse(data.createdAt))).to.equal(false);
+    const line = data.lines.find(line => line.sku === "H-M");
+    expect(line).to.include({ id: bru.getVar("line-H-M"), originalQuantity: 8, effectiveQuantity: 7 });
+    expect(data.corrections).to.deep.equal([bru.getVar("firstCorrection"), bru.getVar("secondCorrection")]);
+    bru.setVar("afterSecondCorrection", data);
+  });
+}

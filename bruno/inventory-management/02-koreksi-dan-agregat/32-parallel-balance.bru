@@ -1,0 +1,24 @@
+meta {
+  name: IM-AT-09 Saldo mencerminkan seluruh delta koreksi
+  type: http
+  seq: 32
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/products/{{optionProduct}}/stock
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("IM-AT-09 Saldo mencerminkan seluruh delta koreksi", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.variants.find(variant => variant.sku === "H-M").quantity).to.equal(bru.getVar("parallelFinalQuantity"));
+    expect(data.totalQuantity).to.equal(bru.getVar("parallelFinalQuantity") + 7);
+  });
+}

@@ -78,6 +78,13 @@ public class InventoryReceiptRepository {
                 .query(InventoryReceiptRepository::readSummary).optional();
     }
 
+    public boolean lockReceipt(UUID tenantId, UUID id) {
+        return jdbc.sql("""
+                SELECT id FROM inventory_receipts
+                WHERE tenant_id = :tenantId AND id = :id FOR NO KEY UPDATE
+                """).param("tenantId", tenantId).param("id", id).query(UUID.class).optional().isPresent();
+    }
+
     public List<ReceiptLine> listLines(UUID tenantId, UUID receiptId) {
         return jdbc.sql("""
                 SELECT id, variant_id, sku, quantity FROM inventory_receipt_lines

@@ -4,6 +4,9 @@ import com.dagantara.backend.common.config.TransactionConfig;
 import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ChangeSkuRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CreateProductRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.CreateVariantRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.OptionRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.OptionValueRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.SkuMode;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
 import com.dagantara.backend.modules.catalog.repository.CatalogMediaRepository;
@@ -11,8 +14,12 @@ import com.dagantara.backend.modules.catalog.repository.CatalogRepository;
 import com.dagantara.backend.modules.catalog.repository.CatalogVariantRepository;
 import com.dagantara.backend.modules.catalog.service.CatalogAccess;
 import com.dagantara.backend.modules.catalog.service.CatalogService;
+import com.dagantara.backend.modules.inventory.dto.CorrectInventoryRequest;
+import com.dagantara.backend.modules.inventory.dto.InventoryResponses.CorrectionLine;
+import com.dagantara.backend.modules.inventory.dto.InventoryResponses.ProductStock;
 import com.dagantara.backend.modules.inventory.dto.ReceiveInventoryRequest;
 import com.dagantara.backend.modules.inventory.dto.ReceiveInventoryRequest.Line;
+import com.dagantara.backend.modules.inventory.repository.InventoryCorrectionRepository;
 import com.dagantara.backend.modules.inventory.repository.InventoryReceiptRepository;
 import com.dagantara.backend.modules.inventory.repository.InventoryStockRepository;
 import com.dagantara.backend.modules.inventory.service.InventoryAvailabilityService;
@@ -24,6 +31,7 @@ import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -38,6 +46,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -98,7 +107,8 @@ class InventoryPostgresTest {
                 migration("05-help-center-recovery"), migration("06-product-catalog"),
                 migration("07-product-media")).execute(dataSource);
         existingOwner = createOwner(false);
-        new ResourceDatabasePopulator(migration("08-inventory-receipts")).execute(dataSource);
+        new ResourceDatabasePopulator(migration("08-inventory-receipts"),
+                migration("09-inventory-corrections")).execute(dataSource);
 
         context = new AnnotationConfigApplicationContext();
         context.registerBean(JdbcClient.class, () -> jdbc);
@@ -106,7 +116,7 @@ class InventoryPostgresTest {
         context.register(TransactionConfig.class, CatalogAccess.class, CatalogRepository.class,
                 CatalogVariantRepository.class, CatalogMediaRepository.class, CatalogService.class,
                 TenantAccountRepository.class,
-                InventoryReceiptRepository.class, InventoryStockRepository.class,
+                InventoryReceiptRepository.class, InventoryCorrectionRepository.class, InventoryStockRepository.class,
                 InventoryService.class, InventoryAvailabilityService.class);
         context.refresh();
         inventory = context.getBean(InventoryService.class);
@@ -332,6 +342,176 @@ class InventoryPostgresTest {
     }
 
     @Test
+    void imAt04AndImAt08CorrectionsAuditPreviousQuantitiesAndKeepOriginalReceipt() {
+        var owner = createOwner(true);
+        var item = product(owner, "CORRECTED");
+        var receipt = inventory.receive(owner, "first", request(line("CORRECTED", 8)));
+        var otherReceipt = inventory.receive(owner, "second", request(line("CORRECTED", 1)));
+        UUID line = receipt.lines().getFirst().id();
+        var toSix = correction("Counted six", line, 6);
+        var first = inventory.correct(owner, receipt.id(), "first", toSix);
+        var second = inventory.correct(owner, receipt.id(), "second", correction("Found one", line, 7));
+
+        assertEquals(first, inventory.correct(owner, receipt.id(), "first", toSix));
+        assertApiFailure("IDEMPOTENCY_CONFLICT", () ->
+                inventory.correct(owner, receipt.id(), "first", correction("Changed reason", line, 6)));
+        assertApiFailure("IDEMPOTENCY_CONFLICT", () ->
+                inventory.correct(owner, otherReceipt.id(), "first", toSix));
+        assertEquals(owner.id(), first.correctedBy());
+        assertEquals(receipt.id(), first.receiptId());
+        assertEquals("Counted six", first.reason());
+        assertEquals(new CorrectionLine(line, 8, 6, -2), first.lines().getFirst());
+        assertEquals(new CorrectionLine(line, 6, 7, 1), second.lines().getFirst());
+        var detail = inventory.getReceipt(owner, receipt.id());
+        assertEquals(List.of(first, second), detail.corrections());
+        assertEquals(8L, detail.lines().getFirst().originalQuantity());
+        assertEquals(7L, detail.lines().getFirst().effectiveQuantity());
+        assertEquals(receipt, inventory.receive(owner, "first", request(line("CORRECTED", 8))));
+        assertEquals(8L, quantity(owner, item));
+
+        UUID variant = item.variant().id();
+        var ids = List.of(variant, UUID.randomUUID());
+        assertEquals(Map.of(variant, IN_STOCK), availability.availability(owner.tenantId(), ids));
+        inventory.correct(owner, otherReceipt.id(), "zero-other",
+                correction("Other units were not delivered", otherReceipt.lines().getFirst().id(), 0));
+        var zero = transactions.execute(status -> {
+            var result = inventory.correct(owner, receipt.id(), "zero", correction("Wrong SKU", line, 0));
+            assertEquals(Map.of(variant, IN_STOCK), CompletableFuture.supplyAsync(
+                    () -> availability.availability(owner.tenantId(), ids)).join());
+            return result;
+        });
+        assertEquals(Map.of(variant, OUT_OF_STOCK), availability.availability(owner.tenantId(), ids));
+        assertEquals(2L, countReceipts(owner));
+        assertEquals(List.of(first, second, zero), inventory.getReceipt(owner, receipt.id()).corrections());
+        assertNotNull(marker(item));
+    }
+
+    @Test
+    void imAt05AndImAt07RejectInvalidCorrectionsWithoutPartialChangesAndReleaseFailedKey() {
+        var owner = createOwner(true);
+        var other = createOwner(true);
+        var item = product(owner, "A");
+        var secondItem = product(owner, "B");
+        var receipt = inventory.receive(owner, "one", request(line("A", 8), line("B", 8)));
+        var otherReceipt = inventory.receive(owner, "two", request(line("A", 1)));
+        var first = receipt.lines().getFirst();
+        var last = receipt.lines().getLast();
+        var invalidLine = otherReceipt.lines().getFirst().id();
+        var valid = correction("Valid recount", first.id(), 6);
+        var reader = transactions.execute(status -> {
+            UUID role = jdbc.sql("""
+                    INSERT INTO roles (id, tenant_id, code, name)
+                    VALUES (gen_random_uuid(), :tenant, 'READER', 'Reader') RETURNING id
+                    """).param("tenant", owner.tenantId()).query(UUID.class).single();
+            jdbc.sql("""
+                    INSERT INTO role_permissions (role_id, permission_id)
+                    SELECT :role, id FROM permissions WHERE code = 'inventory.read'
+                    """).param("role", role).update();
+            return insertUser(owner.tenantId(), role);
+        });
+        var before = inventory.getReceipt(reader, receipt.id());
+        assertApiFailure("VALIDATION_ERROR", () ->
+                inventory.correct(owner, receipt.id(), "empty", correction(" \t", first.id(), 6)));
+        assertApiFailure("INVALID_RECEIPT_LINE", () ->
+                inventory.correct(owner, receipt.id(), "wrong-line", correction("Wrong line", invalidLine, 0)));
+        assertEquals(403, assertThrows(ApiException.class, () ->
+                inventory.correct(reader, receipt.id(), "restricted", valid)).getStatus().value());
+        assertEquals(404, assertThrows(ApiException.class, () ->
+                inventory.correct(other, receipt.id(), "foreign", valid)).getStatus().value());
+        assertEquals(before, inventory.getReceipt(reader, receipt.id()));
+        assertEquals(9L, quantity(owner, item));
+        assertEquals(8L, quantity(owner, secondItem));
+
+        // Simulate a lower balance on the last variant to exercise guarded updates and rollback.
+        jdbc.sql("UPDATE inventory_stock_balances SET quantity = 0 WHERE tenant_id = :tenant AND variant_id = :id")
+                .param("tenant", owner.tenantId()).param("id", last.variantId()).update();
+        var beforeQuantities = availabilityQuantities(owner, item, secondItem);
+        var rejected = new CorrectInventoryRequest(new TextNode("Count both"), List.of(
+                correctionLine(first.id(), 6), correctionLine(last.id(), 6)));
+        assertApiFailure("STOCK_BALANCE_CONFLICT", () ->
+                inventory.correct(owner, receipt.id(), "balance", rejected));
+        assertEquals(before, inventory.getReceipt(reader, receipt.id()));
+        assertEquals(beforeQuantities, availabilityQuantities(owner, item, secondItem));
+        var accepted = inventory.correct(owner, receipt.id(), "balance", valid);
+        assertEquals(List.of(accepted), inventory.getReceipt(reader, receipt.id()).corrections());
+        assertEquals(8L, inventory.getReceipt(reader, receipt.id()).lines().getLast().effectiveQuantity());
+    }
+
+    @Test
+    void imAt06AggregatesStockByProductAndValueIdentityAfterCorrection() {
+        var owner = createOwner(true);
+        UUID category = catalog.createCategory(owner, "Kaos").id();
+        var product = catalog.createProduct(owner, new CreateProductRequest("Kaos Basic", null, null, Set.of(category),
+                category, null, List.of(
+                        new OptionRequest("Warna", List.of(new OptionValueRequest("Hitam", null),
+                                new OptionValueRequest("Putih", null))),
+                        new OptionRequest("Ukuran", List.of(new OptionValueRequest("M", null),
+                                new OptionValueRequest("L", null)))), null, null));
+        Map<String, UUID> values = product.options().stream().flatMap(option -> option.values().stream())
+                .collect(Collectors.toMap(value -> value.label(), value -> value.id()));
+        catalog.createVariant(owner, product.id(), new CreateVariantRequest(
+                List.of(values.get("Hitam"), values.get("M")), SkuMode.MANUAL, "H-M"));
+        catalog.createVariant(owner, product.id(), new CreateVariantRequest(
+                List.of(values.get("Hitam"), values.get("L")), SkuMode.MANUAL, "H-L"));
+        catalog.createVariant(owner, product.id(), new CreateVariantRequest(
+                List.of(values.get("Putih"), values.get("L")), SkuMode.MANUAL, "P-L"));
+        var defaultProduct = product(owner, "NO-OPTIONS");
+        var receipt = inventory.receive(owner, "aggregate", request(line("H-M", 8), line("H-L", 2),
+                line("P-L", 5), line("NO-OPTIONS", 3)));
+        var before = inventory.getProductStock(owner, product.id());
+        assertEquals(BigInteger.valueOf(15), before.totalQuantity());
+        assertEquals(Map.of(values.get("Hitam"), 10L, values.get("Putih"), 5L,
+                values.get("M"), 8L, values.get("L"), 7L), optionQuantities(before));
+        UUID receiptLine = receipt.lines().stream().filter(line -> line.sku().equals("H-M")).findFirst().orElseThrow().id();
+        inventory.correct(owner, receipt.id(), "recount", correction("Counted six", receiptLine, 6));
+        var after = inventory.getProductStock(owner, product.id());
+        assertEquals(BigInteger.valueOf(13), after.totalQuantity());
+        assertEquals(Map.of(values.get("Hitam"), 8L, values.get("Putih"), 5L,
+                values.get("M"), 6L, values.get("L"), 7L), optionQuantities(after));
+        var defaultStock = inventory.getProductStock(owner, defaultProduct.id());
+        assertEquals(BigInteger.valueOf(3), defaultStock.totalQuantity());
+        assertEquals(List.of(), defaultStock.optionTotals());
+    }
+
+    @Test
+    void imAt09ParallelCorrectionsUseLastEffectiveQuantityAndSerializeWithNewReceipts() throws Exception {
+        var owner = createOwner(true);
+        var item = product(owner, "PARALLEL-CORRECTION");
+        var receipt = inventory.receive(owner, "start", request(line("PARALLEL-CORRECTION", 8)));
+        UUID line = receipt.lines().getFirst().id();
+        var payload = correction("First recount", line, 6);
+        try (ExecutorService workers = Executors.newSingleThreadExecutor()) {
+            var results = transactions.execute(status -> {
+                var first = inventory.correct(owner, receipt.id(), "correct-first", payload);
+                var second = whileCurrentTransactionHoldsLocks(workers, () ->
+                        inventory.correct(owner, receipt.id(), "correct-second", correction("Next recount", line, 7)));
+                return Map.entry(first, second);
+            });
+            var first = results.getKey();
+            var second = results.getValue().get(10, TimeUnit.SECONDS);
+            assertEquals(new CorrectionLine(line, 8, 6, -2), first.lines().getFirst());
+            assertEquals(new CorrectionLine(line, 6, 7, 1), second.lines().getFirst());
+            assertEquals(List.of(first, second), inventory.getReceipt(owner, receipt.id()).corrections());
+            var received = transactions.execute(status -> {
+                inventory.correct(owner, receipt.id(), "correct-third", correction("New count", line, 4));
+                return whileCurrentTransactionHoldsLocks(workers, () ->
+                        inventory.receive(owner, "new-receipt", request(line("PARALLEL-CORRECTION", 5))));
+            });
+            assertEquals(receipt.warehouseId(), received.get(10, TimeUnit.SECONDS).warehouseId());
+            var retryPayload = correction("Retry count", line, 3);
+            var retry = transactions.execute(status -> {
+                var firstTry = inventory.correct(owner, receipt.id(), "retry", retryPayload);
+                var duplicate = whileCurrentTransactionHoldsLocks(workers, () ->
+                        inventory.correct(owner, receipt.id(), "retry", retryPayload));
+                return Map.entry(firstTry, duplicate);
+            });
+            assertEquals(retry.getKey(), retry.getValue().get(10, TimeUnit.SECONDS));
+        }
+        assertEquals(8L, quantity(owner, item));
+        assertEquals(4, inventory.getReceipt(owner, receipt.id()).corrections().size());
+    }
+
+    @Test
     void postgresRejectsCrossTenantStockAndKeysWithoutReceipts() {
         AccountSession owner = createOwner(true);
         Product item = product(owner, "OWNED");
@@ -407,6 +587,23 @@ class InventoryPostgresTest {
 
     private long quantity(AccountSession account, Product product) {
         return inventory.getProductStock(account, product.id()).variants().getFirst().quantity();
+    }
+
+    private List<Long> availabilityQuantities(AccountSession account, Product first, Product second) {
+        return List.of(quantity(account, first), quantity(account, second));
+    }
+
+    private static Map<UUID, Long> optionQuantities(ProductStock stock) {
+        return stock.optionTotals().stream().flatMap(option -> option.values().stream())
+                .collect(Collectors.toMap(value -> value.valueId(), value -> value.totalQuantity().longValueExact()));
+    }
+
+    private static CorrectInventoryRequest correction(String reason, UUID line, long quantity) {
+        return new CorrectInventoryRequest(new TextNode(reason), List.of(correctionLine(line, quantity)));
+    }
+
+    private static CorrectInventoryRequest.Line correctionLine(UUID line, long quantity) {
+        return new CorrectInventoryRequest.Line(line, LongNode.valueOf(quantity));
     }
 
     private OffsetDateTime marker(Product product) {

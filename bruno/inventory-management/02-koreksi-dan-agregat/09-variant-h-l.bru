@@ -1,0 +1,37 @@
+meta {
+  name: Fixture SKU H-L
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{optionProduct}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{Hitam}}",
+      "{{L}}"
+    ],
+    "skuMode": "MANUAL",
+    "sku": "H-L"
+  }
+}
+
+tests {
+  test("Fixture SKU H-L", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.be.a("string");
+    expect(data.sku).to.equal("H-L");
+    expect(data.optionValueIds).to.deep.equal([bru.getVar("Hitam"), bru.getVar("L")]);
+    bru.setVar("variant-H-L", data.id);
+  });
+}

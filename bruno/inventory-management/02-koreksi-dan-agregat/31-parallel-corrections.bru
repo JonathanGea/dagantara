@@ -1,0 +1,45 @@
+meta {
+  name: IM-AT-09 Koreksi serentak berangkat dari jumlah efektif terakhir
+  type: http
+  seq: 31
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+script:pre-request {
+  const url = bru.getEnvVar("baseUrl") + "/" + bru.getVar("shopA") + "/api/v1/inventory/receipts/" + bru.getVar("receipt") + "/corrections";
+  const results = await Promise.all([4, 5].map(quantity => bru.sendRequest({
+    url,
+    method: "POST",
+    headers: { Authorization: "Bearer " + bru.getVar("ownerA"), "Idempotency-Key": "parallel-" + quantity },
+    data: { reason: "Hitung paralel " + quantity, lines: [{ receiptLineId: bru.getVar("line-H-M"), quantity }] }
+  })));
+  bru.setVar("parallelResults", results.map(result => ({ status: result.status, correction: result.data.data })));
+}
+
+tests {
+  test("IM-AT-09 Koreksi serentak berangkat dari jumlah efektif terakhir", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    const saved = bru.getVar("parallelResults");
+    expect(saved.map(result => result.status)).to.deep.equal([201, 201]);
+    expect(data.corrections).to.have.length(4);
+    const history = data.corrections.slice(2);
+    expect(history.map(correction => correction.id)).to.have.members(saved.map(result => result.correction.id));
+    const [first, second] = history.map(correction => correction.lines[0]);
+    expect(first.previousQuantity).to.equal(7);
+    expect(second.previousQuantity).to.equal(first.quantity);
+    expect([first.quantity, second.quantity]).to.have.members([4, 5]);
+    expect(first.delta + second.delta).to.equal(second.quantity - 7);
+    expect(data.lines.find(line => line.sku === "H-M").effectiveQuantity).to.equal(second.quantity);
+    bru.setVar("parallelFinalQuantity", second.quantity);
+  });
+}

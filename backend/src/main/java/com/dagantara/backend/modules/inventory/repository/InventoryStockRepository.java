@@ -41,6 +41,16 @@ public class InventoryStockRepository {
                 .param("quantity", quantity).param("maxPrevious", Long.MAX_VALUE - quantity).update() == 1;
     }
 
+    public boolean applyCorrection(UUID tenantId, UUID warehouseId, UUID variantId, long delta) {
+        return jdbc.sql("""
+                UPDATE inventory_stock_balances SET quantity = quantity + :delta
+                WHERE tenant_id = :tenantId AND warehouse_id = :warehouseId AND variant_id = :variantId
+                    AND quantity BETWEEN :minimum AND :maximum
+                """).param("tenantId", tenantId).param("warehouseId", warehouseId).param("variantId", variantId)
+                .param("delta", delta).param("minimum", Math.max(0, -delta))
+                .param("maximum", Long.MAX_VALUE - Math.max(0, delta)).update() == 1;
+    }
+
     /** Returns owned variants only, including zero for variants without a stock balance. */
     public Map<UUID, Long> quantities(UUID tenantId, Collection<UUID> variantIds) {
         if (variantIds.isEmpty()) {

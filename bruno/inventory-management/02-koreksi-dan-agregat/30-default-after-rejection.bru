@@ -1,0 +1,28 @@
+meta {
+  name: IM-AT-05 Saldo awal bertahan setelah penolakan koreksi negatif
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/products/{{defaultProduct}}/stock
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("IM-AT-05 Saldo awal bertahan setelah penolakan koreksi negatif", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.productId).to.equal(bru.getVar("defaultProduct"));
+    expect(data.totalQuantity).to.equal(3);
+    expect(data.variants).to.have.length(1);
+    expect(data.variants[0]).to.include({ sku: "DEFAULT", quantity: 3 });
+    expect(data.variants[0].optionValues).to.deep.equal([]);
+    expect(data.optionTotals).to.deep.equal([]);
+  });
+}

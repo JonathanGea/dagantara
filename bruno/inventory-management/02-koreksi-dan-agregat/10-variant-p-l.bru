@@ -1,0 +1,37 @@
+meta {
+  name: Fixture SKU P-L
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{optionProduct}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{Putih}}",
+      "{{L}}"
+    ],
+    "skuMode": "MANUAL",
+    "sku": "P-L"
+  }
+}
+
+tests {
+  test("Fixture SKU P-L", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.be.a("string");
+    expect(data.sku).to.equal("P-L");
+    expect(data.optionValueIds).to.deep.equal([bru.getVar("Putih"), bru.getVar("L")]);
+    bru.setVar("variant-P-L", data.id);
+  });
+}
