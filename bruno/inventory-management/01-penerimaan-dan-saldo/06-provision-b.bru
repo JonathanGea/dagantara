@@ -1,0 +1,38 @@
+meta {
+  name: Fixture buat tenant B dengan admin bawaan
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tenants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{platformToken}}
+}
+
+body:json {
+  {
+    "storeName": "Fixture Inventory B",
+    "phoneNumber": "+628000000041",
+    "ownerUsername": "{{ownerB}}",
+    "loginUrl": "https://{{fixtureHost}}/{{shopB}}",
+    "loginUrlReady": true
+  }
+}
+
+tests {
+  test("Fixture buat tenant B dengan admin bawaan", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.tenantId).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result.ownerUsername).to.equal(bru.getVar("ownerB"));
+    expect(result.temporaryPassword).to.be.a("string");
+    expect(result.ownerId).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    bru.setVar("ownerBId", result.ownerId);
+    bru.setVar("tempB", result.temporaryPassword);
+  });
+}

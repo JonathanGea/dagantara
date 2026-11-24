@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-02 Ganti daftar dan Primary Category bersama
+  type: http
+  seq: 21
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "categoryIds": [
+      "{{a2}}"
+    ],
+    "primaryCategoryId": "{{a2}}"
+  }
+}
+
+tests {
+  test("PM-AT-02 Ganti daftar dan Primary Category bersama", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data).to.deep.equal({ categoryIds: [bru.getVar("a2")], primaryCategoryId: bru.getVar("a2") });
+  });
+}

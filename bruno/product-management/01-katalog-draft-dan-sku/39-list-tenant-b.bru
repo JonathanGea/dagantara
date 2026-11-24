@@ -1,0 +1,24 @@
+meta {
+  name: PM-AT-01 Pagination B hanya memuat produk milik B
+  type: http
+  seq: 39
+}
+
+get {
+  url: {{baseUrl}}/{{shopB}}/api/v1/catalog/products?page=0&size=1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminB}}
+}
+
+tests {
+  test("PM-AT-01 Pagination B hanya memuat produk milik B", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.meta).to.include({ page: 0, size: 1, totalElements: 1, totalPages: 1 });
+    expect(body.data.map(item => item.id)).to.deep.equal([bru.getVar("productB")]);
+  });
+}

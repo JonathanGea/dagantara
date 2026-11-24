@@ -1,0 +1,40 @@
+meta {
+  name: PM-AT-05 Varian bawaan AUTO hanya memakai kode produk
+  type: http
+  seq: 31
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Aksesoris",
+    "priceIdr": 0,
+    "categoryIds": [
+      "{{a2}}"
+    ],
+    "primaryCategoryId": "{{a2}}",
+    "productCode": " aks ",
+    "options": []
+  }
+}
+
+tests {
+  test("PM-AT-05 Varian bawaan AUTO hanya memakai kode produk", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.status).to.equal("DRAFT");
+    expect(result.variants).to.have.length(1);
+    expect(result.variants[0]).to.include({ sku: "AKS", skuMode: "AUTO" });
+    expect(result.variants[0].optionValueIds).to.deep.equal([]);
+    bru.setVar("defaultA", result.id);
+  });
+}

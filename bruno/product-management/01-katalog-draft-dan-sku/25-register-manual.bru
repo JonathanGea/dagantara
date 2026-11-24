@@ -1,0 +1,38 @@
+meta {
+  name: PM-AT-05 SKU MANUAL dipangkas dan dinormalisasi
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{white}}",
+      "{{large}}"
+    ],
+    "skuMode": "MANUAL",
+    "sku": " putih.l_01 "
+  }
+}
+
+tests {
+  test("PM-AT-05 SKU MANUAL dipangkas dan dinormalisasi", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result.sku).to.equal("PUTIH.L_01");
+    expect(result.skuMode).to.equal("MANUAL");
+    expect(result.optionValueIds).to.deep.equal([bru.getVar("white"), bru.getVar("large")]);
+    bru.setVar("manualVariant", result.id);
+  });
+}

@@ -37,13 +37,14 @@ Buat subpackage yang dibutuhkan modul. Tempatkan tipe request dan response di `d
 ## Ketergantungan keputusan domain
 
 - Produk adalah milik satu tenant (Independent Catalog).
-- Hubungan Product–Category many-to-many dengan tepat satu Primary Category, tetapi penyimpanan Primary Category **belum diputuskan** (PM-02). Jangan membuat kolom/constraint sendiri sebelum diputuskan.
+- Hubungan Product–Category many-to-many. Gunakan `products.primary_category_id` dan constraint ke relasi `product_categories` sesuai PM-02.
 - Media harus dimiliki produk dan asosiasinya dengan nilai opsi adalah many-to-many (PM-03/PM-04).
+- Penerimaan dan koreksi stok memakai UUID varian, gudang dan tenant yang sesuai, serta satu transaksi untuk seluruh perubahan saldo. Ikuti `../docs/inventory-management.md`.
 - Struktur tabel yang belum ditetapkan detailnya tidak boleh dianggap final hanya dari gambar referensi.
 
 ## Checklist pengerjaan
 
-1. Petakan task ke ID di `../docs/user-management.md` atau `../docs/product-management.md`.
+1. Petakan task ke ID di `../docs/user-management.md`, `../docs/product-management.md`, atau `../docs/inventory-management.md`.
 2. Pilih skill yang sesuai di `../.agents/skills/`; security dan testing sering juga berlaku pada tugas API/database.
 3. Baca kode yang terdampak dan tes yang sudah ada.
 4. Implementasikan change set kecil dengan validasi tenant, permission, dan integritas data.

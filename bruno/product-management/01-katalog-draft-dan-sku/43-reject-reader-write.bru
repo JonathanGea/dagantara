@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-09 Pembaca ditolak ketika mengubah produk nyata
+  type: http
+  seq: 43
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/details
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{readerToken}}
+}
+
+body:json {
+  {
+    "name": "Dilarang",
+    "priceIdr": 1,
+    "productCode": "KBS"
+  }
+}
+
+tests {
+  test("PM-AT-09 Pembaca ditolak ketika mengubah produk nyata", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+  });
+}

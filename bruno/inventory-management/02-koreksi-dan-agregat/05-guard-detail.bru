@@ -1,0 +1,28 @@
+meta {
+  name: Fixture baris penerimaan untuk konflik saldo
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{guardReceipt}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+tests {
+  test("Fixture baris penerimaan untuk konflik saldo", function () {
+    expect(res.getStatus()).to.equal(200);
+    const data = res.getBody().data;
+    expect(data.lines).to.have.length(1);
+    expect(data.lines[0]).to.include({ sku: "DEFAULT", originalQuantity: 8, effectiveQuantity: 8 });
+    expect(data.lines[0].id).to.be.a("string");
+    expect(data.corrections).to.deep.equal([]);
+    bru.setVar("guardLine", data.lines[0].id);
+    bru.setVar("guardDetail", data);
+  });
+}

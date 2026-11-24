@@ -1,0 +1,35 @@
+meta {
+  name: IM-AT-03 POST membutuhkan Idempotency-Key
+  type: http
+  seq: 29
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "lines": [
+      {
+        "sku": "FIX.HTP-M",
+        "quantity": 8
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-03 POST membutuhkan Idempotency-Key", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_IDEMPOTENCY_KEY");
+  });
+}

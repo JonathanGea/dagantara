@@ -1,0 +1,32 @@
+meta {
+  name: Fixture Siapkan role katalog baca-saja
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/tenant/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "code": "CATALOG_READER",
+    "name": "Catalog reader"
+  }
+}
+
+tests {
+  test("Fixture Siapkan role katalog baca-saja", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result.permissions).to.deep.equal([]);
+    bru.setVar("readerRole", result.id);
+  });
+}

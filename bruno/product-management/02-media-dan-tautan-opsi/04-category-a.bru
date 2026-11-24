@@ -1,0 +1,35 @@
+meta {
+  name: Fixture kategori tenant A
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const name = "Media fixture " + Date.now() + "-" + Math.random().toString(36).slice(2);
+  bru.setVar("categoryAName", name);
+  req.setBody({ name });
+}
+
+tests {
+  test("Fixture kategori tenant A", function () {
+    expect(res.getStatus()).to.equal(201);
+    const category = res.getBody().data;
+    expect(category.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(category.name).to.equal(bru.getVar("categoryAName"));
+    bru.setVar("categoryA", category.id);
+  });
+}

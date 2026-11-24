@@ -1,0 +1,68 @@
+meta {
+  name: Fixture Kaos Basic dengan opsi warna dan ukuran
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+body:json {
+  {
+    "name": "Kaos Basic",
+    "categoryIds": [
+      "{{category}}"
+    ],
+    "primaryCategoryId": "{{category}}",
+    "options": [
+      {
+        "name": "Warna",
+        "values": [
+          {
+            "label": "Hitam"
+          },
+          {
+            "label": "Putih"
+          }
+        ]
+      },
+      {
+        "name": "Ukuran",
+        "values": [
+          {
+            "label": "M"
+          },
+          {
+            "label": "L"
+          }
+        ]
+      }
+    ]
+  }
+}
+
+tests {
+  test("Fixture Kaos Basic dengan opsi warna dan ukuran", function () {
+    expect(res.getStatus()).to.equal(201);
+    const data = res.getBody().data;
+    expect(data.id).to.be.a("string");
+    expect(data.options.map(option => option.name)).to.deep.equal(["Warna", "Ukuran"]);
+    for (const [option, labels] of [[data.options[0], ["Hitam", "Putih"]], [data.options[1], ["M", "L"]]]) {
+      expect(option.id).to.be.a("string");
+      expect(option.values.map(value => value.label)).to.have.members(labels);
+      bru.setVar(option.name, option.id);
+      for (const value of option.values) {
+        expect(value.id).to.be.a("string");
+        bru.setVar(value.label, value.id);
+      }
+    }
+    bru.setVar("optionProduct", data.id);
+  });
+}

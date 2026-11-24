@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-06 SKU dengan penerimaan ditolak saat hendak diubah
+  type: http
+  seq: 36
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants/{{autoVariant}}/sku
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "skuMode": "MANUAL",
+    "sku": "LOCKED-REPLACEMENT"
+  }
+}
+
+tests {
+  test("PM-AT-06 SKU dengan penerimaan ditolak saat hendak diubah", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("SKU_LOCKED");
+  });
+}

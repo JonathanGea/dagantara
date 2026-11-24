@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-03 Foto tidak dapat diubah melalui produk tetangga
+  type: http
+  seq: 19
+}
+
+put {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{otherProduct}}/media/{{mediaA}}/option-values
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{otherProductBlack}}"
+    ]
+  }
+}
+
+tests {
+  test("PM-AT-03 Foto tidak dapat diubah melalui produk tetangga", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+  });
+}

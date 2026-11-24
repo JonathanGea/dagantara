@@ -1,0 +1,82 @@
+meta {
+  name: PM-AT-02 Buat Draft dengan dua kategori A dan urutan opsi
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "name": "Kaos Basic",
+    "description": "Katalog Product 01",
+    "priceIdr": null,
+    "productCode": " kbs ",
+    "categoryIds": [
+      "{{a1}}",
+      "{{a2}}"
+    ],
+    "primaryCategoryId": "{{a1}}",
+    "options": [
+      {
+        "name": "Warna",
+        "values": [
+          {
+            "label": "Hitam",
+            "code": " htm "
+          },
+          {
+            "label": "Putih",
+            "code": "PTH"
+          }
+        ]
+      },
+      {
+        "name": "Ukuran",
+        "values": [
+          {
+            "label": "M",
+            "code": "M"
+          },
+          {
+            "label": "L",
+            "code": "L"
+          }
+        ]
+      }
+    ]
+  }
+}
+
+tests {
+  test("PM-AT-02 Buat Draft dengan dua kategori A dan urutan opsi", function () {
+    expect(res.getStatus()).to.equal(201);
+    const product = res.getBody().data;
+    expect(product.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(product.status).to.equal("DRAFT");
+    expect(product.priceIdr).to.equal(null);
+    expect(product.productCode).to.equal("KBS");
+    expect(product.categoryIds).to.have.members([bru.getVar("a1"), bru.getVar("a2")]);
+    expect(product.primaryCategoryId).to.equal(bru.getVar("a1"));
+    expect(product.options.map(option => option.name)).to.deep.equal(["Warna", "Ukuran"]);
+    expect(product.variants).to.deep.equal([]);
+    const [color, size] = product.options;
+    expect(color.values.map(value => value.label)).to.have.members(["Hitam", "Putih"]);
+    expect(size.values.map(value => value.label)).to.have.members(["M", "L"]);
+    expect(color.values.find(value => value.label === "Hitam").code).to.equal("HTM");
+    bru.setVar("productA", product.id);
+    bru.setVar("color", color.id);
+    bru.setVar("black", color.values.find(value => value.label === "Hitam").id);
+    bru.setVar("white", color.values.find(value => value.label === "Putih").id);
+    bru.setVar("medium", size.values.find(value => value.label === "M").id);
+    bru.setVar("large", size.values.find(value => value.label === "L").id);
+  });
+}

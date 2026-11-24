@@ -1,0 +1,29 @@
+meta {
+  name: PM-AT-01 Pembaca tidak bisa menambah media
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}/media
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{reader}}
+}
+
+body:json {
+  {
+    "url": "https://example.test/forbidden.jpg"
+  }
+}
+
+tests {
+  test("PM-AT-01 Pembaca tidak bisa menambah media", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

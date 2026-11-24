@@ -277,19 +277,19 @@
         "id":  "bruno-api-testing",
         "title":  "Pengujian API HTTP dengan Bruno",
         "description":  "Buat, tinjau, atau jalankan smoke test dan skenario penerimaan API HTTP Dagantara dengan Bruno dan koleksi bruno/.",
-        "markdown":  "---\nname: bruno-api-testing\ndescription: Buat, tinjau, atau jalankan smoke test dan skenario penerimaan API HTTP Dagantara dengan Bruno dan koleksi bruno/.\n---\n\n# Pengujian API HTTP dengan Bruno\n\nBaca spec atau tiket, kontrak HTTP, dan koleksi `bruno/` yang terkait. Untuk setiap perilaku API yang baru atau berubah dalam cakupan, cantumkan rujukan ke kriteria penerimaan atau ID skenario, seperti `UM-AT-01`. Tentukan hasil yang diharapkan dari spec, kontrak, dan fixture yang diketahui sebelum melihat respons aktual. Jika ada keputusan domain yang masih terbuka, kerjakan skenario yang sudah jelas dan laporkan kriteria yang tertahan.\n\n## Buktikan perilaku per kasus\n\n| Bukti | Yang diperiksa |\n| --- | --- |\n| Kondisi awal | Pastikan login, permission, tenant, dan data awal sesuai skenario. Untuk menguji penolakan izin, gunakan identitas yang berhasil login dan payload serta target yang valid. Saat menguji batas tenant, pastikan target memang ada melalui pelaku yang berwenang. |\n| Status HTTP | Assert status yang ditetapkan kontrak untuk aksi itu, termasuk pada kasus penolakan. |\n| Kontrak respons | Assert field atau kode error yang menunjukkan hasil. Bandingkan nilai bisnis dengan fixture. Untuk ID atau waktu yang dibuat server, cek bentuk atau relasi yang dijanjikan. Periksa header saat menjadi bagian kontrak. |\n| Keadaan akhir | Untuk aksi tulis, baca kembali lewat API yang tersedia. Untuk penolakan, buktikan data tetap sama, entitas baru tidak tersimpan, atau data yang dilindungi tidak muncul, sesuai kriteria. Pakai integration test melalui `spring-boot-testing` untuk efek yang tidak bisa diamati melalui API yang ada. |\n\nContoh `UM-AT-01` memerlukan bukti bahwa akun tersimpan di tenant pelaku dan role aktifnya sama dengan pilihan saat setup. Tes harus gagal apabila akun tersimpan di tenant yang salah meskipun status HTTP sukses. `UM-AT-02` memerlukan bukti bahwa pelaku yang terautentikasi tanpa `users.create` ditolak dan akun tidak tersimpan.\n\n## Susun skenario yang bisa diulang\n\n- Simpan smoke test di `bruno/smoke/`. Gunakan satu folder `bruno/\u003cmodul-atau-slug\u003e/\u003cID-atau-nomor\u003e-\u003cnama-skenario\u003e/` per kasus. Cantumkan rujukan spec dan kriteria di nama atau deskripsi request aksi. Setiap folder harus bisa dijalankan sendiri.\n- Untuk beberapa request, susun setup, aksi, verifikasi, dan cleanup sesuai kebutuhan. Gunakan awalan angka pada nama file `.bru` yang sama dengan `seq`. Beri nama assertion sesuai hasil yang dibuktikan. Validasi respons setup sebelum memakai `bru.setVar` untuk meneruskan ID atau token. Jika setup gagal, hentikan request yang bergantung padanya.\n- Gunakan `{{baseUrl}}` dari environment dan simpan kredensial uji di secret lokal atau variabel proses. Gunakan fixture unik tiap run, database uji terisolasi untuk perubahan data, dan cara membersihkan fixture yang tetap tersedia jika run terhenti.\n\n## Jalankan dan laporkan\n\n1. Gunakan environment `Local` dan pastikan target adalah backend worktree yang sedang diuji. Gunakan `spring-boot-run` bila perlu menyiapkan atau memeriksa backend lokal. Saat dipanggil dari `implement-from-spec`, lanjutkan verifikasi lokal dalam cakupan sebagai bagian dari tugas tersebut.\n2. Dari folder `bruno/`, jalankan `bru run smoke --env Local`. Setelah smoke lulus, jalankan `bru run \u003cfolder-skenario\u003e --env Local` untuk setiap skenario HTTP dalam cakupan. Urutkan request yang saling bergantung. Gunakan `--bail` bila pembersihan tetap bisa dijalankan setelah run berhenti.\n3. Laporkan rujukan kriteria, perintah aktual, serta hasil `pass`, `fail`, atau `not run`. Bedakan kegagalan assertion fitur dari setup yang gagal sebelum aksi. Jika membuat report, hilangkan header dan payload yang memuat rahasia atau PII.\n\n[Pola assertion Bruno](https://github.com/bruno-collections/bruno-agent-skills/blob/main/bruno-test-writer/references/testing-patterns.md) · [Opsi Bruno CLI](https://docs.usebruno.com/bru-cli/run/options)\n"
+        "markdown":  "---\r\nname: bruno-api-testing\r\ndescription: Buat, tinjau, atau jalankan smoke test dan skenario penerimaan API HTTP Dagantara dengan Bruno dan koleksi bruno/.\r\n---\r\n\r\n# Pengujian API HTTP dengan Bruno\r\n\r\nBaca spec atau tiket, kontrak HTTP, dan koleksi `bruno/` yang terkait. Untuk setiap perilaku API yang baru atau berubah dalam cakupan, cantumkan rujukan ke kriteria penerimaan atau ID skenario, seperti `UM-AT-01`. Tentukan hasil yang diharapkan dari spec, kontrak, dan fixture yang diketahui sebelum melihat respons aktual. Jika ada keputusan domain yang masih terbuka, kerjakan skenario yang sudah jelas dan laporkan kriteria yang tertahan.\r\n\r\n## Buktikan perilaku per kasus\r\n\r\n| Bukti | Yang diperiksa |\r\n| --- | --- |\r\n| Kondisi awal | Pastikan login, permission, tenant, dan data awal sesuai skenario. Untuk menguji penolakan izin, gunakan identitas yang berhasil login dan payload serta target yang valid. Saat menguji batas tenant, pastikan target memang ada melalui pelaku yang berwenang. |\r\n| Status HTTP | Assert status yang ditetapkan kontrak untuk aksi itu, termasuk pada kasus penolakan. |\r\n| Kontrak respons | Assert field atau kode error yang menunjukkan hasil. Bandingkan nilai bisnis dengan fixture. Untuk ID atau waktu yang dibuat server, cek bentuk atau relasi yang dijanjikan. Periksa header saat menjadi bagian kontrak. |\r\n| Keadaan akhir | Untuk aksi tulis, baca kembali lewat API yang tersedia. Untuk penolakan, buktikan data tetap sama, entitas baru tidak tersimpan, atau data yang dilindungi tidak muncul, sesuai kriteria. Pakai integration test melalui `spring-boot-testing` untuk efek yang tidak bisa diamati melalui API yang ada. |\r\n\r\nContoh `UM-AT-01` memerlukan bukti bahwa akun tersimpan di tenant pelaku dan role aktifnya sama dengan pilihan saat setup. Tes harus gagal apabila akun tersimpan di tenant yang salah meskipun status HTTP sukses. `UM-AT-02` memerlukan bukti bahwa pelaku yang terautentikasi tanpa `users.create` ditolak dan akun tidak tersimpan.\r\n\r\n## Susun skenario yang bisa diulang\r\n\r\n- Simpan smoke test di `bruno/smoke/`. Gunakan satu folder `bruno/\u003cmodul-atau-slug\u003e/\u003cID-atau-nomor\u003e-\u003cnama-skenario\u003e/` per kasus. Cantumkan rujukan spec dan kriteria di nama atau deskripsi request aksi. Setiap folder harus bisa dijalankan sendiri.\r\n- Untuk beberapa request, susun setup, aksi, verifikasi, dan cleanup sesuai kebutuhan. Gunakan awalan angka pada nama file `.bru` yang sama dengan `seq`. Beri nama assertion sesuai hasil yang dibuktikan. Validasi respons setup sebelum memakai `bru.setVar` untuk meneruskan ID atau token. Jika setup gagal, hentikan request yang bergantung padanya.\r\n- Gunakan `{{baseUrl}}` dari environment dan simpan kredensial uji di secret lokal atau variabel proses. Gunakan fixture unik tiap run, database uji terisolasi untuk perubahan data, dan cara membersihkan fixture yang tetap tersedia jika run terhenti.\r\n\r\n## Jalankan dan laporkan\r\n\r\n1. Gunakan environment `Local` dan pastikan target adalah backend worktree yang sedang diuji. Gunakan `spring-boot-run` bila perlu menyiapkan atau memeriksa backend lokal. Saat dipanggil dari `implement-from-spec`, lanjutkan verifikasi lokal dalam cakupan sebagai bagian dari tugas tersebut.\r\n2. Dari folder `bruno/`, jalankan `bru run smoke --env Local`. Setelah smoke lulus, jalankan `bru run \u003cfolder-skenario\u003e --env Local` untuk setiap skenario HTTP dalam cakupan. Urutkan request yang saling bergantung. Gunakan `--bail` bila pembersihan tetap bisa dijalankan setelah run berhenti.\r\n3. Laporkan rujukan kriteria, perintah aktual, serta hasil `pass`, `fail`, atau `not run`. Bedakan kegagalan assertion fitur dari setup yang gagal sebelum aksi. Jika membuat report, hilangkan header dan payload yang memuat rahasia atau PII.\r\n\r\n[Pola assertion Bruno](https://github.com/bruno-collections/bruno-agent-skills/blob/main/bruno-test-writer/references/testing-patterns.md) · [Opsi Bruno CLI](https://docs.usebruno.com/bru-cli/run/options)\r\n"
     },
     {
         "id":  "create-postgres-database",
         "title":  "Membuat database PostgreSQL Dagantara",
         "description":  "Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.",
-        "markdown":  "---\nname: create-postgres-database\ndescription: Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.\n---\n\n# Membuat database PostgreSQL Dagantara\n\nJalankan skrip dari root repo untuk menyiapkan instance lokal dengan PostgreSQL 16 yang sudah terpasang. Skrip menggunakan kredensial Windows terenkripsi di luar repo dan memeriksa koneksi sebagai `dagantara_app`.\n\n```powershell\n$result = \u0026 .\\.agents\\skills\\create-postgres-database\\scripts\\create-database.ps1\n$result\n```\n\nDefault-nya adalah `127.0.0.1:5433` dengan data di `%LOCALAPPDATA%\\Dagantara\\postgresql-16`. Skrip memakai ulang instance tersebut, menyalakannya bila berhenti, dan mengisi role atau database yang masih belum ada. Gunakan `-PgBin` jika lokasi binary PostgreSQL 16 berbeda. Untuk instance tambahan yang memang diminta, gunakan nama direktori lokal dan port yang berbeda, misalnya `-StateName Dagantara-Test -Port 15433`. Periksa konflik port sebelum memilih instance tambahan.\n\nJika pengguna memilih instance PostgreSQL yang sudah ada, gunakan kredensial admin yang sah pada instance tersebut dan ikuti langkah SQL di [README backend](../../../backend/README.md#postgresql-lokal). Verifikasi koneksi dengan akun aplikasi. Jika instance tersebut meminta password yang tidak tersedia, instance lokal terpisah adalah opsi ketika targetnya belum ditetapkan. Pertahankan konfigurasi, kredensial, dan data instance yang sudah ada.\n\nLaporkan URL JDBC, nama akun aplikasi, status verifikasi, dan lokasi berkas kredensial tanpa menampilkan password. Untuk menjalankan backend, muat nilai yang dikembalikan skrip ke terminal yang sama.\n\n```powershell\n$db = Import-Clixml -LiteralPath $result.CredentialPath\n$env:SPRING_DATASOURCE_URL = $result.JdbcUrl\n$env:SPRING_DATASOURCE_USERNAME = $db.UserName\n$env:SPRING_DATASOURCE_PASSWORD = $db.GetNetworkCredential().Password\n```\n\nJika backend juga diminta berjalan, ikuti panduan [spring-boot-run](../spring-boot-run/SKILL.md) dan cek `/actuator/health/db` dengan pengaturan Actuator lokal di README backend. Untuk membuat tabel atau migrasi, gunakan [spring-boot-database](../spring-boot-database/SKILL.md).\n"
+        "markdown":  "---\r\nname: create-postgres-database\r\ndescription: Buat atau siapkan database PostgreSQL lokal Dagantara di Windows. Gunakan untuk menyiapkan instance pengembangan, database dagantara, dan akun aplikasi.\r\n---\r\n\r\n# Membuat database PostgreSQL Dagantara\r\n\r\nJalankan skrip dari root repo untuk menyiapkan instance lokal dengan PostgreSQL 16 yang sudah terpasang. Skrip menggunakan kredensial Windows terenkripsi di luar repo dan memeriksa koneksi sebagai `dagantara_app`.\r\n\r\n```powershell\r\n$result = \u0026 .\\.agents\\skills\\create-postgres-database\\scripts\\create-database.ps1\r\n$result\r\n```\r\n\r\nDefault-nya adalah `127.0.0.1:5433` dengan data di `%LOCALAPPDATA%\\Dagantara\\postgresql-16`. Skrip memakai ulang instance tersebut, menyalakannya bila berhenti, dan mengisi role atau database yang masih belum ada. Gunakan `-PgBin` jika lokasi binary PostgreSQL 16 berbeda. Untuk instance tambahan yang memang diminta, gunakan nama direktori lokal dan port yang berbeda, misalnya `-StateName Dagantara-Test -Port 15433`. Periksa konflik port sebelum memilih instance tambahan.\r\n\r\nJika pengguna memilih instance PostgreSQL yang sudah ada, gunakan kredensial admin yang sah pada instance tersebut dan ikuti langkah SQL di [README backend](../../../backend/README.md#postgresql-lokal). Verifikasi koneksi dengan akun aplikasi. Jika instance tersebut meminta password yang tidak tersedia, instance lokal terpisah adalah opsi ketika targetnya belum ditetapkan. Pertahankan konfigurasi, kredensial, dan data instance yang sudah ada.\r\n\r\nLaporkan URL JDBC, nama akun aplikasi, status verifikasi, dan lokasi berkas kredensial tanpa menampilkan password. Untuk menjalankan backend, muat nilai yang dikembalikan skrip ke terminal yang sama.\r\n\r\n```powershell\r\n$db = Import-Clixml -LiteralPath $result.CredentialPath\r\n$env:SPRING_DATASOURCE_URL = $result.JdbcUrl\r\n$env:SPRING_DATASOURCE_USERNAME = $db.UserName\r\n$env:SPRING_DATASOURCE_PASSWORD = $db.GetNetworkCredential().Password\r\n```\r\n\r\nJika backend juga diminta berjalan, ikuti panduan [spring-boot-run](../spring-boot-run/SKILL.md) dan cek `/actuator/health/db` dengan pengaturan Actuator lokal di README backend. Untuk membuat tabel atau migrasi, gunakan [spring-boot-database](../spring-boot-database/SKILL.md).\r\n"
     },
     {
         "id":  "design-ui",
         "title":  "Desain UI",
         "description":  "Rancang atau tinjau layout, halaman, dan alur UI lintas proyek. Gunakan aplikasi yang ada, spesifikasi, atau brief singkat untuk menghasilkan wireframe atau prototipe yang siap ditinjau.",
-        "markdown":  "---\nname: design-ui\ndescription: Rancang atau tinjau layout, halaman, dan alur UI lintas proyek. Gunakan aplikasi yang ada, spesifikasi, atau brief singkat untuk menghasilkan wireframe atau prototipe yang siap ditinjau.\n---\n\n# Desain UI\n\nTentukan pengguna, tugas utama, dan hasil desain yang diminta. Gunakan instruksi proyek dan batas cakupan dari pengguna. Pilih dasar desain yang tersedia.\n\n- **Aplikasi yang sudah berjalan.** Periksa layar, navigasi, komponen, dan pedoman desain yang dipakai. Ikuti pola yang relevan dengan alur yang sedang diubah.\n- **Spesifikasi atau tiket.** Petakan aktor, izin, aksi, hasil yang terlihat, dan skenario yang relevan. Gunakan aturan produk yang telah disepakati untuk menentukan perilaku prototipe.\n- **Brief proyek baru.** Mulai dari tujuan, pengguna, tugas utama, dan platform sasaran. Untuk layout dasar, gunakan satu tugas representatif untuk menguji navigasi dan area konten. Catat asumsi yang mudah direvisi dan tanyakan hanya hal yang diperlukan untuk melanjutkan desain.\n\n## Buat rancangan untuk ditinjau\n\n1. Pilih bentuk yang sesuai dengan keputusan yang akan ditinjau. Gunakan wireframe untuk struktur dan hierarki. Gunakan prototipe yang bisa diklik untuk urutan langkah, transisi, atau umpan balik. Ikuti format yang diminta pengguna dan gunakan komponen proyek bila tersedia.\n2. Gambarkan alur dengan data contoh. Sertakan keadaan yang memengaruhi langkah pengguna, seperti keadaan kosong, proses memuat, berhasil, input gagal, atau akses ditolak jika relevan. Periksa ukuran layar sasaran, keterbacaan, serta navigasi keyboard dan fokus jika prototipe interaktif.\n3. Tunjukkan rancangan dan keputusan yang perlu ditinjau. Putuskan susunan, label, dan interaksi dalam review UI. Jika rancangan menimbulkan pertanyaan tentang kemampuan produk, izin, atau aturan bisnis, rujuk sumbernya dan catat keputusan yang perlu disepakati di spec atau tiket. Lanjutkan bagian desain yang sudah jelas dan tandai bagian yang terdampak sebagai usulan.\n\n## Serahkan hasil\n\nSertakan rancangan, rujukan yang dipakai, asumsi dan keputusan terbuka, serta langkah singkat untuk mencoba hasilnya. Simpan artefak sesuai konvensi proyek. Saat desain siap diserahkan, catat perilaku UI yang perlu diverifikasi dan tautkan rancangan dari spec atau tiket jika relevan. Simpan kode prototipe sebagai artefak desain. Perubahan aplikasi produksi mengikuti permintaan implementasi dan proses proyek.\n"
+        "markdown":  "---\r\nname: design-ui\r\ndescription: Rancang atau tinjau layout, halaman, dan alur UI lintas proyek. Gunakan aplikasi yang ada, spesifikasi, atau brief singkat untuk menghasilkan wireframe atau prototipe yang siap ditinjau.\r\n---\r\n\r\n# Desain UI\r\n\r\nTentukan pengguna, tugas utama, dan hasil desain yang diminta. Gunakan instruksi proyek dan batas cakupan dari pengguna. Pilih dasar desain yang tersedia.\r\n\r\n- **Aplikasi yang sudah berjalan.** Periksa layar, navigasi, komponen, dan pedoman desain yang dipakai. Ikuti pola yang relevan dengan alur yang sedang diubah.\r\n- **Spesifikasi atau tiket.** Petakan aktor, izin, aksi, hasil yang terlihat, dan skenario yang relevan. Gunakan aturan produk yang telah disepakati untuk menentukan perilaku prototipe.\r\n- **Brief proyek baru.** Mulai dari tujuan, pengguna, tugas utama, dan platform sasaran. Untuk layout dasar, gunakan satu tugas representatif untuk menguji navigasi dan area konten. Catat asumsi yang mudah direvisi dan tanyakan hanya hal yang diperlukan untuk melanjutkan desain.\r\n\r\n## Buat rancangan untuk ditinjau\r\n\r\n1. Pilih bentuk yang sesuai dengan keputusan yang akan ditinjau. Gunakan wireframe untuk struktur dan hierarki. Gunakan prototipe yang bisa diklik untuk urutan langkah, transisi, atau umpan balik. Ikuti format yang diminta pengguna dan gunakan komponen proyek bila tersedia.\r\n2. Gambarkan alur dengan data contoh. Sertakan keadaan yang memengaruhi langkah pengguna, seperti keadaan kosong, proses memuat, berhasil, input gagal, atau akses ditolak jika relevan. Periksa ukuran layar sasaran, keterbacaan, serta navigasi keyboard dan fokus jika prototipe interaktif.\r\n3. Tunjukkan rancangan dan keputusan yang perlu ditinjau. Putuskan susunan, label, dan interaksi dalam review UI. Jika rancangan menimbulkan pertanyaan tentang kemampuan produk, izin, atau aturan bisnis, rujuk sumbernya dan catat keputusan yang perlu disepakati di spec atau tiket. Lanjutkan bagian desain yang sudah jelas dan tandai bagian yang terdampak sebagai usulan.\r\n\r\n## Serahkan hasil\r\n\r\nSertakan rancangan, rujukan yang dipakai, asumsi dan keputusan terbuka, serta langkah singkat untuk mencoba hasilnya. Simpan artefak sesuai konvensi proyek. Saat desain siap diserahkan, catat perilaku UI yang perlu diverifikasi dan tautkan rancangan dari spec atau tiket jika relevan. Simpan kode prototipe sebagai artefak desain. Perubahan aplikasi produksi mengikuti permintaan implementasi dan proses proyek.\r\n"
     },
     {
         "id":  "implement-from-spec",
@@ -301,31 +301,31 @@
         "id":  "spring-boot-api",
         "title":  "Spring Boot API",
         "description":  "Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara.",
-        "markdown":  "---\r\nname: spring-boot-api\r\ndescription: Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara.\r\n---\r\n\r\n# Spring Boot API\r\n\r\n## Tujuan\r\n\r\nMembuat REST API yang konsisten, aman, dan sesuai spesifikasi modul Dagantara. Skill ini **bukan** izin untuk membuat endpoint yang belum diputuskan.\r\n\r\n## Sebelum coding\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan spesifikasi modul terkait.\r\n2. Catat Functional Specification ID dan Acceptance Scenario ID yang hendak dipenuhi.\r\n3. Periksa routing, response format, DTO, exception handler, validation, dan coding style aktual; ikuti yang sudah ada.\r\n4. Jika kontrak endpoint belum ada, jelaskan keputusan yang perlu dibuat. Jangan menetapkan URL, payload, atau fitur baru sebagai keputusan domain.\r\n\r\n## Aturan implementasi\r\n\r\n- Controller tipis: menerima request, validasi DTO, delegasi ke service, lalu bentuk HTTP response.\r\n- Jangan expose JPA entity secara langsung ke API. Gunakan request/response DTO dan mapping yang jelas.\r\n- Gunakan Bean Validation untuk bentuk data; validasi business rules dan tenant boundary di service.\r\n- Gunakan semantik HTTP yang konsisten dengan kode eksisting: 400 untuk input tidak valid, 401 bila belum terautentikasi, 403 bila tidak berizin, 404 bila resource tidak dapat ditemukan/diakses sesuai kebijakan, 409 untuk konflik state/integritas yang memang dipetakan sebagai konflik.\r\n- Buat error handling terpusat dan response yang stabil tanpa stack trace atau informasi internal ke client.\r\n- Untuk list endpoint yang diminta, saring berdasarkan tenant di sumber data; gunakan pagination, batas ukuran, serta sort field yang di-allowlist.\r\n- Jangan percaya `tenant_id`, `role_id`, atau permission dari body/header client sebagai bukti hak akses. Role target harus tetap divalidasi terhadap konteks dan scope.\r\n- Periksa update parsial, idempotensi, serta transaksi saat use case memang membutuhkannya. Jangan menambah proses asynchronous secara spekulatif.\r\n- Endpoint hanya mengembalikan data yang memang diizinkan; cegah mass assignment dengan DTO yang spesifik.\r\n\r\n## Domain-sensitive cases\r\n\r\n- User creation (UM-01/UM-02): cek `users.create`, konteks tenant, dan validitas role target sebelum persist.\r\n- Product (PM-01): request dan query harus menjaga Independent Catalog.\r\n- Primary Category (PM-02): jangan implementasikan detail storage yang masih menjadi dependency.\r\n\r\n## Definition of done\r\n\r\n- Kontrak request/response selaras dengan spesifikasi yang benar-benar final.\r\n- Ada pengujian untuk happy path, validation error, unauthorized/forbidden, dan lintas tenant (bila relevan).\r\n- Tidak ada endpoint atau field tambahan yang dibuat semata karena terlihat pada Admin UI Structure.\r\n- Laporkan path, ID spesifikasi, status test, dan unresolved dependency.\r\n"
+        "markdown":  "---\r\nname: spring-boot-api\r\ndescription: Gunakan saat membuat atau mengubah REST controller, endpoint, request/response DTO, validation, pagination, atau kontrak error pada backend Spring Boot Dagantara.\r\n---\r\n\r\n# Spring Boot API\r\n\r\n## Tujuan\r\n\r\nMembuat REST API yang konsisten, aman, dan sesuai spesifikasi modul Dagantara. Skill ini **bukan** izin untuk membuat endpoint yang belum diputuskan.\r\n\r\n## Sebelum coding\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan spesifikasi modul terkait.\r\n2. Catat Functional Specification ID dan Acceptance Scenario ID yang hendak dipenuhi.\r\n3. Periksa routing, response format, DTO, exception handler, validation, dan coding style aktual; ikuti yang sudah ada.\r\n4. Jika kontrak endpoint belum ada, jelaskan keputusan yang perlu dibuat. Jangan menetapkan URL, payload, atau fitur baru sebagai keputusan domain.\r\n\r\n## Aturan implementasi\r\n\r\n- Tempatkan controller di `modules/\u003cnama_module\u003e/controller`, request dan response di `dto`, serta use case di `service` pada modul yang sama. Service dapat memakai DTO modul tanpa mengimpor tipe dari controller.\r\n- Controller tipis: menerima request, validasi DTO, delegasi ke service, lalu bentuk HTTP response.\r\n- Jangan expose JPA entity secara langsung ke API. Gunakan request/response DTO dan mapping yang jelas.\r\n- Gunakan Bean Validation untuk bentuk data; validasi business rules dan tenant boundary di service.\r\n- Gunakan semantik HTTP yang konsisten dengan kode eksisting: 400 untuk input tidak valid, 401 bila belum terautentikasi, 403 bila tidak berizin, 404 bila resource tidak dapat ditemukan/diakses sesuai kebijakan, 409 untuk konflik state/integritas yang memang dipetakan sebagai konflik.\r\n- Buat error handling terpusat dan response yang stabil tanpa stack trace atau informasi internal ke client.\r\n- Untuk list endpoint yang diminta, saring berdasarkan tenant di sumber data; gunakan pagination, batas ukuran, serta sort field yang di-allowlist.\r\n- Jangan percaya `tenant_id`, `role_id`, atau permission dari body/header client sebagai bukti hak akses. Role target harus tetap divalidasi terhadap konteks dan scope.\r\n- Periksa update parsial, idempotensi, serta transaksi saat use case memang membutuhkannya. Jangan menambah proses asynchronous secara spekulatif.\r\n- Endpoint hanya mengembalikan data yang memang diizinkan; cegah mass assignment dengan DTO yang spesifik.\r\n\r\n## Domain-sensitive cases\r\n\r\n- User creation (UM-01/UM-02): cek `users.create`, konteks tenant, dan validitas role target sebelum persist.\r\n- Product (PM-01): request dan query harus menjaga Independent Catalog.\r\n- Primary Category (PM-02): jangan implementasikan detail storage yang masih menjadi dependency.\r\n\r\n## Definition of done\r\n\r\n- Kontrak request/response selaras dengan spesifikasi yang benar-benar final.\r\n- Ada pengujian untuk happy path, validation error, unauthorized/forbidden, dan lintas tenant (bila relevan).\r\n- Tidak ada endpoint atau field tambahan yang dibuat semata karena terlihat pada Admin UI Structure.\r\n- Laporkan path, ID spesifikasi, status test, dan unresolved dependency.\r\n"
     },
     {
         "id":  "spring-boot-database",
         "title":  "Spring Boot Database",
         "description":  "Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara.",
-        "markdown":  "---\r\nname: spring-boot-database\r\ndescription: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara.\r\n---\r\n\r\n# Spring Boot Database\r\n\r\n## Source of truth\r\n\r\n- `docs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.\r\n- `docs/product-management.md`: ERD dan aturan PM-01 s.d. PM-04.\r\n- Detail yang tidak dicantumkan sebagai keputusan final **jangan** diisi dengan asumsi tanpa persetujuan.\r\n\r\n## Workflow\r\n\r\n1. Baca AGENTS root/backend dan spesifikasi yang menyebut tabel serta relasi terkait.\r\n2. Inspeksi schema, entity, naming, migration tool (jika ada), dan query yang saat ini dipakai.\r\n3. Buat rencana minimal: tabel/kolom/FK/index/constraint yang dibutuhkan **hanya** dari keputusan final.\r\n4. Periksa dampak perubahan pada data existing, migration/rollback, tenant isolation, dan referential integrity.\r\n5. Implementasikan migration melalui tool yang sudah dipakai project (Flyway/Liquibase jika tersedia). Jangan bergantung pada `ddl-auto=update` untuk perubahan production.\r\n6. Tambahkan integration test yang mengecek constraint dan isolasi tenant bila lingkungan test tersedia.\r\n\r\n## Model yang sudah disepakati\r\n\r\n- User management: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, `role_permissions`.\r\n- `users.role_id` menunjuk satu role aktif; `role_permissions` unik untuk pasangan `(role_id, permission_id)`.\r\n- `users.tenant_id` dapat NULL untuk akun platform; `roles.tenant_id` dapat NULL untuk role sistem. Penanganan NULL tidak sama dengan izin akses global.\r\n- Product management: `products` dimiliki tenant; `product_categories` menghubungkan produk dan kategori secara many-to-many.\r\n- Produk memiliki tepat satu Primary Category secara aturan bisnis, **namun representasi kolom/constraint penandanya belum diputuskan**. Tandai sebagai blocked; jangan mengarang skema finalnya.\r\n- `product_media` dan `product_option_values` terhubung many-to-many melalui `media_option_values`, dengan media tetap milik produk.\r\n- Jangan menyimpulkan `tenant_id` wajib ada pada tabel yang belum dirinci di ERD; identifikasi kebutuhan isolasi dan minta keputusan bila skema belum final.\r\n\r\n## Aturan query, transaction, dan constraint\r\n\r\n- Terapkan filter tenant pada query repository yang mengakses data tenant; validasi kedua sisi saat mengaitkan FK agar tidak dapat membuat relasi lintas tenant tanpa izin.\r\n- Jangan mengandalkan filter HTTP saja untuk tenant isolation.\r\n- Pertahankan FK, UNIQUE, dan NOT NULL yang sudah disepakati; beri indeks berdasar query yang nyata, bukan secara spekulatif.\r\n- Gunakan @Transactional di service untuk operasi atomik; tentukan locking/concurrency control dari kebutuhan terukur.\r\n- Cegah N+1 dan pagination tidak stabil; verifikasi query/filter dengan integration test.\r\n- Migration harus bisa dijalankan konsisten pada database bersih; perubahan data existing memerlukan strategi migrasi yang jelas.\r\n\r\n## Definition of done\r\n\r\nSertakan daftar perubahan schema, alasan dari ID requirement, pengujian query/constraint/tenant, serta keputusan yang masih belum final. Jangan klaim migration berhasil tanpa eksekusi.\r\n"
+        "markdown":  "---\r\nname: spring-boot-database\r\ndescription: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity, relationship, repository query, constraint, transaction, atau migration backend Dagantara.\r\n---\r\n\r\n# Spring Boot Database\r\n\r\n## Source of truth\r\n\r\n- `docs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.\r\n- `docs/product-management.md`: model data, Primary Category, relasi media, dan identitas varian.\r\n- `docs/inventory-management.md`: gudang, penerimaan, koreksi, dan saldo per varian.\r\n- Detail yang tidak dicantumkan sebagai keputusan final **jangan** diisi dengan asumsi tanpa persetujuan.\r\n\r\n## Workflow\r\n\r\n1. Baca AGENTS root/backend dan spesifikasi yang menyebut tabel serta relasi terkait.\r\n2. Inspeksi schema, entity, naming, migration tool (jika ada), dan query yang saat ini dipakai.\r\n3. Buat rencana minimal: tabel/kolom/FK/index/constraint yang dibutuhkan **hanya** dari keputusan final.\r\n4. Periksa dampak perubahan pada data existing, migration/rollback, tenant isolation, dan referential integrity.\r\n5. Implementasikan migration melalui tool yang sudah dipakai project (Flyway/Liquibase jika tersedia). Jangan bergantung pada `ddl-auto=update` untuk perubahan production.\r\n6. Tambahkan integration test yang mengecek constraint dan isolasi tenant bila lingkungan test tersedia.\r\n\r\n## Model yang sudah disepakati\r\n\r\n- User management: `tenants`, `tenant_domains`, `users`, `roles`, `permissions`, `role_permissions`.\r\n- `users.role_id` menunjuk satu role aktif; `role_permissions` unik untuk pasangan `(role_id, permission_id)`.\r\n- `users.tenant_id` dapat NULL untuk akun platform; `roles.tenant_id` dapat NULL untuk role sistem. Penanganan NULL tidak sama dengan izin akses global.\r\n- Product management: `products` dimiliki tenant; `product_categories` menghubungkan produk dan kategori secara many-to-many.\r\n- Simpan satu Primary Category pada `products.primary_category_id` dengan FK gabungan ke `product_categories` yang diperiksa saat commit sesuai PM-02.\r\n- `product_media` dan `product_option_values` terhubung many-to-many melalui `media_option_values`, dengan media tetap milik produk.\r\n- Jangan menyimpulkan `tenant_id` wajib ada pada tabel yang belum dirinci di ERD; identifikasi kebutuhan isolasi dan minta keputusan bila skema belum final.\r\n\r\n## Aturan query, transaction, dan constraint\r\n\r\n- Gunakan subpackage `entity` dan `repository` di `modules/\u003cnama_module\u003e` untuk model persistence dan akses data modul.\r\n- Terapkan filter tenant pada query repository yang mengakses data tenant; validasi kedua sisi saat mengaitkan FK agar tidak dapat membuat relasi lintas tenant tanpa izin.\r\n- Jangan mengandalkan filter HTTP saja untuk tenant isolation.\r\n- Pertahankan FK, UNIQUE, dan NOT NULL yang sudah disepakati; beri indeks berdasar query yang nyata, bukan secara spekulatif.\r\n- Gunakan @Transactional di service untuk operasi atomik; tentukan locking/concurrency control dari kebutuhan terukur.\r\n- Cegah N+1 dan pagination tidak stabil; verifikasi query/filter dengan integration test.\r\n- Migration harus bisa dijalankan konsisten pada database bersih; perubahan data existing memerlukan strategi migrasi yang jelas.\r\n\r\n## Definition of done\r\n\r\nSertakan daftar perubahan schema, alasan dari ID requirement, pengujian query/constraint/tenant, serta keputusan yang masih belum final. Jangan klaim migration berhasil tanpa eksekusi.\r\n"
     },
     {
         "id":  "spring-boot-run",
         "title":  "Menjalankan Backend Dagantara",
         "description":  "Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur.",
-        "markdown":  "---\nname: spring-boot-run\ndescription: Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur.\n---\n\n# Menjalankan Backend Dagantara\n\nPastikan repository dan branch yang diminta, lalu baca `AGENTS.md`, `backend/AGENTS.md`, dan `backend/README.md`. Gunakan `backend/pom.xml` untuk target Java. Tugas menjalankan backend lokal tidak mencakup ID Functional Specification atau Acceptance Scenario modul.\n\nLaporkan hasil startup, PID, URL health, dan keterbatasan verifikasi. Hindari menyalin rahasia dari log.\n\n## Orca Chat\n\nJalankan backend di foreground dalam tab terminal **Dagantara Backend** pada worktree chat. Gunakan `$orca-cli` untuk memilih worktree dan mengelola terminal. Di Windows, gunakan `$env:ORCA_CLI_COMMAND` jika tersedia, atau `orca`.\n\nDari root worktree, cek port tujuan dan cari judul persis `Dagantara Backend` di `result.terminals` dari `orca terminal list --worktree active --json`. Jika backend dari worktree ini sudah sehat, laporkan PID dan tabnya jika tersedia. Jika proses lain memakai port, laporkan konflik dan biarkan proses tersebut berjalan.\n\nPakai ulang handle tab yang ditemukan jika tab punya `tabId`, terhubung, dan bisa menerima input (`connected` dan `writable`). Baca tampilan terkininya dengan `orca terminal read --terminal \u0027\u003chandle\u003e\u0027 --screen --json`. Kirim perintah hanya jika prompt shell yang sesuai sudah siap dan draf perintah kosong. Jika tab sibuk atau tujuan ambigu, laporkan keadaannya. Gunakan `orca terminal switch --terminal \u0027\u003chandle\u003e\u0027` bila pengguna meminta langsung pindah ke tab yang dipakai ulang.\n\nBuat tab baru hanya bila belum ada tab **Dagantara Backend** di worktree itu. Tambahkan `--focus` bila pengguna meminta langsung pindah ke tab.\n\n```powershell\norca terminal create --worktree active --title \u0027Dagantara Backend\u0027 --shell powershell.exe --json\n```\n\nUntuk tab baru, gunakan `result.terminal.handle` setelah pembuatan mengonfirmasi `result.terminal.surface` bernilai `visible`. Jika tab terlihat tidak tersedia, laporkan kendalanya sebelum menjalankan backend.\n\nKirim perintah ke handle tab yang dipilih. Gunakan path absolut dari worktree agar perintah tetap benar jika direktori kerja tab berubah.\n\n```powershell\n$backendRunScript = (Resolve-Path \u0027.agents/skills/spring-boot-run/scripts/run-backend.ps1\u0027).Path.Replace(\"\u0027\", \"\u0027\u0027\")\norca terminal send --terminal \u0027\u003chandle\u003e\u0027 --text \"\u0026 \u0027$backendRunScript\u0027 -Foreground\" --enter --json\n```\n\nDi POSIX, buat tab baru tanpa `--shell` bila perlu, lalu kirim `cd \u0027\u003cpath absolut ke backend\u003e\u0027 \u0026\u0026 ./mvnw spring-boot:run`.\n\nGunakan `orca terminal read` pada handle tab untuk memantau build dan startup. Setelah Java mulai, cek `http://localhost:8080/actuator/health` dari sesi chat dan pastikan PID listener berasal dari worktree backend yang diminta. Tinggalkan proses yang sehat di tab. Pengguna bisa menghentikannya dengan `Ctrl+C`.\n\nGunakan `-Port \u003cnomor\u003e` di Windows hanya bila pengguna meminta port lain, lalu cek health pada port tersebut.\n\n## Windows PowerShell di luar Orca\n\nDari root repository, jalankan `\u0026 .\\.agents\\skills\\spring-boot-run\\scripts\\run-backend.ps1` untuk mode background. Skrip memvalidasi JDK dan port, membangun JAR dengan Maven Wrapper, lalu menunggu health `UP`. Gunakan `-Foreground` jika pengguna ingin log langsung di terminal. Cek health dari shell lain dalam mode foreground. Untuk kegagalan di mode background, baca `backend/target/run-backend.*.log`.\n\n## Shell POSIX\n\nGunakan `./mvnw spring-boot:run` dari folder `backend`, biarkan proses tetap hidup, lalu verifikasi `http://localhost:8080/actuator/health`. Periksa port sebelum memulai agar tidak membuka instance kedua.\n"
+        "markdown":  "---\r\nname: spring-boot-run\r\ndescription: Gunakan saat diminta menjalankan atau memeriksa backend Spring Boot Dagantara secara lokal. Bukan untuk deployment atau implementasi fitur.\r\n---\r\n\r\n# Menjalankan Backend Dagantara\r\n\r\nPastikan repository dan branch yang diminta, lalu baca `AGENTS.md`, `backend/AGENTS.md`, dan `backend/README.md`. Gunakan `backend/pom.xml` untuk target Java. Tugas menjalankan backend lokal tidak mencakup ID Functional Specification atau Acceptance Scenario modul.\r\n\r\nLaporkan hasil startup, PID, URL health, dan keterbatasan verifikasi. Hindari menyalin rahasia dari log.\r\n\r\n## Orca Chat\r\n\r\nJalankan backend di foreground dalam tab terminal **Dagantara Backend** pada worktree chat. Gunakan `$orca-cli` untuk memilih worktree dan mengelola terminal. Di Windows, gunakan `$env:ORCA_CLI_COMMAND` jika tersedia, atau `orca`.\r\n\r\nDari root worktree, cek port tujuan dan cari judul persis `Dagantara Backend` di `result.terminals` dari `orca terminal list --worktree active --json`. Jika backend dari worktree ini sudah sehat, laporkan PID dan tabnya jika tersedia. Jika proses lain memakai port, laporkan konflik dan biarkan proses tersebut berjalan.\r\n\r\nPakai ulang handle tab yang ditemukan jika tab punya `tabId`, terhubung, dan bisa menerima input (`connected` dan `writable`). Baca tampilan terkininya dengan `orca terminal read --terminal \u0027\u003chandle\u003e\u0027 --screen --json`. Kirim perintah hanya jika prompt shell yang sesuai sudah siap dan draf perintah kosong. Jika tab sibuk atau tujuan ambigu, laporkan keadaannya. Gunakan `orca terminal switch --terminal \u0027\u003chandle\u003e\u0027` bila pengguna meminta langsung pindah ke tab yang dipakai ulang.\r\n\r\nBuat tab baru hanya bila belum ada tab **Dagantara Backend** di worktree itu. Tambahkan `--focus` bila pengguna meminta langsung pindah ke tab.\r\n\r\n```powershell\r\norca terminal create --worktree active --title \u0027Dagantara Backend\u0027 --shell powershell.exe --json\r\n```\r\n\r\nUntuk tab baru, gunakan `result.terminal.handle` setelah pembuatan mengonfirmasi `result.terminal.surface` bernilai `visible`. Jika tab terlihat tidak tersedia, laporkan kendalanya sebelum menjalankan backend.\r\n\r\nKirim perintah ke handle tab yang dipilih. Gunakan path absolut dari worktree agar perintah tetap benar jika direktori kerja tab berubah.\r\n\r\n```powershell\r\n$backendRunScript = (Resolve-Path \u0027.agents/skills/spring-boot-run/scripts/run-backend.ps1\u0027).Path.Replace(\"\u0027\", \"\u0027\u0027\")\r\norca terminal send --terminal \u0027\u003chandle\u003e\u0027 --text \"\u0026 \u0027$backendRunScript\u0027 -Foreground\" --enter --json\r\n```\r\n\r\nDi POSIX, buat tab baru tanpa `--shell` bila perlu, lalu kirim `cd \u0027\u003cpath absolut ke backend\u003e\u0027 \u0026\u0026 ./mvnw spring-boot:run`.\r\n\r\nGunakan `orca terminal read` pada handle tab untuk memantau build dan startup. Setelah Java mulai, cek `http://localhost:8080/actuator/health` dari sesi chat dan pastikan PID listener berasal dari worktree backend yang diminta. Tinggalkan proses yang sehat di tab. Pengguna bisa menghentikannya dengan `Ctrl+C`.\r\n\r\nGunakan `-Port \u003cnomor\u003e` di Windows hanya bila pengguna meminta port lain, lalu cek health pada port tersebut.\r\n\r\n## Windows PowerShell di luar Orca\r\n\r\nDari root repository, jalankan `\u0026 .\\.agents\\skills\\spring-boot-run\\scripts\\run-backend.ps1` untuk mode background. Skrip memvalidasi JDK dan port, membangun JAR dengan Maven Wrapper, lalu menunggu health `UP`. Gunakan `-Foreground` jika pengguna ingin log langsung di terminal. Cek health dari shell lain dalam mode foreground. Untuk kegagalan di mode background, baca `backend/target/run-backend.*.log`.\r\n\r\n## Shell POSIX\r\n\r\nGunakan `./mvnw spring-boot:run` dari folder `backend`, biarkan proses tetap hidup, lalu verifikasi `http://localhost:8080/actuator/health`. Periksa port sebelum memulai agar tidak membuka instance kedua.\r\n"
     },
     {
         "id":  "spring-boot-security",
         "title":  "Spring Boot Security",
         "description":  "Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara.",
-        "markdown":  "---\r\nname: spring-boot-security\r\ndescription: Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara.\r\n---\r\n\r\n# Spring Boot Security\r\n\r\n## Tujuan\r\n\r\nMenegakkan authentication, authorization, dan tenant isolation pada semua jalur akses data, sesuai `docs/user-management.md` dan kontrak modul terkait.\r\n\r\n## Sebelum implementasi\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, dan spesifikasi terkait.\r\n2. Inspeksi konfigurasi keamanan aktual (JWT, session, filter chain, auth principal, exception handling). **Jangan mengasumsikan JWT sudah terpasang** ketika backend masih skeleton.\r\n3. Petakan akses tiap use case ke permission yang memang dinyatakan di spesifikasi. Jangan mengarang permission baru tanpa requirement.\r\n4. Identifikasi sumber tenant context dan aturan validasinya; jangan menerima tenant claim/header yang belum diverifikasi.\r\n\r\n## Authorization model\r\n\r\n- Setiap user memiliki satu `users.role_id` aktif.\r\n- Permission efektif berasal dari `users.role_id -\u003e roles -\u003e role_permissions -\u003e permissions`.\r\n- Untuk pembuatan user, butuh `users.create` (UM-01), lalu validasi role dan tenant target (UM-02/UM-06).\r\n- Role scope/tenant harus kompatibel dengan user target; periksa di service, bukan hanya di anotasi controller.\r\n- User platform `tenant_id = NULL` dan role sistem `tenant_id = NULL` tidak otomatis memberikan akses tak terbatas.\r\n- Prinsip deny by default: operasi tanpa aturan akses yang pasti tidak boleh dibuka hanya untuk mempermudah development.\r\n- Frontend menyembunyikan menu bukan mekanisme otorisasi backend.\r\n\r\n## Implementasi aman\r\n\r\n- Simpan password memakai `PasswordEncoder` yang aman; jangan simpan plaintext atau menuliskannya ke log.\r\n- Jika JWT dipakai, verifikasi signature, expiry, issuer/audience sesuai konfigurasi eksisting, dan jangan percaya claim yang tidak tervalidasi.\r\n- Validasi tenant pada lookup dan mutasi entity, termasuk hubungan entity, listing, dan resource ID yang bisa ditebak.\r\n- Utamakan hasil 401 untuk unauthenticated dan 403 untuk authenticated tetapi tidak memiliki izin; cegah kebocoran detail resource tenant lain.\r\n- Gunakan least privilege pada konfigurasi route dan service; cegah privilege escalation saat create/update role atau assign role.\r\n- Jangan commit key/secret; gunakan konfigurasi lingkungan dan jangan memaparkan token dalam response/log.\r\n\r\n## Test wajib saat fitur tersedia\r\n\r\n- Unauthenticated request ditolak.\r\n- Authenticated tanpa `users.create` tidak dapat membuat user (UM-AT-02).\r\n- Role yang salah scope/tenant ditolak (UM-AT-05).\r\n- Tenant A tidak dapat mengakses atau mengubah data tenant B (UM-AT-04).\r\n- Jalur sukses berizin diverifikasi (UM-AT-01/UM-AT-03).\r\n\r\n## Definition of done\r\n\r\nLaporkan aturan permission yang ditegakkan, tenant boundary, hasil security tests, dan keputusan autentikasi/otorisasi yang belum dinyatakan dalam spesifikasi.\r\n"
+        "markdown":  "---\r\nname: spring-boot-security\r\ndescription: Gunakan untuk autentikasi Spring Security/JWT, authorization role-permission, validasi tenant, password handling, dan perlindungan endpoint backend Dagantara.\r\n---\r\n\r\n# Spring Boot Security\r\n\r\n## Tujuan\r\n\r\nMenegakkan authentication, authorization, dan tenant isolation pada semua jalur akses data, sesuai `docs/user-management.md` dan kontrak modul terkait.\r\n\r\n## Sebelum implementasi\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, dan spesifikasi terkait.\r\n2. Inspeksi konfigurasi keamanan aktual (JWT, session, filter chain, auth principal, exception handling). **Jangan mengasumsikan JWT sudah terpasang** ketika backend masih skeleton.\r\n3. Petakan akses tiap use case ke permission yang memang dinyatakan di spesifikasi. Jangan mengarang permission baru tanpa requirement.\r\n4. Identifikasi sumber tenant context dan aturan validasinya; jangan menerima tenant claim/header yang belum diverifikasi.\r\n\r\n## Authorization model\r\n\r\n- Tempatkan pemeriksaan izin bisnis di `modules/\u003cnama_module\u003e/service`. Gunakan `common/security` untuk konfigurasi dan komponen keamanan lintas modul.\r\n- Setiap user memiliki satu `users.role_id` aktif.\r\n- Permission efektif berasal dari `users.role_id -\u003e roles -\u003e role_permissions -\u003e permissions`.\r\n- Untuk pembuatan user, butuh `users.create` (UM-01), lalu validasi role dan tenant target (UM-02/UM-06).\r\n- Role scope/tenant harus kompatibel dengan user target; periksa di service, bukan hanya di anotasi controller.\r\n- User platform `tenant_id = NULL` dan role sistem `tenant_id = NULL` tidak otomatis memberikan akses tak terbatas.\r\n- Prinsip deny by default: operasi tanpa aturan akses yang pasti tidak boleh dibuka hanya untuk mempermudah development.\r\n- Frontend menyembunyikan menu bukan mekanisme otorisasi backend.\r\n\r\n## Implementasi aman\r\n\r\n- Simpan password memakai `PasswordEncoder` yang aman; jangan simpan plaintext atau menuliskannya ke log.\r\n- Jika JWT dipakai, verifikasi signature, expiry, issuer/audience sesuai konfigurasi eksisting, dan jangan percaya claim yang tidak tervalidasi.\r\n- Validasi tenant pada lookup dan mutasi entity, termasuk hubungan entity, listing, dan resource ID yang bisa ditebak.\r\n- Utamakan hasil 401 untuk unauthenticated dan 403 untuk authenticated tetapi tidak memiliki izin; cegah kebocoran detail resource tenant lain.\r\n- Gunakan least privilege pada konfigurasi route dan service; cegah privilege escalation saat create/update role atau assign role.\r\n- Jangan commit key/secret; gunakan konfigurasi lingkungan dan jangan memaparkan token dalam response/log.\r\n\r\n## Test wajib saat fitur tersedia\r\n\r\n- Unauthenticated request ditolak.\r\n- Authenticated tanpa `users.create` tidak dapat membuat user (UM-AT-02).\r\n- Role yang salah scope/tenant ditolak (UM-AT-05).\r\n- Tenant A tidak dapat mengakses atau mengubah data tenant B (UM-AT-04).\r\n- Jalur sukses berizin diverifikasi (UM-AT-01/UM-AT-03).\r\n\r\n## Definition of done\r\n\r\nLaporkan aturan permission yang ditegakkan, tenant boundary, hasil security tests, dan keputusan autentikasi/otorisasi yang belum dinyatakan dalam spesifikasi.\r\n"
     },
     {
         "id":  "spring-boot-testing",
         "title":  "Spring Boot Testing",
         "description":  "Buat atau jalankan unit, MVC, integration, repository, dan security test untuk backend Spring Boot Dagantara.",
-        "markdown":  "---\r\nname: spring-boot-testing\r\ndescription: Buat atau jalankan unit, MVC, integration, repository, dan security test untuk backend Spring Boot Dagantara.\r\n---\r\n\r\n# Spring Boot Testing\r\n\r\n## Prinsip\r\n\r\nPengujian harus membuktikan business rules dan acceptance scenarios yang telah diputuskan, bukan mengunci asumsi fitur yang belum disepakati.\r\n\r\n## Persiapan\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan modul relevan.\r\n2. Rujuk kriteria penerimaan atau ID skenario yang dibuktikan pada nama test atau deskripsi test.\r\n3. Inspeksi framework, build tool, test profile, fixture, dan infrastruktur yang tersedia. Jangan menambahkan dependency besar tanpa alasan tugas.\r\n4. Pilih level uji paling rendah yang memberi bukti memadai; tambahkan integration test untuk perilaku persistence/security yang tidak dapat dibuktikan oleh mock.\r\n\r\n## Strategi per lapisan\r\n\r\n- **Unit/service:** business rules, validation, role assignment, domain edge cases.\r\n- **Web/MVC:** serialization, request validation, HTTP status, error contract, dan endpoint authorization.\r\n- **API HTTP:** ikuti `bruno-api-testing` untuk memverifikasi perilaku melalui backend yang berjalan. Pakai integration test untuk melengkapi bukti efek data yang tidak bisa diamati lewat API.\r\n- **Repository/integration:** FK/UNIQUE, transaction, query/filter tenant, relasi JPA, dan migration.\r\n- **Security integration:** authenticated vs unauthenticated, permission denied, role scope, tenant cross-access.\r\n- **Database:** gunakan PostgreSQL yang terisolasi (mis. Testcontainers) bila tersedia dan relevan; jangan menyamakan perilaku in-memory DB dengan PostgreSQL production.\r\n\r\n## Praktik test\r\n\r\n- Gunakan data deterministik, fixture terisolasi, dan cleanup. Pastikan setiap skenario dapat dijalankan tanpa bergantung pada urutan antarskenario.\r\n- Pilih kasus penolakan yang relevan dengan spec, seperti input invalid, relasi duplikat, pelanggaran constraint, penolakan akses, atau asosiasi lintas tenant.\r\n- Hindari mengganti semua dependency dengan mock pada test yang mengklaim menguji constraint database.\r\n- Jalankan tes Spring Boot lewat command build yang dipakai repository, misalnya `./mvnw test`.\r\n- Bila environment test, migration, atau server belum tersedia, tandai **not run** beserta sebabnya; jangan membuat laporan hijau palsu.\r\n\r\n## Definition of done\r\n\r\nLaporkan test yang ditambah, scenario ID yang dicakup, perintah aktual, hasil test, dan gap pengujian/keputusan yang masih terbuka.\r\n"
+        "markdown":  "---\r\nname: spring-boot-testing\r\ndescription: Buat atau jalankan unit, MVC, integration, repository, dan security test untuk backend Spring Boot Dagantara.\r\n---\r\n\r\n# Spring Boot Testing\r\n\r\n## Prinsip\r\n\r\nPengujian harus membuktikan business rules dan acceptance scenarios yang telah diputuskan, bukan mengunci asumsi fitur yang belum disepakati.\r\n\r\n## Persiapan\r\n\r\n1. Baca `AGENTS.md`, `backend/AGENTS.md`, `docs/README.md`, dan modul relevan.\r\n2. Rujuk kriteria penerimaan atau ID skenario yang dibuktikan pada nama test atau deskripsi test.\r\n3. Inspeksi framework, build tool, test profile, fixture, dan infrastruktur yang tersedia. Jangan menambahkan dependency besar tanpa alasan tugas.\r\n4. Pilih level uji paling rendah yang memberi bukti memadai; tambahkan integration test untuk perilaku persistence/security yang tidak dapat dibuktikan oleh mock.\r\n\r\n## Strategi per lapisan\r\n\r\n- Tempatkan tes Java di `src/test/java` dengan package yang mengikuti kelas yang diuji. Contohnya, tes `modules.users.service.UserService` memakai package `com.dagantara.backend.modules.users.service`.\r\n- **Unit/service:** business rules, validation, role assignment, domain edge cases.\r\n- **Web/MVC:** serialization, request validation, HTTP status, error contract, dan endpoint authorization.\r\n- **API HTTP:** ikuti `bruno-api-testing` untuk memverifikasi perilaku melalui backend yang berjalan. Pakai integration test untuk melengkapi bukti efek data yang tidak bisa diamati lewat API.\r\n- **Repository/integration:** FK/UNIQUE, transaction, query/filter tenant, relasi JPA, dan migration.\r\n- **Security integration:** authenticated vs unauthenticated, permission denied, role scope, tenant cross-access.\r\n- **Database:** gunakan PostgreSQL yang terisolasi (mis. Testcontainers) bila tersedia dan relevan; jangan menyamakan perilaku in-memory DB dengan PostgreSQL production.\r\n\r\n## Praktik test\r\n\r\n- Gunakan data deterministik, fixture terisolasi, dan cleanup. Pastikan setiap skenario dapat dijalankan tanpa bergantung pada urutan antarskenario.\r\n- Pilih kasus penolakan yang relevan dengan spec, seperti input invalid, relasi duplikat, pelanggaran constraint, penolakan akses, atau asosiasi lintas tenant.\r\n- Hindari mengganti semua dependency dengan mock pada test yang mengklaim menguji constraint database.\r\n- Jalankan tes Spring Boot lewat command build yang dipakai repository, misalnya `./mvnw test`.\r\n- Bila environment test, migration, atau server belum tersedia, tandai **not run** beserta sebabnya; jangan membuat laporan hijau palsu.\r\n\r\n## Definition of done\r\n\r\nLaporkan test yang ditambah, scenario ID yang dicakup, perintah aktual, hasil test, dan gap pengujian/keputusan yang masih terbuka.\r\n"
     },
     {
         "id":  "write-module-spec",
@@ -714,7 +714,6 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 
 ## Dokumentasi Modul
 
-- [Product Management](product-management.md)
 - [Module Roadmap & Ownership](module-roadmap.md)
 - [Development Dependencies & Parallel Workstreams](development-dependencies.md)
 
@@ -723,6 +722,8 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa ekstensi dapat dipakai untuk memilih spec.
 
 - [User Management — Akses Platform dan Tenant](user-management.md)
+- [Product Management](product-management.md)
+- [Inventory Management](inventory-management.md)
 
 ## Aturan Membaca untuk AI Developer
 
@@ -757,11 +758,11 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 3. Gunakan `$implement-from-spec <slug>` untuk spec yang siap dikerjakan. Jika spec menautkan tiket yang sudah disetujui, panggilan ini mengoordinasikan worker di sesi Orca. Gunakan `$implement-from-spec <slug> <NN>` untuk memilih satu tiket yang sudah bisa dimulai.
 4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
-Untuk format modul yang sudah ada, `$implement-from-spec @docs/product-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
+Gunakan `$implement-from-spec product-management` atau `$implement-from-spec inventory-management` untuk memilih salah satu spec. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, atau indeks ini, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html`, sehingga daftar skill dan panduan tersedia saat halaman dibuka langsung.
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, indeks ini, atau spec Product dan Inventory Management, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html` untuk akses saat viewer dibuka langsung.
 </script>
   <script id="offline-user-management" type="text/plain">
 # User Management — Akses Platform dan Tenant
@@ -869,127 +870,267 @@ Gunakan API HTTP melalui Bruno untuk menguji alur pemohon, operator platform, da
 | [04](tickets/user-management/04-akun-dan-role-tenant.md) | Pemilik dan staf mengelola akun serta role tenant sesuai izin, dengan perlindungan akun pemilik dan admin. | 02 untuk identitas tenant, akun pemilik, dan konteks login. |
 | [05](tickets/user-management/05-pemulihan-help-center.md) | Operator Help Center yang berizin memulihkan akun admin awal atau tambahan dengan verifikasi, password sementara, dan audit. | 02 untuk akun pemilik, 03 untuk role operator Help Center, dan 04 untuk admin tambahan. |
 </script>
-  <script id="offline-product-management" type="text/plain"># Product Management
+  <script id="offline-inventory-management" type="text/plain">
+# Inventory Management
 
-## Module Overview
+## Problem Statement
 
-Mengelola katalog produk per tenant (**Independent Catalog**), hubungan produk–kategori, dan asosiasi media produk dengan nilai opsi. Produk berada dalam katalog tenant pemiliknya.
+Ketika kiriman datang, petugas toko perlu mencatat kuantitas barang berdasarkan SKU yang tertera pada barang. Pengelola perlu mengetahui jumlah total produk, melihat rinciannya per warna atau ukuran, dan memperbaiki pencatatan yang keliru dengan riwayat yang dapat ditelusuri.
 
-## Admin UI Structure
+## Solution
 
-Referensi struktur navigasi Tenant Admin:
+Versi pertama memakai satu gudang dalam tiap tenant. Petugas menerima satu kiriman berisi beberapa SKU dalam satu transaksi. Pengelola melihat saldo per SKU dan hasil penjumlahannya. Koreksi menyimpan selisih dan alasan beserta rujukan ke penerimaan yang dikoreksi. Storefront membaca status ketersediaan dari saldo per varian.
 
-```text
-Tenant Admin
-└── Catalog
-    ├── Products
-    ├── Categories
-    ├── Brands
-    ├── Collections
-    └── Option Library
-```
+## User Stories
 
-Nama submenu di atas mengikuti referensi navigasi. Spesifikasi fungsi yang sudah disepakati saat ini:
-
-| Menu | Submenu / halaman | Fitur dan aksi |
-| --- | --- | --- |
-| Catalog | Products | Menghubungkan produk dengan beberapa kategori dan memilih satu Primary Category. |
-| Catalog | Products | Menghubungkan media produk ke nilai opsi produk. |
+1. Sebagai petugas barang masuk, saya bisa mencatat SKU dan kuantitas untuk seluruh isi kiriman agar stok bertambah pada varian yang sesuai.
+2. Sebagai pengawas gudang, saya bisa mengoreksi jumlah yang keliru dan menyertakan alasan agar saldo dan riwayat bisa ditelusuri.
+3. Sebagai pengelola toko, saya bisa melihat saldo per SKU, total produk, dan jumlah per nilai opsi agar bisa menjawab berapa unit yang tersedia.
+4. Sebagai pengunjung storefront, saya bisa melihat status stok kombinasi yang saya pilih agar tahu apakah varian tersebut tersedia.
 
 ## Functional Specification
 
 | ID | Perilaku |
 | --- | --- |
-| **PM-01** | Setiap tenant memiliki katalog produknya sendiri. Produk terhubung ke tenant pemilik. |
-| **PM-02** | Produk dapat terhubung ke beberapa kategori dan memiliki tepat satu Primary Category. |
-| **PM-03** | Media produk dimiliki oleh produk terkait. |
-| **PM-04** | Satu media dapat dihubungkan dengan beberapa Product Option Values; satu Product Option Value dapat mempunyai beberapa media. |
+| **IM-01** | Setiap tenant memiliki satu gudang versi pertama. Saldo dicatat per varian di gudang tenant. |
+| **IM-02** | Penerimaan beberapa SKU dalam tenant yang sama menambah saldo secara atomik. |
+| **IM-03** | Koreksi jumlah merujuk penerimaan awal, memiliki alasan, dan dicatat sebagai perubahan saldo yang terpisah. |
+| **IM-04** | Pengelola melihat riwayat, saldo SKU, total produk, serta total per nilai opsi dari saldo yang sama. |
+| **IM-05** | Storefront dapat membaca status ketersediaan per varian dalam tenant yang sedang dibuka. |
 
-## Business Rules
+## Implementation Decisions
 
-- **PM-BR-01:** katalog produk independen untuk setiap tenant.
-- **PM-BR-02:** kategori produk bersifat many-to-many melalui `product_categories`; satu produk memiliki satu Primary Category.
-- **PM-BR-03:** media merupakan bagian dari produk, bukan bagian dari pustaka nilai opsi.
-- **PM-BR-04:** hubungan Product Media ↔ Product Option Values bersifat many-to-many melalui `media_option_values`.
+### Gudang, tenant, dan permission
+
+- Setiap tenant memakai satu gudang bawaan. Inventory menyiapkan gudang tersebut saat transaksi stok pertama berhasil, dengan keunikan gudang per tenant untuk versi ini. API mengarahkan transaksi ke gudang bawaan dan tidak meminta pilihan gudang dari petugas.
+- Gunakan tenant dari akun terautentikasi dan permission dari role aktif sesuai [User Management](user-management.md). Cakupan pengelolaan mencakup varian, gudang, penerimaan, koreksi, saldo, daftar, dan total milik tenant akun.
+- Daftarkan `inventory.read` untuk membaca saldo dan riwayat, `inventory.receive` untuk membuat penerimaan, serta `inventory.correct` untuk membuat koreksi. Aksi publik hanya memakai operasi baca status ketersediaan melalui Product Management.
+- [Product Management](product-management.md#opsi-varian-dan-sku) memiliki definisi varian dan aturan kode SKU. Input SKU dicari dalam tenant akun dan disimpan sebagai referensi UUID varian beserta kode SKU pada saat transaksi. Produk Draft dan produk terbit yang memiliki SKU dapat menerima stok. Varian yang belum memiliki catatan saldo dibaca sebagai nol.
+
+### Penerimaan barang
+
+- Petugas memasukkan daftar baris berisi `sku` dan `quantity` dalam satu penerimaan. Satu kiriman boleh memuat beberapa kombinasi dari produk yang sama maupun beberapa produk berbeda.
+- Jumlah masuk berupa bilangan bulat positif dalam satuan unit. Daftar baris harus berisi minimal satu SKU. SKU yang muncul lebih dari satu kali dalam satu kiriman dijumlahkan berdasarkan UUID varian sebelum mencatat baris.
+- Saat petugas mengonfirmasi, sistem menyimpan ID penerimaan, gudang, akun pencatat, waktu, baris transaksi, dan saldo baru dalam satu transaksi. Jika satu baris gagal validasi, penolakan mencakup seluruh penerimaan dan tidak mencatat perubahan saldo.
+- Penerimaan yang sudah dikonfirmasi menjadi catatan tetap. Koreksi yang disetujui masuk sebagai transaksi baru yang mengacu pada penerimaan tersebut.
+
+### Koreksi penerimaan
+
+- Ajukan koreksi dengan ID penerimaan awal, alasan yang wajib diisi, dan satu atau lebih baris keliru dari penerimaan tersebut. Setiap baris berisi ID baris awal dan jumlah baru yang benar. Jumlah baru berupa bilangan bulat nonnegatif. Baris yang tidak dikirim mempertahankan jumlah efektifnya.
+- Hitung delta terhadap **jumlah efektif** baris setelah seluruh koreksi terdahulu. Contohnya, penerimaan 8 unit yang dikoreksi menjadi 6 menghasilkan delta −2. Jika kemudian dikoreksi menjadi 7, delta berikutnya adalah +1.
+- Bila SKU awal salah, jumlah pada SKU awal dapat dikoreksi sampai nol dan SKU yang benar dicatat melalui penerimaan. Koreksi menolak baris yang bukan milik penerimaan awal serta delta yang akan membuat saldo gudang menjadi negatif. Aksi yang ditolak tidak meninggalkan koreksi atau perubahan sebagian.
+- Simpan akun, waktu, alasan, rujukan penerimaan dan baris awal, jumlah efektif sebelumnya, jumlah baru, dan delta. Riwayat menampilkan penerimaan serta koreksi sesuai urutan kejadian.
+
+### Konsistensi dan pengiriman ulang
+
+- Saldo merupakan jumlah seluruh transaksi stok yang sudah dikonfirmasi untuk varian dan gudang. Jika saldo disimpan sebagai proyeksi, perbarui bersama catatan transaksi pada commit yang sama. Serialisasikan transaksi yang menyentuh saldo atau baris penerimaan yang sama. Koordinasikan kunci varian dengan pengecekan perubahan SKU.
+- Pada POST penerimaan dan koreksi, gunakan `Idempotency-Key` yang dipertahankan oleh pemanggil saat mengulang request yang sama. Cakupan keunikan adalah tenant, akun, dan jenis operasi. Key dengan payload yang sama mengembalikan hasil transaksi pertama. Pemakaian key yang sama untuk payload atau target berbeda memberi `409`. Permintaan ulang setelah validasi gagal dapat dikirim kembali dengan data yang diperbaiki.
+
+### Saldo dan total per opsi
+
+- Saldo per SKU menampilkan UUID varian, kode SKU yang berlaku, nilai opsi, dan kuantitas per unit. Total produk adalah penjumlahan seluruh saldo variannya.
+- Untuk setiap opsi, kelompokkan varian berdasarkan identitas nilai opsi pada varian lalu jumlahkan saldo dalam kelompok tersebut. Produk tanpa opsi memiliki satu varian bawaan dan rincian opsi kosong.
+- Contoh Kaos Basic memiliki 8 unit Hitam/M, 2 unit Hitam/L, dan 5 unit Putih/L. Total produk adalah 15. Total per warna adalah Hitam 10 dan Putih 5. Total per ukuran adalah M 8 dan L 7. Setiap pengelompokan merupakan cara melihat saldo SKU yang sama.
+
+### Ketersediaan untuk storefront
+
+- Kontrak baca menerima tenant yang sudah dipetakan server dan sekumpulan UUID varian miliknya. Hasil per varian adalah `IN_STOCK` untuk saldo positif atau `OUT_OF_STOCK` untuk saldo nol. Varian yang tidak berada dalam himpunan milik tenant tidak boleh menghasilkan status dari tenant lain.
+- Status mengikuti saldo yang sudah dikonfirmasi pada pembacaan berikutnya. Visibilitas produk ditentukan oleh status publikasi di Product Management. Storefront menampilkan label **Tersedia** atau **Habis** sesuai status yang dibaca.
+
+### Kontrak HTTP
+
+Gunakan `ApiResponse`, pagination repo untuk riwayat, dan `ProblemDetail` untuk kegagalan. Akun tanpa autentikasi ditolak dengan `401`. Akun tanpa tenant atau tanpa permission mendapat `403`. Target di luar tenant pada path mendapat `404`. Referensi baris atau SKU yang tidak valid di payload serta jumlah yang tidak sah mendapat `400`. Konflik payload idempoten atau koreksi yang akan membuat saldo negatif mendapat `409`.
+
+| Metode dan path relatif | Izin | Input dan hasil sukses |
+| --- | --- | --- |
+| `POST /api/v1/inventory/receipts` | `inventory.receive` | `Idempotency-Key`, daftar `lines` berisi `sku` dan `quantity`. `201` dengan ID, waktu, dan baris penerimaan. |
+| `GET /api/v1/inventory/receipts` | `inventory.read` | `200` dengan daftar ringkas penerimaan milik tenant dalam pagination. |
+| `GET /api/v1/inventory/receipts/{receiptId}` | `inventory.read` | `200` dengan penerimaan, jumlah awal, jumlah efektif per baris, dan riwayat koreksi. |
+| `POST /api/v1/inventory/receipts/{receiptId}/corrections` | `inventory.correct` | `Idempotency-Key`, `reason`, daftar `lines` berisi `receiptLineId` dan `quantity` baru. `201` dengan detail koreksi dan delta. |
+| `GET /api/v1/inventory/products/{productId}/stock` | `inventory.read` | `200` dengan saldo varian, `totalQuantity`, dan total per nilai untuk setiap opsi. |
 
 ## Data Model
 
-```mermaid
-erDiagram
-    TENANTS {
-        uuid id PK
-    }
-
-    PRODUCTS {
-        uuid id PK
-        uuid tenant_id FK
-    }
-
-    CATEGORIES {
-        uuid id PK
-    }
-
-    PRODUCT_CATEGORIES {
-        uuid product_id PK, FK
-        uuid category_id PK, FK
-    }
-
-    PRODUCT_MEDIA {
-        uuid id PK
-        uuid product_id FK
-    }
-
-    PRODUCT_OPTION_VALUES {
-        uuid id PK
-        uuid product_id FK
-    }
-
-    MEDIA_OPTION_VALUES {
-        uuid media_id PK, FK
-        uuid option_value_id PK, FK
-    }
-
-    TENANTS ||--o{ PRODUCTS : owns
-    PRODUCTS ||--o{ PRODUCT_CATEGORIES : categorized_as
-    CATEGORIES ||--o{ PRODUCT_CATEGORIES : groups
-    PRODUCTS ||--o{ PRODUCT_MEDIA : has
-    PRODUCTS ||--o{ PRODUCT_OPTION_VALUES : has
-    PRODUCT_MEDIA ||--o{ MEDIA_OPTION_VALUES : links
-    PRODUCT_OPTION_VALUES ||--o{ MEDIA_OPTION_VALUES : links
-```
-
-### Penjelasan tabel
-
-| Tabel | Fungsi |
+| Data | Kepemilikan dan integritas |
 | --- | --- |
-| `tenants` | Tenant pemilik katalog produk. |
-| `products` | Data produk yang dimiliki tenant melalui `tenant_id`. |
-| `categories` | Data kategori produk. |
-| `product_categories` | Tabel penghubung produk dengan kategori. |
-| `product_media` | Media yang dimiliki suatu produk. |
-| `product_option_values` | Nilai opsi yang terkait dengan produk. |
-| `media_option_values` | Tabel penghubung media produk dengan nilai opsi. |
+| Gudang | UUID dan `tenant_id`. Satu gudang bawaan per tenant pada versi ini. Referensi gudang disimpan bersama transaksi agar riwayat penerimaan tetap bisa dibaca saat dukungan gudang bertambah. |
+| Penerimaan dan baris penerimaan | UUID penerimaan, tenant, gudang, pencatat, waktu, serta baris yang merujuk UUID varian, SKU saat penerimaan, dan jumlah positif. Pasangan penerimaan dan varian unik. |
+| Koreksi dan baris koreksi | UUID koreksi, penerimaan awal, tenant dan gudang yang sama, pencatat, waktu, alasan, serta delta per baris penerimaan yang dikoreksi. |
+| Saldo varian | Satu saldo untuk pasangan gudang dan varian. Gudang dan varian harus berada dalam tenant yang sama. Saldo hasil transaksi wajib nonnegatif. |
+| Kunci idempotensi | Simpan identitas request dan hasil yang sudah dikonfirmasi dalam cakupan tenant, akun, serta operasi. Hubungkan kunci dan transaksi dengan batas atomik yang sama. |
 
-### Penjelasan relasi
+## Testing Decisions
 
-| Relasi | Makna |
-| --- | --- |
-| `tenants → products` | Setiap tenant memiliki katalog produknya sendiri. |
-| `products ↔ categories` | Many-to-many melalui `product_categories`. Satu produk memiliki satu Primary Category dari kategori yang dipilih. |
-| `products → product_media` | Satu produk dapat memiliki beberapa media. |
-| `products → product_option_values` | Produk memiliki nilai opsi yang dapat dikaitkan dengan medianya. |
-| `product_media ↔ product_option_values` | Many-to-many melalui `media_option_values`; media dapat ditautkan ke beberapa nilai opsi dan sebaliknya. |
-
-**Implementation dependency — PM-02:** lokasi penyimpanan penanda Primary Category belum ditentukan dalam model yang disepakati. Jangan menetapkan kolom atau constraint baru untuk itu sebelum ada keputusan skema.
+Gunakan Bruno dengan `bru run --env Local` dari direktori `bruno/`. Untuk alur penerimaan dan koreksi, baca kembali riwayat dan saldo melalui akun tenant dengan permission yang sesuai setelah aksi berhasil ataupun ditolak. Gunakan pengujian transaksi pada PostgreSQL untuk memastikan penerimaan bersamaan, retry, dan koreksi bersamaan tidak menghilangkan perubahan saldo atau menggandakan penerimaan. Konfirmasi status publik melalui skenario storefront Product Management.
 
 ## Acceptance Scenarios
 
-| ID | Kondisi | Tindakan | Hasil yang diharapkan |
-| --- | --- | --- | --- |
-| **PM-AT-01** | Terdapat tenant A dan tenant B. | Mengaitkan produk ke katalog tenant A. | Produk mempunyai kepemilikan tenant A dan tidak menjadi entri katalog bersama lintas tenant. |
-| **PM-AT-02** | Satu produk memiliki dua kategori. | Menetapkan satu kategori sebagai Primary Category. | Kedua kategori tetap terhubung dan tepat satu menjadi Primary Category. Implementasi penyimpanannya mengikuti keputusan skema PM-02. |
-| **PM-AT-03** | Satu produk memiliki media M1 dan nilai opsi V1, V2. | Mengaitkan M1 dengan V1 dan V2. | M1 mempunyai dua asosiasi nilai opsi. |
-| **PM-AT-04** | Nilai opsi V1 berkaitan dengan media M1 dan M2 milik produk yang sama. | Mengaitkan V1 dengan kedua media. | V1 mempunyai dua asosiasi media tanpa memindahkan kepemilikan media dari produk. |</script>
+| ID | Requirement | Kondisi, aksi, dan hasil |
+| --- | --- | --- |
+| **IM-AT-01** | IM-01, IM-02 | Toko A mulai dari saldo nol. Dalam satu penerimaan, masukkan 8 unit Hitam/M dari produk Draft, 5 unit Putih/L, dan 3 unit dari produk tanpa opsi. Dapat satu penerimaan dan saldo naik sesuai tiap SKU. Seluruh transaksi memakai gudang A. |
+| **IM-AT-02** | IM-02 | Kirim penerimaan dengan satu baris sah dan satu SKU yang tidak ada dalam tenant A atau jumlah tidak valid. Dapat `400`. Setelah dibaca ulang, tidak ada penerimaan baru dan seluruh saldo tetap. |
+| **IM-AT-03** | IM-02 | Ulangi POST penerimaan dengan key dan payload yang sama. Respons merujuk penerimaan awal dan saldo hanya bertambah sekali. Kirim payload berbeda dengan key itu dan periksa `409`. |
+| **IM-AT-04** | IM-03 | Terima 8 unit, koreksi menjadi 6 dengan alasan, lalu menjadi 7. Riwayat memuat penerimaan dan dua koreksi dengan delta −2 dan +1. Saldo akhirnya 7. Ulangi request koreksi dengan key yang sama dan buktikan koreksi tidak digandakan. |
+| **IM-AT-05** | IM-01, IM-03 | Koreksi tanpa alasan atau dengan baris dari penerimaan lain ditolak `400`. Akun tanpa izin koreksi mendapat `403`. Detail penerimaan dan saldo tidak berubah. |
+| **IM-AT-06** | IM-01, IM-04 | Stok 8 Hitam/M, 2 Hitam/L, dan 5 Putih/L menampilkan total produk 15, warna 10/5, serta ukuran 8/7. Setelah Hitam/M dikoreksi menjadi 6, total menjadi 13, warna 8/5, dan ukuran 6/7. |
+| **IM-AT-07** | IM-01, IM-04 | Akun B berizin mencoba membaca atau mengoreksi penerimaan A dan mendapat `404`. Riwayat B hanya memuat penerimaan B. Baca ulang saldo dan riwayat A untuk memastikan tidak ada perubahan. |
+| **IM-AT-08** | IM-05 | Untuk produk terbit, varian lama dengan saldo nol berstatus Habis. Terima stok lalu baca ulang detail publik dan periksa status Tersedia. Koreksi ke nol dan periksa Habis serta produk tetap dapat dilihat. |
+| **IM-AT-09** | IM-01, IM-02, IM-03 | Lakukan dua penerimaan bersamaan pada SKU yang sama, lalu dua koreksi bersamaan pada baris yang sama. Saldo mencerminkan setiap penerimaan dan delta koreksi berdasarkan jumlah efektif terakhir tanpa kehilangan transaksi. |
+
+## Out of Scope
+
+- **Enhancement berikutnya:** beberapa gudang per tenant, pilihan gudang pada transaksi, dan transfer stok antargudang.
+- Reservasi, stok keluar karena penjualan, pengembalian, stok opname, dan integrasi pesanan atau POS.
+
+## Further Notes
+
+Implementasi penerimaan membutuhkan kontrak varian dan SKU yang stabil dari Product Management serta tenant dan permission dari User Management. Dukungan reservasi dapat dirancang bersama Cart, Checkout, dan Order ketika aturan pemesanan sudah dibahas. [Development Dependencies](development-dependencies.md)
+
+## Implementation Tickets
+
+- [Inventory 01 — Penerimaan beberapa SKU dan saldo](tickets/inventory-management/01-penerimaan-dan-saldo.md)
+- [Inventory 02 — Koreksi penerimaan dan agregat stok](tickets/inventory-management/02-koreksi-dan-agregat.md)
+</script>
+  <script id="offline-product-management" type="text/plain">
+# Product Management
+
+## Problem Statement
+
+Pengelola toko perlu mencatat satu produk dengan beberapa kombinasi pilihan, seperti Kaos Basic warna Hitam ukuran M dan warna Putih ukuran L. Petugas penerimaan perlu mengenali kombinasi yang tepat melalui SKU. Pengunjung perlu melihat produk yang sudah terbit, foto yang sesuai dengan pilihan, serta ketersediaan kombinasi yang dipilih.
+
+## Solution
+
+Setiap tenant mengelola katalog, kategori, media, opsi, dan SKU miliknya. Pengelola menyiapkan produk sebagai Draft, lalu menerbitkannya saat siap. Storefront membaca katalog toko yang sedang dibuka dan mengambil status ketersediaan SKU dari Inventory Management.
+
+## Admin UI Structure
+
+Referensi Tenant Admin menempatkan Products, Categories, Brands, Collections, dan Option Library di bawah Catalog. Products dan Categories menyediakan konteks navigasi untuk pengelolaan lewat API di spec ini.
+
+## User Stories
+
+1. Sebagai pengelola katalog, saya bisa membuat kategori dan produk untuk toko saya serta memilih satu kategori utama agar produk mudah dikelompokkan.
+2. Sebagai pengelola katalog, saya bisa membuat opsi dan menetapkan SKU otomatis atau manual untuk setiap kombinasi yang disediakan toko agar petugas dapat mencatat barang yang tepat.
+3. Sebagai pengelola katalog, saya bisa menyimpan URL foto dan menautkan foto ke nilai opsi agar pengunjung melihat media yang sesuai pilihannya.
+4. Sebagai pengelola katalog, saya bisa melengkapi harga, menerbitkan produk, menariknya ke Draft, dan menerbitkannya kembali agar saya dapat mengatur kapan produk terlihat.
+5. Sebagai pengunjung, saya bisa melihat daftar dan detail produk terbit di toko yang saya buka, memilih kombinasi, dan mengetahui ketersediaannya.
+
+## Functional Specification
+
+| ID | Perilaku |
+| --- | --- |
+| **PM-01** | Setiap tenant memiliki katalog independen. Produk dan kategori dimiliki tenant. |
+| **PM-02** | Produk terhubung ke satu atau lebih kategori milik tenant yang sama dan memiliki tepat satu Primary Category dari daftar tersebut sejak dibuat. |
+| **PM-03** | Media URL dimiliki satu produk. |
+| **PM-04** | Media dan nilai opsi pada produk yang sama dapat ditautkan many-to-many. |
+| **PM-05** | Produk dengan opsi memiliki satu varian per kombinasi yang didaftarkan. Produk tanpa opsi memiliki satu varian bawaan. |
+| **PM-06** | Setiap varian memiliki satu SKU unik per tenant yang bisa dihasilkan otomatis atau diisi manual. Kode bisa diperbaiki sebelum transaksi stok pertama. |
+| **PM-07** | Produk baru berstatus Draft. Pengelola dapat menerbitkan produk yang sudah punya harga rupiah dan varian, atau menarik produk terbit kembali ke Draft. |
+| **PM-08** | Storefront menampilkan daftar dan detail produk terbit dalam tenant yang dipetakan dari URL toko, termasuk galeri dan status stok varian. |
+
+## Implementation Decisions
+
+### Tenant, kategori, dan permission
+
+- Gunakan tenant akun terautentikasi sesuai [User Management](user-management.md). Jika URL request juga memetakan tenant, pemetaan harus cocok dengan akun. Akses data katalog admin memerlukan tenant aktif dan permission dari role aktif.
+- `catalog.read` mengizinkan daftar dan detail admin. `catalog.manage` mengizinkan pembuatan kategori serta perubahan produk, opsi, SKU, media, dan publikasi. Kedua permission tersedia di katalog permission untuk role tenant. Lookup objek dan pagination dilakukan dalam tenant akun.
+- Daftar kategori produk adalah himpunan kategori milik tenant produk. Saat membuat produk atau mengganti daftar, kirim `categoryIds` yang berisi setidaknya satu kategori serta `primaryCategoryId` yang merupakan salah satu anggotanya. Simpan keduanya dalam satu transaksi.
+- Produk punya UUID, nama, deskripsi opsional, dan satu harga untuk seluruh variannya. Harga memakai bilangan bulat rupiah (`priceIdr`), boleh nol, dan boleh kosong selama Draft. Foto dan deskripsi bersifat opsional saat terbit. Produk yang terbit harus tetap memenuhi syarat harga dan varian saat diperbarui.
+
+### Opsi, varian, dan SKU
+
+- Opsi memiliki nama dan urutan dalam produk. Nilai opsi memiliki identitas sendiri di bawah opsi tersebut. Contoh opsi `Warna` memiliki nilai `Hitam` dan `Putih`.
+- Satu varian untuk produk beropsi berisi tepat satu nilai dari tiap opsi produk. Admin mendaftarkan kombinasi yang disediakan toko. Kombinasi yang sama hanya bisa didaftarkan sekali. Produk tanpa opsi memperoleh satu varian bawaan saat dibuat.
+- Varian memiliki UUID stabil yang dipakai Inventory sebagai referensi. Kode SKU mengidentifikasi varian dalam tenant dan pencariannya mengabaikan kapitalisasi. Nilai pilihan yang membentuk satu varian adalah bagian dari identitas varian tersebut. Kombinasi lain mendapatkan varian baru.
+- Saat membuat varian, admin memilih mode `AUTO` atau `MANUAL`. Generator memakai satu pola bawaan. Gabungkan kode singkat produk dan kode nilai pilihan sesuai urutan opsi dengan pemisah tanda hubung. Sebagai contoh, kode produk `KBS` dan nilai `HTM` serta `M` menghasilkan `KBS-HTM-M`. Varian bawaan memakai kode produk saja. Kode singkat berupa alfanumerik yang disediakan admin untuk data yang menggunakan generator. Mode manual menerima SKU yang ditentukan admin.
+- Klien admin dapat memakai pola yang sama untuk pratinjau. Server menghasilkan SKU final saat menyimpan. Normalisasikan kode ke huruf besar setelah memangkas spasi tepi. SKU manual boleh memuat huruf ASCII, angka, titik, garis bawah, dan tanda hubung. Konflik SKU dalam tenant atau kombinasi yang sudah ada memberi `409`. Admin dapat memperbaiki input atau memilih mode manual.
+- SKU boleh diperbaiki sebelum transaksi stok pertama. Setelah ada catatan barang masuk, kode dan kombinasi SKU terkunci, termasuk ketika saldo kemudian kembali nol. Pengecekan pada perubahan SKU dan pencatatan stok harus diserialisasi untuk varian yang sama. Perubahan label mempertahankan identitas nilai opsi. Kode singkat yang diperbarui berlaku untuk hasil generate berikutnya dan tidak menghitung ulang SKU tersimpan.
+- Daftar dimensi dan urutan opsi ditetapkan saat produk dibuat. Admin dapat menambah nilai pada opsi yang sudah didefinisikan dan mendaftarkan kombinasi baru dari nilai-nilai tersebut.
+
+### Media produk
+
+- URL media disimpan pada produk. Urutkan media menurut waktu penambahan dengan ID sebagai pembeda saat waktunya sama. Foto pertama menjadi foto kartu produk.
+- Penggantian `optionValueIds` berlaku untuk satu media dalam satu transaksi. Daftar kosong melepas semua tautan pada media tersebut. Setiap nilai opsi yang dikirim harus berasal dari produk pemilik media. Satu nilai opsi tetap bisa ditautkan ke beberapa media.
+- Payload admin detail produk mengembalikan kategori dan Primary Category, opsi dan nilainya, varian beserta SKU, serta media dan daftar `optionValueIds` per media.
+
+### Publikasi dan storefront
+
+- Status tersimpan adalah `DRAFT` dan `PUBLISHED`. Buat produk sebagai `DRAFT`. Penerbitan memerlukan harga yang sah dan setidaknya satu varian. Menarik produk mengubahnya kembali ke `DRAFT`. Produk Draft juga dapat menerima stok. Pengiriman ulang status yang sudah aktif bersifat idempoten.
+- Pemetaan domain aktif atau pasangan hostname dan jalur toko menentukan tenant publik. Gunakan pemetaan yang diverifikasi server. Identitas tenant dari parameter klien tidak memberi akses ke katalog lain. Tenant atau target publik yang tidak tersedia, produk Draft, dan produk milik tenant lain menghasilkan `404` yang setara.
+- Daftar publik menampilkan kartu dengan nama, harga rupiah, dan foto pertama bila tersedia. Detail menampilkan nama, harga, deskripsi bila tersedia, kategori, galeri, serta opsi dan kombinasi varian yang terdaftar. ID produk dan varian pada respons publik cukup untuk resolusi dan tampilan.
+- Galeri awal menampilkan media produk dalam urutan tetap. Saat ada nilai terpilih yang punya media, tampilkan media untuk nilai terpilih pertama menurut urutan opsi. Tampilkan galeri awal bila tidak ada nilai terpilih yang memiliki foto. Pada contoh Warna lalu Ukuran, memilih Hitam menampilkan foto Hitam, dan pemilihan ukuran tidak menggantinya jika foto Hitam tersedia.
+- Untuk produk beropsi, evaluasi stok saat pilihan membentuk satu varian terdaftar. Pilihan yang belum lengkap meminta pengunjung melengkapinya. Kombinasi yang tidak terdaftar ditandai sebagai kombinasi yang tidak disediakan toko. Produk tanpa opsi langsung menggunakan varian bawaan.
+- Baca status dari [Inventory Management](inventory-management.md#ketersediaan-untuk-storefront) dengan tenant dan UUID varian. Saldo positif ditampilkan sebagai **Tersedia**, saldo nol sebagai **Habis**. Produk terbit dapat dilihat meski semua variannya habis. Informasi publik ketersediaan berupa status. Sumber saldo dan agregat angka tersedia melalui API admin Inventory.
+
+### Kontrak HTTP
+
+Gunakan respons sukses `ApiResponse`, pagination repo untuk daftar, dan `ProblemDetail` untuk error. Permission dinilai sebelum lookup. Request tanpa autentikasi pada jalur admin memberi `401`, akun tanpa tenant atau tanpa permission memberi `403`, dan target yang tidak ada dalam tenant memberi `404`. Data atau referensi body yang tidak valid memberi `400`, termasuk kategori atau nilai opsi di luar himpunan yang sah, dengan pesan yang tidak mengungkap entitas tenant lain. Perubahan dengan konflik keadaan, seperti SKU yang sudah digunakan atau penerbitan Draft yang belum memenuhi syarat, memberi `409`.
+
+| Metode dan path relatif | Izin | Input dan hasil sukses |
+| --- | --- | --- |
+| `POST /api/v1/catalog/categories` | `catalog.manage` | `name`. `201` dengan ID dan nama kategori. |
+| `GET /api/v1/catalog/categories` | `catalog.read` | Daftar kategori dalam tenant. `200` dengan pagination. |
+| `POST /api/v1/catalog/products` | `catalog.manage` | `name`, `description`, `priceIdr`, `categoryIds`, `primaryCategoryId`, `productCode` untuk mode otomatis, serta `options` berisi nama dan daftar awal nilai dengan label dan kode opsional. Urutan `options` menentukan pola SKU. Sertakan `skuMode` dan `sku` bila manual untuk produk tanpa opsi. `201` dengan detail Draft. |
+| `GET /api/v1/catalog/products` | `catalog.read` | Daftar ID, nama, harga, status, dan ID kategori utama. `200` dengan pagination. |
+| `GET /api/v1/catalog/products/{productId}` | `catalog.read` | `200` dengan detail produk admin. |
+| `PUT /api/v1/catalog/products/{productId}/details` | `catalog.manage` | Ganti `name`, `description`, `priceIdr`, dan `productCode`. `200` dengan detail terbaru. |
+| `PUT /api/v1/catalog/products/{productId}/categories` | `catalog.manage` | Daftar akhir `categoryIds` dan `primaryCategoryId`. `200` dengan kategori produk yang tersimpan. |
+| `POST /api/v1/catalog/products/{productId}/options/{optionId}/values` | `catalog.manage` | Tambah label dan kode opsional untuk generator. `201` dengan nilai opsi. |
+| `PUT /api/v1/catalog/products/{productId}/options/{optionId}/values/{valueId}/details` | `catalog.manage` | Perbarui label nilai opsi dan kode singkat untuk hasil generate berikutnya. `200` dengan nilai opsi pada ID yang sama. |
+| `POST /api/v1/catalog/products/{productId}/variants` | `catalog.manage` | `optionValueIds`, `skuMode`, serta `sku` bila manual. `201` dengan ID varian, kombinasi, dan SKU. |
+| `PUT /api/v1/catalog/products/{productId}/variants/{variantId}/sku` | `catalog.manage` | `skuMode` dan `sku` bila manual. `200` dengan SKU terbaru jika belum ada transaksi. |
+| `POST /api/v1/catalog/products/{productId}/media` | `catalog.manage` | URL absolut HTTP atau HTTPS. `201` dengan ID media, URL, dan daftar tautan kosong. |
+| `PUT /api/v1/catalog/products/{productId}/media/{mediaId}/option-values` | `catalog.manage` | Daftar akhir `optionValueIds`. `200` dengan media dan tautan terbaru. |
+| `PUT /api/v1/catalog/products/{productId}/publication` | `catalog.manage` | `status` berupa `DRAFT` atau `PUBLISHED`. `200` dengan status tersimpan. |
+| `GET /api/v1/storefront/products` | Publik pada URL toko | `200` dengan kartu produk terbit dan pagination. |
+| `GET /api/v1/storefront/products/{productId}` | Publik pada URL toko | `200` dengan detail produk terbit, termasuk status ketersediaan per varian. |
+
+Alamat halaman publik adalah `/products` dan `/products/{productId}` relatif terhadap URL toko. Jalur API publik juga mengikuti URL toko, termasuk prefiks jalur bila toko dipetakan melalui prefiks.
+
+## Data Model
+
+| Data | Kepemilikan dan integritas |
+| --- | --- |
+| `products`, `categories` | UUID dan `tenant_id` wajib. Satu tenant dapat membuat kategorinya sendiri dengan nama yang juga dipakai tenant lain. |
+| `product_categories` | Pasangan `(product_id, category_id)` unik. FK gabungan dengan tenant memastikan produk dan kategori berada dalam tenant yang sama. |
+| Primary Category | Simpan pada `products.primary_category_id` dengan `NOT NULL`. FK gabungan `(id, primary_category_id)` ke `product_categories(product_id, category_id)` diperiksa pada commit sehingga pembuatan produk dan penggantian kategori dapat disimpan sebagai satu transaksi. |
+| `product_options`, `product_option_values` | Opsi dan nilai dimiliki produk yang sama. Identitas nilai mengikat tautan media dan varian. |
+| `product_variants` dan relasi nilai opsi | UUID varian stabil. Terapkan keunikan SKU per tenant dan kombinasi nilai per produk. Relasi ke nilai opsi harus tetap dalam produk yang sama. |
+| `product_media`, `media_option_values` | Media dimiliki produk. Pasangan `(media_id, option_value_id)` unik dan kedua sisi harus milik produk yang sama. |
+
+## Testing Decisions
+
+Jalankan skenario HTTP dengan Bruno melalui `bru run --env Local` dari `bruno/`. Gunakan dua tenant dengan role berizin dan akun baca-saja. Pakai PostgreSQL untuk menguji constraint kategori dan keunikan SKU. Uji halaman publik melalui browser menggunakan API dan data stok yang sama.
+
+## Acceptance Scenarios
+
+| ID | Requirement | Kondisi, aksi, dan hasil |
+| --- | --- | --- |
+| **PM-AT-01** | PM-01, PM-04 | Akun B dengan izin kelola mencoba menautkan media produk A. Dapat `404` dan pembacaan ulang oleh akun A menunjukkan tautan awal. Daftar admin B hanya berisi produk B. |
+| **PM-AT-02** | PM-02 | Buat produk dengan dua kategori A dan pilih salah satunya. Ganti daftar serta pilih Primary Category baru. Detail menunjukkan tepat satu kategori utama dari daftar terbaru. Kategori B atau primary di luar daftar memberi `400` tanpa perubahan parsial. |
+| **PM-AT-03** | PM-03, PM-04 | Tautkan satu media ke dua nilai opsi produk. Detail mengembalikan kedua nilai dan media tetap dimiliki produk tersebut. Nilai dari produk lain memberi `400` dan tautan sebelumnya tetap berlaku. |
+| **PM-AT-04** | PM-03, PM-04 | Tautkan dua media ke satu nilai opsi. Detail mengembalikan kedua relasi. Simpan daftar kosong pada satu media dan periksa bahwa hanya tautan media tersebut yang hilang. |
+| **PM-AT-05** | PM-05, PM-06 | Buat Hitam/M otomatis dan Putih/L manual. Periksa kode dan kombinasi. Duplikasi kombinasi atau SKU, termasuk beda kapitalisasi, memberi `409`. Produk tanpa opsi memiliki satu varian bawaan. |
+| **PM-AT-06** | PM-06 | Ganti SKU sebelum penerimaan pertama. Terima stok dengan SKU baru, lalu coba ubah lagi. Perubahan ditolak dengan `409` dan lookup stok tetap merujuk varian yang sama. |
+| **PM-AT-07** | PM-07 | Produk baru tidak muncul secara publik. Coba terbitkan tanpa harga dan dapat `409`. Isi harga lalu terbitkan. Tarik dan terbitkan lagi, serta cek daftar dan URL detail publik pada setiap transisi. |
+| **PM-AT-08** | PM-08 | Buka daftar dan detail produk terbit. Cek harga, galeri yang mengikuti pilihan, status SKU bersaldo positif atau nol, serta hasil saat kombinasi belum lengkap atau tidak terdaftar. Saat seluruh SKU habis, detail produk tetap dapat dibuka. ID produk A dari URL tenant B memberi `404`. |
+| **PM-AT-09** | PM-01, PM-07 | Akun baca-saja dapat melihat detail namun percobaan perubahan memberi `403`. Request admin tanpa login memberi `401`. Produk dan statusnya tetap sama setelah penolakan. |
+
+## Out of Scope
+
+- Pembuatan UI admin, unggah file, Brands, Collections, Option Library, dan pengaturan tema storefront.
+- Harga per varian, promosi, pencarian dan filter katalog, keranjang, checkout, dan pemesanan.
+- Pengelolaan stok, penerimaan, koreksi, dan multi-gudang. Pengelolaan stok versi pertama ditetapkan di [Inventory Management](inventory-management.md).
+
+## Further Notes
+
+Integrasi admin membutuhkan identitas tenant, login, dan evaluasi permission sesuai User Management. Integrasi publik membutuhkan pemetaan URL toko aktif. Detail ketersediaan end-to-end membutuhkan saldo per varian dari Inventory Management. Rute pengelolaan katalog dan storefront diperkenalkan dalam spesifikasi ini.
+
+## Implementation Tickets
+
+- [Product 01 — Katalog Draft, kategori, opsi, dan SKU](tickets/product-management/01-katalog-draft-dan-sku.md)
+- [Product 02 — Media dan tautan nilai opsi](tickets/product-management/02-media-dan-tautan-opsi.md)
+- [Product 03 — Publikasi dan storefront tenant](tickets/product-management/03-publikasi-dan-storefront.md)
+</script>
 
   <script>
     (() => {
@@ -1014,6 +1155,7 @@ erDiagram
         'skill-guide.md': byId('offline-skill-guide').textContent.trim(),
         'user-management.md': byId('offline-user-management').textContent.trim(),
         'product-management.md': byId('offline-product-management').textContent.trim(),
+        'inventory-management.md': byId('offline-inventory-management').textContent.trim(),
         'module-roadmap.md': byId('offline-module-roadmap').textContent.trim(),
         'development-dependencies.md': byId('offline-development-dependencies').textContent.trim(),
       };

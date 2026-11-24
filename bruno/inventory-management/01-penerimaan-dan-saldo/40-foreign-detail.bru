@@ -1,0 +1,24 @@
+meta {
+  name: IM-AT-07 Detail penerimaan A tidak dapat dibaca oleh B
+  type: http
+  seq: 40
+}
+
+get {
+  url: {{baseUrl}}/{{shopB}}/api/v1/inventory/receipts/{{receiptA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminB}}
+}
+
+tests {
+  test("IM-AT-07 Detail penerimaan A tidak dapat dibaca oleh B", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(404);
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+  });
+}

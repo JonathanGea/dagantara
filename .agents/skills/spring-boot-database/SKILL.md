@@ -8,7 +8,8 @@ description: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity
 ## Source of truth
 
 - `docs/user-management.md`: ERD dan aturan UM-01 s.d. UM-06.
-- `docs/product-management.md`: ERD dan aturan PM-01 s.d. PM-04.
+- `docs/product-management.md`: model data, Primary Category, relasi media, dan identitas varian.
+- `docs/inventory-management.md`: gudang, penerimaan, koreksi, dan saldo per varian.
 - Detail yang tidak dicantumkan sebagai keputusan final **jangan** diisi dengan asumsi tanpa persetujuan.
 
 ## Workflow
@@ -26,7 +27,7 @@ description: Gunakan untuk desain dan perubahan PostgreSQL, JPA/Hibernate entity
 - `users.role_id` menunjuk satu role aktif; `role_permissions` unik untuk pasangan `(role_id, permission_id)`.
 - `users.tenant_id` dapat NULL untuk akun platform; `roles.tenant_id` dapat NULL untuk role sistem. Penanganan NULL tidak sama dengan izin akses global.
 - Product management: `products` dimiliki tenant; `product_categories` menghubungkan produk dan kategori secara many-to-many.
-- Produk memiliki tepat satu Primary Category secara aturan bisnis, **namun representasi kolom/constraint penandanya belum diputuskan**. Tandai sebagai blocked; jangan mengarang skema finalnya.
+- Simpan satu Primary Category pada `products.primary_category_id` dengan FK gabungan ke `product_categories` yang diperiksa saat commit sesuai PM-02.
 - `product_media` dan `product_option_values` terhubung many-to-many melalui `media_option_values`, dengan media tetap milik produk.
 - Jangan menyimpulkan `tenant_id` wajib ada pada tabel yang belum dirinci di ERD; identifikasi kebutuhan isolasi dan minta keputusan bila skema belum final.
 

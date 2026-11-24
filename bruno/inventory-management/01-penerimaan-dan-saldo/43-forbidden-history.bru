@@ -1,0 +1,24 @@
+meta {
+  name: IM-AT-07 Akun tanpa inventory.read tidak dapat membaca penerimaan
+  type: http
+  seq: 43
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receiptA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{readerToken}}
+}
+
+tests {
+  test("IM-AT-07 Akun tanpa inventory.read tidak dapat membaca penerimaan", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

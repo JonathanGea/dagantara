@@ -64,11 +64,6 @@ public class GlobalExceptionHandler {
                 "Malformed or missing JSON request body", request);
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ProblemDetail handleInvalidParameter(HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Invalid request parameter", request);
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleIntegrity(DataIntegrityViolationException exception,
                                          HttpServletRequest request) {

@@ -18,7 +18,7 @@ Excluded by decision: automated database migration tooling, Redis/cache, rate li
 ## Development
 
 1. Install JDK 25 and PostgreSQL 15 or later.
-2. Create an empty PostgreSQL database named dagantara, apply the User Management migrations below, and grant your local database user access.
+2. Create an empty PostgreSQL database named dagantara, apply the User Management, Product, and Inventory migrations below, and grant your local database user access.
 3. Copy `.env.example` to `.env`. Set `DB_PASSWORD` and `APP_JWT_SECRET_BASE64`. The `dev` profile defaults to PostgreSQL at `127.0.0.1:5433` with user `dagantara_app`. Set `DB_URL` and `DB_USERNAME` if your local instance differs. Export the values before launching Spring Boot.
 4. Generate a signing secret: `openssl rand -base64 48`. Do not reuse one secret across environments.
 5. For first-time Admin Platform setup, set the two bootstrap variables described below.
@@ -142,6 +142,19 @@ Pada kedua cakupan, gunakan `PUT /{id}/role` pada rute akun untuk mengganti role
 ## Pemulihan admin tenant (UM-09)
 
 Operator Help Center masuk melalui akses platform dengan permission `tenants.admins.password.reset`. Alur ini menggunakan lookup admin dan konfirmasi cara operator memeriksa pemohon. Reset menghasilkan password sementara, mencabut sesi lama, dan mencatat operator, target, metode verifikasi, serta waktu. Ikuti kontrak pada [tiket 05](../docs/tickets/user-management/05-pemulihan-help-center.md#alur-help-center).
+
+## Migrasi Product dan Inventory Management
+
+Terapkan migrasi berikut dari folder `backend/` setelah migrasi User Management 01–05. Pada database yang sudah memiliki sebagian skema, mulai dari migrasi pertama yang belum diterapkan.
+
+```powershell
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/06-product-catalog.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/07-product-media.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/08-inventory-receipts.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/09-inventory-corrections.sql
+```
+
+Migrasi mendaftarkan izin katalog dan Inventory serta memberikannya kepada role Admin Tenant yang sudah ada. Provisioning tenant baru memakai katalog permission yang sama. Ikuti [Product Management](../docs/product-management.md) dan [Inventory Management](../docs/inventory-management.md) untuk kontrak API dan skenario Bruno.
 
 ## Verification
 

@@ -1,0 +1,34 @@
+meta {
+  name: PM-AT-06 Koreksi SKU sebelum stok memakai UUID varian yang sama
+  type: http
+  seq: 21
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants/{{autoVariant}}/sku
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "skuMode": "MANUAL",
+    "sku": " fix.htp-m "
+  }
+}
+
+tests {
+  test("PM-AT-06 Koreksi SKU sebelum stok memakai UUID varian yang sama", function () {
+    expect(res.getStatus()).to.equal(200);
+    const result = res.getBody().data;
+    expect(result.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(result.sku).to.equal("FIX.HTP-M");
+    expect(result.skuMode).to.equal("MANUAL");
+    expect(result.optionValueIds).to.deep.equal([bru.getVar("black"), bru.getVar("medium")]);
+    expect(result.id).to.equal(bru.getVar("autoVariant"));
+  });
+}

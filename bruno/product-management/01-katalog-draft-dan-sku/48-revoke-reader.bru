@@ -1,0 +1,28 @@
+meta {
+  name: PM-AT-09 Cabut izin role pembaca
+  type: http
+  seq: 48
+}
+
+put {
+  url: {{baseUrl}}/{{shopA}}/api/v1/tenant/roles/{{readerRole}}/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "permissions": []
+  }
+}
+
+tests {
+  test("PM-AT-09 Cabut izin role pembaca", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data.permissions).to.deep.equal([]);
+  });
+}

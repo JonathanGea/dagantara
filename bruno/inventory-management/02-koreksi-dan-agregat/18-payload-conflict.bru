@@ -1,0 +1,38 @@
+meta {
+  name: IM-AT-04 Payload berbeda dengan key lama memberi 409
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: recount-six
+}
+
+body:json {
+  {
+    "reason": "Jumlah terhitung enam",
+    "lines": [
+      {
+        "receiptLineId": "{{line-H-M}}",
+        "quantity": 7
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-04 Payload berbeda dengan key lama memberi 409", function () {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().errorCode).to.equal("IDEMPOTENCY_CONFLICT");
+  });
+}

@@ -1,0 +1,42 @@
+meta {
+  name: Fixture masuk sebagai operator platform
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const username = bru.getProcessEnv("PRODUCT01_PLATFORM_USERNAME");
+  const password = bru.getProcessEnv("PRODUCT01_PLATFORM_PASSWORD");
+  if (!username || !password) {
+    throw new Error("Set the Product 01 platform fixture credentials in the process environment");
+  }
+  const host = new URL(bru.getEnvVar("baseUrl")).hostname;
+  const suffix = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  bru.setVar("fixtureHost", host);
+  for (const label of ["A", "B"]) {
+    bru.setVar("shop" + label, "pm01-" + label.toLowerCase() + "-" + suffix);
+    bru.setVar("owner" + label, "pm01-owner-" + suffix);
+  }
+  bru.setVar("newPassword", "Pm01-" + suffix + "-" + Math.random().toString(36).slice(2));
+  req.setBody({ username, password });
+}
+
+tests {
+  test("Fixture masuk sebagai operator platform", function () {
+    expect(res.getStatus()).to.equal(200);
+    const result = res.getBody().data;
+    expect(result.passwordChangeRequired).to.equal(false);
+    expect(result.accessToken).to.be.a("string");
+    bru.setVar("platformToken", result.accessToken);
+  });
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Fixture admin A masuk dengan password sementara
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{ownerA}}",
+    "password": "{{tempA}}"
+  }
+}
+
+tests {
+  test("Fixture admin A masuk dengan password sementara", function () {
+    expect(res.getStatus()).to.equal(200);
+    const result = res.getBody().data;
+    expect(result.passwordChangeRequired).to.equal(true);
+    expect(result.accessToken).to.be.a("string");
+    bru.setVar("setupA", result.accessToken);
+  });
+}

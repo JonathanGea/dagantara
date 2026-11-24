@@ -1,0 +1,24 @@
+meta {
+  name: IM-AT-07 Akun platform tanpa tenant tidak dapat membaca riwayat
+  type: http
+  seq: 45
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory/receipts
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{platformToken}}
+}
+
+tests {
+  test("IM-AT-07 Akun platform tanpa tenant tidak dapat membaca riwayat", function () {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(403);
+    expect(res.getBody().errorCode).to.equal("FORBIDDEN");
+  });
+}

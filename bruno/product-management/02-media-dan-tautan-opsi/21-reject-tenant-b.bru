@@ -1,0 +1,29 @@
+meta {
+  name: PM-AT-01 Pengelola B tidak dapat mengubah media A
+  type: http
+  seq: 21
+}
+
+put {
+  url: {{baseUrl}}/pm02-b/api/v1/catalog/products/{{productA}}/media/{{mediaA}}/option-values
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerB}}
+}
+
+body:json {
+  {
+    "optionValueIds": []
+  }
+}
+
+tests {
+  test("PM-AT-01 Pengelola B tidak dapat mengubah media A", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().errorCode).to.equal("NOT_FOUND");
+  });
+}

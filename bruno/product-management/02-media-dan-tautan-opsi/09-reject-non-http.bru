@@ -1,0 +1,29 @@
+meta {
+  name: PM-AT-03 Tolak URL non-http
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products/{{productA}}/media
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "url": "ftp://example.test/photo.jpg"
+  }
+}
+
+tests {
+  test("PM-AT-03 Tolak URL non-http", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().errorCode).to.equal("INVALID_MEDIA_URL");
+  });
+}

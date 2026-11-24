@@ -1,0 +1,33 @@
+meta {
+  name: PM-AT-05 Tolak kombinasi yang belum lengkap
+  type: http
+  seq: 28
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "optionValueIds": [
+      "{{black}}"
+    ],
+    "skuMode": "AUTO"
+  }
+}
+
+tests {
+  test("PM-AT-05 Tolak kombinasi yang belum lengkap", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.include("application/problem+json");
+    expect(res.getBody().status).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("INVALID_COMBINATION");
+  });
+}

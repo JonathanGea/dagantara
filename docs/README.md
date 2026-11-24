@@ -6,7 +6,6 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 
 ## Dokumentasi Modul
 
-- [Product Management](product-management.md)
 - [Module Roadmap & Ownership](module-roadmap.md)
 - [Development Dependencies & Parallel Workstreams](development-dependencies.md)
 
@@ -15,6 +14,8 @@ Dagantara adalah platform e-commerce multi-tenant. Setiap tenant beroperasi dala
 Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa ekstensi dapat dipakai untuk memilih spec.
 
 - [User Management — Akses Platform dan Tenant](user-management.md)
+- [Product Management](product-management.md)
+- [Inventory Management](inventory-management.md)
 
 ## Aturan Membaca untuk AI Developer
 
@@ -49,8 +50,8 @@ Gunakan diagram Mermaid apabila membantu menjelaskan data atau workflow. Tambahk
 3. Gunakan `$implement-from-spec <slug>` untuk spec yang siap dikerjakan. Jika spec menautkan tiket yang sudah disetujui, panggilan ini mengoordinasikan worker di sesi Orca. Gunakan `$implement-from-spec <slug> <NN>` untuk memilih satu tiket yang sudah bisa dimulai.
 4. Lanjutkan di sesi yang sama atau buka sesi baru yang punya akses ke spec, tiket, dan perubahan prasyarat. Satu sesi per tiket membantu menjaga fokus pada hasil yang akan diverifikasi.
 
-Untuk format modul yang sudah ada, `$implement-from-spec @docs/product-management.md` memilih seluruh modul. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
+Gunakan `$implement-from-spec product-management` atau `$implement-from-spec inventory-management` untuk memilih salah satu spec. Tambahkan aksi, ID requirement, atau ID skenario untuk mempersempit cakupan.
 
 ### Daftar skill pada viewer
 
-Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, atau indeks ini, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html`, sehingga daftar skill dan panduan tersedia saat halaman dibuka langsung.
+Viewer mengambil skill dari setiap folder `.agents/skills/` yang memiliki `SKILL.md`. Setelah mengubah skill, panduan, indeks ini, atau spec Product dan Inventory Management, jalankan `powershell -ExecutionPolicy Bypass -File .\docs\generate-skills.ps1` dari root repository. Skrip memperbarui manifest, salinan publik skill, dan data cadangan di `index.html` untuk akses saat viewer dibuka langsung.

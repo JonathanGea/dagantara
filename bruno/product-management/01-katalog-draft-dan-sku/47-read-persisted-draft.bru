@@ -1,0 +1,31 @@
+meta {
+  name: PM-AT-02 PM-AT-05 PM-AT-06 PM-AT-09 Pembaca melihat keadaan akhir setelah penolakan
+  type: http
+  seq: 47
+}
+
+get {
+  url: {{baseUrl}}/{{shopA}}/api/v1/catalog/products/{{productA}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{readerToken}}
+}
+
+tests {
+  test("PM-AT-02 PM-AT-05 PM-AT-06 PM-AT-09 Pembaca melihat keadaan akhir setelah penolakan", function () {
+    expect(res.getStatus()).to.equal(200);
+    const result = res.getBody().data;
+    expect(result).to.include({ id: bru.getVar("productA"), name: "Kaos Basic", description: "Deskripsi baru", priceIdr: 12000, status: "DRAFT", productCode: "KBT", primaryCategoryId: bru.getVar("a2") });
+    expect(result.categoryIds).to.deep.equal([bru.getVar("a2")]);
+    expect(result.options[0].values.find(value => value.id === bru.getVar("black")))
+      .to.deep.equal({ id: bru.getVar("black"), label: "Hitam Pekat", code: "HTP" });
+    expect(result.variants.map(variant => variant.id)).to.have.members([bru.getVar("autoVariant"), bru.getVar("manualVariant"), bru.getVar("newVariant")]);
+    expect(result.variants.find(variant => variant.id === bru.getVar("autoVariant"))).to.deep.equal({
+      id: bru.getVar("autoVariant"), sku: "FIX.HTP-M", skuMode: "MANUAL",
+      optionValueIds: [bru.getVar("black"), bru.getVar("medium")]
+    });
+  });
+}

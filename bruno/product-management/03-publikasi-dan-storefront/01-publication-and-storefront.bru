@@ -1,0 +1,184 @@
+meta {
+  name: PM-AT-07–09 dan IM-AT-08 Publikasi dan storefront tenant
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/pm03/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("PRODUCT03_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set PRODUCT03_FIXTURE_PASSWORD");
+  req.setBody({ username: "pm03-manager", password });
+}
+
+tests {
+  const axios = require("axios");
+
+  test("Publikasi memerlukan harga dan varian, membatasi akses, serta membaca status stok dan galeri tenant", async function () {
+    expect(res.getStatus()).to.equal(200);
+    const manager = res.getBody().data;
+    expect(manager.passwordChangeRequired).to.equal(false);
+    expect(Boolean(manager.accessToken)).to.equal(true);
+
+    const base = bru.getEnvVar("baseUrl");
+    const domain = base.replace("localhost", "127.0.0.1");
+    const shop = base + "/pm03";
+    const suffix = Date.now().toString(36).toUpperCase();
+    const products = "/api/v1/catalog/products";
+    const published = "/api/v1/storefront/products";
+    const photos = ["https://placehold.co/800x600/374541/ffffff/png?text=Hitam",
+      "https://placehold.co/800x600/e2c6a4/33241b/png?text=M"];
+
+    async function request(method, origin, path, { status = 200, token, body, key } = {}) {
+      const headers = {};
+      if (token) headers.Authorization = "Bearer " + token;
+      if (key) headers["Idempotency-Key"] = key;
+      let response;
+      try {
+        response = await axios({
+          method, url: origin + path, data: body, validateStatus: () => true, headers
+        });
+      } catch {
+        throw new Error(method + " " + path + " received no HTTP response");
+      }
+      expect(response.status, method + " " + path + " " + (response.data?.errorCode ?? "")).to.equal(status);
+      if (response.headers["content-type"].includes("text/html") || status >= 400) return response.data;
+      expect(response.data.success).to.equal(true);
+      return response.data;
+    }
+
+    async function login(origin, username) {
+      const result = await request("POST", origin, "/api/v1/auth/login", {
+        body: { username, password: bru.getProcessEnv("PRODUCT03_FIXTURE_PASSWORD") }
+      });
+      expect(result.data.passwordChangeRequired).to.equal(false);
+      expect(Boolean(result.data.accessToken)).to.equal(true);
+      return result.data.accessToken;
+    }
+
+    function admin(method, path, body, status = 200, token = manager.accessToken, origin = shop) {
+      return request(method, origin, path, { body, status, token });
+    }
+
+    function publication(id, status, http = 200, token = manager.accessToken, origin = shop) {
+      return admin("PUT", products + "/" + id + "/publication", { status }, http, token, origin);
+    }
+
+    function product(id, origin = shop, status = 200) {
+      return request("GET", origin, published + "/" + id, { status });
+    }
+
+    function receive(variant, quantity) {
+      return request("POST", shop, "/api/v1/inventory/receipts", {
+        status: 201, token: manager.accessToken, key: "pm03-" + variant.id,
+        body: { lines: [{ sku: variant.sku, quantity }] }
+      });
+    }
+
+    function equivalent404(problem) {
+      return [problem.status, problem.errorCode, problem.detail];
+    }
+
+    const reader = await login(shop, "pm03-reader");
+    const foreignManager = await login(domain, "pm03-manager");
+    const category = (await admin("POST", "/api/v1/catalog/categories", { name: "Pakaian" }, 201)).data;
+    const foreignCategory = (await admin("POST", "/api/v1/catalog/categories",
+      { name: "Aksesori" }, 201, foreignManager, domain)).data;
+    const name = "Kaos " + suffix;
+    const options = [
+      { name: "Warna", values: [{ label: "Hitam", code: "HTM" }, { label: "Putih", code: "PTH" }] },
+      { name: "Ukuran", values: [{ label: "M", code: "M" }, { label: "L", code: "L" }] }
+    ];
+    const draft = (await admin("POST", products, {
+      name, priceIdr: null, description: "Kaos katun", productCode: "KAOS" + suffix,
+      categoryIds: [category.id], primaryCategoryId: category.id, options
+    }, 201)).data;
+    expect(draft.status).to.equal("DRAFT");
+    const id = draft.id;
+    const adminPath = products + "/" + id;
+    const draft404 = equivalent404(await product(id, shop, 404));
+    expect(draft404).to.deep.equal([404, "NOT_FOUND", "Resource not found"]);
+    expect((await request("GET", shop, published)).data.some(item => item.id === id)).to.equal(false);
+    await request("GET", shop, "/products/" + id, { status: 404 });
+
+    const sku = "KAOS" + suffix;
+    const black = draft.options[0].values.find(value => value.label === "Hitam").id;
+    const white = draft.options[0].values.find(value => value.label === "Putih").id;
+    const medium = draft.options[1].values.find(value => value.label === "M").id;
+    const large = draft.options[1].values.find(value => value.label === "L").id;
+    expect((await publication(id, "PUBLISHED", 409)).errorCode).to.equal("PRODUCT_NOT_READY");
+    await admin("PUT", adminPath + "/details", { name, priceIdr: 125000, description: "Kaos katun", productCode: sku });
+    expect((await publication(id, "PUBLISHED", 409)).errorCode).to.equal("PRODUCT_NOT_READY");
+    const inStock = (await admin("POST", adminPath + "/variants",
+      { optionValueIds: [black, medium], skuMode: "AUTO" }, 201)).data;
+    const empty = (await admin("POST", adminPath + "/variants",
+      { optionValueIds: [white, large], skuMode: "AUTO" }, 201)).data;
+    await admin("PUT", adminPath + "/details", { name, priceIdr: null, description: "Kaos katun", productCode: sku });
+    expect((await publication(id, "PUBLISHED", 409)).errorCode).to.equal("PRODUCT_NOT_READY");
+    await admin("PUT", adminPath + "/details", { name, priceIdr: 125000, description: "Kaos katun", productCode: sku });
+
+    for (const [index, value] of [black, medium].entries()) {
+      const photo = (await admin("POST", adminPath + "/media", { url: photos[index] }, 201)).data;
+      await admin("PUT", adminPath + "/media/" + photo.id + "/option-values", { optionValueIds: [value] });
+    }
+    await receive(inStock, 3);
+    expect(equivalent404(await product(id, shop, 404))).to.deep.equal(draft404);
+
+    expect((await publication(id, "PUBLISHED")).data).to.deep.equal({ status: "PUBLISHED" });
+    expect((await publication(id, "PUBLISHED")).data).to.deep.equal({ status: "PUBLISHED" });
+    const cards = await request("GET", shop, published + "?size=100");
+    expect(cards.meta.size).to.equal(100);
+    expect(cards.data.find(item => item.id === id)).to.deep.equal({ id, name, priceIdr: 125000, imageUrl: photos[0] });
+    const detail = (await product(id)).data;
+    expect(detail).to.include({ id, name, priceIdr: 125000, description: "Kaos katun", primaryCategoryId: category.id });
+    expect(detail.categories).to.deep.equal([category]);
+    expect(detail.media.map(media => [media.url, media.optionValueIds])).to.deep.equal([[photos[0], [black]], [photos[1], [medium]]]);
+    expect(detail.options.map(option => option.name)).to.deep.equal(["Warna", "Ukuran"]);
+    expect(detail.variants).to.have.deep.members([
+      { id: inStock.id, optionValueIds: [black, medium], availability: "IN_STOCK" },
+      { id: empty.id, optionValueIds: [white, large], availability: "OUT_OF_STOCK" }
+    ]);
+    await request("GET", shop, "/products/" + id);
+    await receive(empty, 1);
+    expect((await product(id)).data.variants.find(variant => variant.id === empty.id).availability).to.equal("IN_STOCK");
+
+    const defaultProduct = (await admin("POST", products, {
+      name: "Tas " + suffix, priceIdr: 0, productCode: "TAS" + suffix,
+      categoryIds: [foreignCategory.id], primaryCategoryId: foreignCategory.id
+    }, 201, foreignManager, domain)).data;
+    await publication(defaultProduct.id, "PUBLISHED", 200, foreignManager, domain);
+    const domainCards = (await request("GET", domain, published + "?size=100")).data;
+    expect(domainCards.some(item => item.id === id)).to.equal(false);
+    expect(domainCards.find(item => item.id === defaultProduct.id).priceIdr).to.equal(0);
+    expect((await product(defaultProduct.id, domain)).data.variants).to.deep.equal([
+      { id: defaultProduct.variants[0].id, optionValueIds: [], availability: "OUT_OF_STOCK" }
+    ]);
+    await request("GET", domain, "/products/" + defaultProduct.id);
+    expect(equivalent404(await product(id, domain, 404))).to.deep.equal(draft404);
+    expect(equivalent404(await request("GET", domain, published + "/" + id, {
+      status: 404, token: manager.accessToken
+    }))).to.deep.equal(draft404);
+    expect(equivalent404(await product(id, base + "/other", 404))).to.deep.equal(draft404);
+    expect(equivalent404(await product(defaultProduct.id, shop, 404))).to.deep.equal(draft404);
+    expect(equivalent404(await request("GET", base, published, { status: 404 }))).to.deep.equal(draft404);
+
+    expect((await admin("GET", adminPath, undefined, 200, reader)).data.status).to.equal("PUBLISHED");
+    await publication(id, "DRAFT", 403, reader);
+    await publication(id, "DRAFT", 401, null);
+    await publication(id, 0, 400);
+    expect((await admin("GET", adminPath, undefined, 200, reader)).data.status).to.equal("PUBLISHED");
+    await admin("PUT", adminPath + "/details", { name, priceIdr: null, productCode: sku }, 409);
+    expect((await product(id)).data.priceIdr).to.equal(125000);
+    expect((await publication(id, "DRAFT")).data.status).to.equal("DRAFT");
+    expect((await publication(id, "DRAFT")).data.status).to.equal("DRAFT");
+    expect(equivalent404(await product(id, shop, 404))).to.deep.equal(draft404);
+    expect((await request("GET", shop, published + "?size=100")).data.some(item => item.id === id)).to.equal(false);
+    expect((await publication(id, "PUBLISHED")).data.status).to.equal("PUBLISHED");
+    expect((await product(id)).data.id).to.equal(id);
+  });
+}

@@ -1,0 +1,38 @@
+meta {
+  name: IM-AT-05 Alasan kosong memberi 400
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/inventory/receipts/{{receipt}}/corrections
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{ownerA}}
+}
+
+headers {
+  Idempotency-Key: blank-reason
+}
+
+body:json {
+  {
+    "reason": " \t",
+    "lines": [
+      {
+        "receiptLineId": "{{line-H-M}}",
+        "quantity": 6
+      }
+    ]
+  }
+}
+
+tests {
+  test("IM-AT-05 Alasan kosong memberi 400", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().errorCode).to.equal("VALIDATION_ERROR");
+  });
+}

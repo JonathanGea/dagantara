@@ -1,0 +1,32 @@
+meta {
+  name: Fixture Buat akun dengan role baca-saja
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/{{shopA}}/api/v1/tenant/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminA}}
+}
+
+body:json {
+  {
+    "username": "catalog-reader",
+    "roleId": "{{readerRole}}"
+  }
+}
+
+tests {
+  test("Fixture Buat akun dengan role baca-saja", function () {
+    expect(res.getStatus()).to.equal(201);
+    const result = res.getBody().data;
+    expect(result.account.roleId).to.equal(bru.getVar("readerRole"));
+    expect(result.temporaryPassword).to.be.a("string");
+    bru.setVar("readerTemp", result.temporaryPassword);
+  });
+}

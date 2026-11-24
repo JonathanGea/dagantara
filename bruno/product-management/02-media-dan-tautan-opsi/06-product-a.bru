@@ -1,0 +1,52 @@
+meta {
+  name: Fixture Foto utama
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/pm02-a/api/v1/catalog/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{managerA}}
+}
+
+body:json {
+  {
+    "name": "Foto utama",
+    "categoryIds": [
+      "{{categoryA}}"
+    ],
+    "primaryCategoryId": "{{categoryA}}",
+    "options": [
+      {
+        "name": "Warna",
+        "values": [
+          {
+            "label": "Hitam"
+          },
+          {
+            "label": "Putih"
+          }
+        ]
+      }
+    ]
+  }
+}
+
+tests {
+  test("Fixture Foto utama", function () {
+    expect(res.getStatus()).to.equal(201);
+    const product = res.getBody().data;
+    expect(product.id).to.match(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/);
+    expect(product.categoryIds).to.deep.equal([bru.getVar("categoryA")]);
+    expect(product.media).to.deep.equal([]);
+    expect(product.options[0].values.map(value => value.label)).to.have.members(["Hitam", "Putih"]);
+    bru.setVar("productA", product.id);
+    bru.setVar("productABlack", product.options[0].values.find(value => value.label === "Hitam").id);
+    bru.setVar("productAWhite", product.options[0].values.find(value => value.label === "Putih").id);
+  });
+}
