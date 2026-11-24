@@ -42,6 +42,19 @@ Backend pertama dijalankan dengan `run-backend.ps1 -Port 18090 -Foreground`. Hen
 | SS-AT-06 (logo) | Bruno mendapat `200` dan gambar yang sesuai di URL masing-masing tenant. ID logo A memberi `404` melalui toko B atau prefiks yang tidak terdaftar. ID B memberi `404` melalui hostname A. Di browser, perubahan logo A tidak mengubah gambar, nama, kontak, atau produk B pada daftar dan detail. |
 | Kontrak aksi dan konkurensi | Bruno menerima `400` untuk file bersama `KEEP` atau `REMOVE`, serta `REPLACE` tanpa file atau dengan dua file. Setelah dua penggantian bersamaan, hanya URL aktif memberi `200`. Spring menguji dua penggantian dan `KEEP` secara bersamaan saat record belum ada. Hanya satu record dan satu file aktif tersisa. Penghapusan menghasilkan `404` dan membersihkan file. |
 
+## Verifikasi gabungan
+
+Kedua tiket diverifikasi dari branch `jonathan/feat-store-settings` setelah sinkronisasi dengan `origin/dev`. Pengujian memakai JDK 25, PostgreSQL 16 terisolasi pada port `15441`, backend pada port `18091`, dan direktori logo uji terpisah. Migrasi 01–09, fixture dua tenant, serta migrasi 10–11 diterapkan pada database bersih.
+
+Dari `backend/`, `.\mvnw.cmd -B -ntp verify` menghasilkan `BUILD SUCCESS` dengan 34 tes lulus tanpa skip. Dari `bruno/`, kedua perintah berikut lulus untuk seluruh skenario HTTP SS-AT-01 hingga SS-AT-06 dan kontrak aksi logo.
+
+```powershell
+npx --yes --package @usebruno/cli@4.3.0 bru run smoke --env Local --env-var baseUrl=http://localhost:18091 --bail --noproxy
+npx --yes --package @usebruno/cli@4.3.0 bru run store-settings -r --env Local --env-var baseUrl=http://localhost:18091 --bail --noproxy --sandbox developer
+```
+
+Smoke lulus 2/2 dan koleksi Store Settings lulus 9/9. Di browser Orca, admin tenant A masuk dan menyimpan nama, WhatsApp, email, serta PNG lewat form. Daftar dan detail di hostname langsung dan URL berprefiks menampilkan nama, tautan kontak, produk, dan logo masing-masing tenant. Setelah JAR dimulai ulang dengan database dan direktori yang sama, keempat halaman menampilkan kembali logo yang termuat dari URL yang sama. Pemeriksaan health menghasilkan `UP` sebelum dan sesudah restart. [Bukti nama dan kontak](01-nama-dan-kontak-publik.md#bukti-verifikasi)
+
 ## Blocked By
 
 - [Store Settings 01](01-nama-dan-kontak-publik.md) menyediakan form, permission, penyimpanan pengaturan per tenant, dan header storefront.
