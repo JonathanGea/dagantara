@@ -1378,15 +1378,32 @@ Cakupan ini menyelesaikan keputusan status tenant dan akses storefront pada [DEP
   <script id="offline-progress" type="text/markdown" data-doc="planning/progress.md">
 # Progres Modul Dagantara
 
-Centang **Spec selesai** setelah spesifikasi versi yang disepakati disetujui dan ditulis. Centang **Kode selesai** setelah implementasi dalam cakupan itu selesai dan verifikasi penerimaan lulus. Tautkan spec dan bukti penyelesaian dari entri modul. Perbarui penanda **Berikutnya dibahas** saat giliran berpindah.
+Selesaikan spesifikasi alur bisnis dan kode backend terlebih dahulu. Setelah fase backend dalam cakupan yang disepakati selesai, buka [sesi frontend dan desain UI](#frontend-dan-desain-ui) dengan spesifikasi backend sebagai konteks.
 
-Lihat [roadmap](module-roadmap.md#module-matrix) untuk cakupan dan prioritas modul serta [daftar dependensi](development-dependencies.md#open-decisions--blockers) untuk keputusan yang masih terbuka.
+## Antrean backend
 
-Setelah memperbarui checklist, ikuti [langkah regenerasi viewer](../README.md#regenerasi-viewer) agar salinan yang tertanam ikut diperbarui.
+| Status | Pekerjaan | Langkah berikutnya atau prasyarat |
+| --- | --- | --- |
+| **Siap dikerjakan** | [Tenant Management v1](#tenant-management) | Implementasikan penonaktifan dan aktivasi kembali. Verifikasi `TM-AT-01` sampai `TM-AT-04` dengan Bruno dan `TM-AT-05` pada halaman katalog yang sudah ada. |
+| **Siap dikerjakan** | [API Product Discovery v1](#product-catalog--discovery) | Implementasikan pencarian dan filter kategori dengan kontrak publikasi dan stok yang tersedia. Verifikasi `PD-AT-01` sampai `PD-AT-06` dengan Bruno. |
+| **Diskusi selanjutnya** | [Customer Management](#customer-management) | Putuskan checkout tamu atau wajib login ([DEP-04](development-dependencies.md#open-decisions--blockers)). Catat hasilnya untuk Cart dan Checkout. |
+| **Menunggu keputusan identitas** | [Cart Management](#cart-management) | Setelah DEP-04 disepakati, bahas cara mengenali keranjang yang dibuka kembali dan aturan item saat produk, varian, atau stok berubah (DEP-02). |
+| **Perlu keputusan bersama** | [Checkout](#checkout-management), [Order](#order-management), dan [reservasi stok](#inventory-management) | Selaraskan identitas pembeli, Cart, snapshot harga, status awal Order, dan waktu reservasi. Penerimaan Checkout terintegrasi juga memerlukan kontrak pilihan Payment dan Shipping. |
+| **Menunggu kontrak Order** | [Payment](#payment-management) dan [Shipping](#shipping-management) | Setelah identitas dan status Order disepakati (DEP-06), implementasi transfer manual dan pemenuhan bisa maju paralel sesuai kontrak masing-masing. |
+| **Menunggu konteks alamat** | [Address & Location](#address--location-management) | Bahas data minimum alamat dan asal kirim bersama Shipping setelah identitas pembeli serta kepemilikan alamat jelas (DEP-04 dan DEP-05). |
 
-Buka **Prompt spec** pada modul yang menunggu pembahasan untuk menyalin prompt awal. Setiap prompt merujuk ke **Draf spec** pada entri yang sama. Tambahkan atau perjelas detail sesuai hasil pembahasan. Buka **Prompt implementasi** setelah spec dan cakupan pengerjaan disetujui.
+Tenant Management dan API Product Discovery bisa dikerjakan bersamaan dengan diskusi Customer Management. Cart bisa lanjut setelah keputusan identitas tercatat. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
 
-## MVP
+Pada tahap backend, bahas kebutuhan pembeli dan admin yang menentukan data, izin, validasi, status, atau respons sistem. Contohnya, data wajib untuk membuat pesanan dibahas di Checkout. Susunan form dan jumlah layar dibahas di sesi desain UI.
+
+### Cara memperbarui status backend
+
+- Centang **Spec selesai** setelah spesifikasi backend untuk versi yang dilacak disetujui dan ditulis. Centang **Kode selesai** setelah cakupan backend diimplementasikan dan verifikasi yang berlaku lulus. Tautkan spec dan bukti penyelesaian dari entri modul.
+- Jalankan penerimaan API HTTP melalui Bruno dengan `bru run --env Local` dari `bruno/`. Pertahankan pemeriksaan pada halaman yang sudah tersedia jika spec memakainya untuk membuktikan perilaku bisnis, seperti penutupan akses katalog tenant nonaktif.
+- Pindahkan penanda **Berikutnya dibahas** setelah spec modul disetujui dan ditulis. Buka **Prompt spec** untuk melanjutkan draf dan **Prompt implementasi** setelah spec serta cakupan pengerjaan disetujui.
+- Ikuti [langkah regenerasi viewer](../README.md#regenerasi-viewer) setelah memperbarui progres.
+
+## Backend MVP
 
 ### User Management
 
@@ -1449,69 +1466,9 @@ Perbarui Kode selesai di Progres Modul setelah seluruh cakupan terverifikasi.
 ```text
 $write-module-spec
 
-Lanjutkan Store Settings dari docs/specs/store-settings.md. Tinjau usulan tiket 01 dan 02. Bantu saya menentukan apakah pembagian itu sudah bisa disetujui, lalu tunggu jawaban saya sebelum menulis tiket.
-```
-
-</details>
-
-<details>
-<summary>Prompt implementasi Store Settings</summary>
-
-```text
-$implement-from-spec store-settings
-
-Baca docs/specs/store-settings.md dan cek status modul di docs/planning/progress.md. Mulai
-implementasi setelah spec dan cakupan pengerjaan disetujui. Jika pembagian tiket 01 dan 02
-masih menunggu persetujuan, laporkan statusnya dan tunggu persetujuan.
-
-Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
-ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
-dilacak terverifikasi.
-```
-
-</details>
-
-### Storefront Management
-
-- [ ] Spec selesai — [Draf spec](../specs/storefront-management.md)
-- [ ] Kode selesai — [daftar dan detail publik dasar](../tickets/product-management/03-publikasi-dan-storefront.md) sudah tersedia.
-
-<details>
-<summary>Prompt spec Storefront Management</summary>
-
-```text
-$write-module-spec
-
-Gunakan docs/specs/storefront-management.md sebagai kerangka awal.
-Bahas Storefront Management versi dasar dengan melihat daftar dan detail publik yang sudah
-ada. Mulai dari satu keputusan. Navigasi apa yang perlu tersedia bagi pengunjung saat
-membuka toko? Rujuk Store Settings untuk identitas toko dan Product Discovery untuk
-pencarian.
-
-Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
-saya sebelum lanjut dan catat tambahan yang disepakati.
-
-Rangkum cakupan dan kriteria penerimaan untuk saya konfirmasi. Setelah saya setuju,
-lengkapi draf yang sama sesuai template skill, tautkan spec dari docs/README.md, dan
-perbarui Progres Modul.
-```
-
-</details>
-
-<details>
-<summary>Prompt implementasi Storefront Management</summary>
-
-```text
-$implement-from-spec storefront-management
-
-Baca docs/specs/storefront-management.md dan cek status modul di
-docs/planning/progress.md. Mulai implementasi setelah spec dan cakupan pengerjaan
-disetujui. Jika spec masih draf atau tiket masih menunggu persetujuan, laporkan prasyarat
-yang tertahan.
-
-Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
-ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
-dilacak terverifikasi.
+Bahas perubahan berikutnya untuk Store Settings. Baca docs/specs/store-settings.md dan
+dua tiket yang sudah selesai. Mulai dari kebutuhan yang ingin saya bahas serta dampaknya
+pada pengaturan tenant dan identitas toko yang ditampilkan ke pengunjung.
 ```
 
 </details>
@@ -1535,7 +1492,7 @@ Bahas lanjutan Inventory Management untuk reservasi stok. Baca docs/specs/invent
 ### Product Catalog / Discovery
 
 - [x] Spec selesai — [Pencarian dan Filter Produk Publik](../specs/product-discovery.md)
-- [ ] Kode selesai — API dan verifikasi Bruno. [Frontend dan uji browser](../specs/product-discovery.md#perilaku-tahap-frontend) menyusul.
+- [ ] Kode selesai — API dan verifikasi Bruno. Lihat [sesi katalog publik](#urutan-sesi-desain-lintas-modul) untuk pekerjaan frontend.
 
 <details>
 <summary>Prompt implementasi Product Catalog / Discovery</summary>
@@ -1851,7 +1808,7 @@ dilacak terverifikasi.
 
 </details>
 
-## Pascaversi MVP
+## Backend pasca-MVP
 
 ### Pricing & Promotion
 
@@ -1993,8 +1950,8 @@ dilacak terverifikasi.
 $write-module-spec
 
 Gunakan docs/specs/tax-management.md sebagai kerangka awal.
-Bahas Tax Management dari DEP-07. Mulai dari satu keputusan desain. Pada tahap mana
-pembeli perlu melihat rincian pajak pada alur checkout?
+Bahas Tax Management dari DEP-07. Mulai dari satu keputusan bisnis. Pada tahap mana
+backend perlu menyediakan rincian pajak bagi pembeli pada alur checkout?
 
 Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
 saya sebelum lanjut dan catat tambahan yang disepakati.
@@ -2274,6 +2231,98 @@ atau tiket masih menunggu persetujuan, laporkan prasyarat yang tertahan.
 Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
 ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
 dilacak terverifikasi.
+```
+
+</details>
+
+## Frontend dan desain UI
+
+Fondasi Angular dan Tailwind belum dimulai. Mulai fase ini dalam sesi baru setelah backend dalam cakupan yang disepakati selesai. Gunakan `$design-ui` untuk meninjau layout dan alur dengan spec backend, kontrak API, dan hasil penerimaannya sebagai konteks. Jika desain membutuhkan perilaku bisnis atau kontrak tambahan, catat keputusan itu pada spec modul terkait sebelum mengintegrasikannya.
+
+### Tiga aplikasi frontend
+
+| Aplikasi | Pengguna dan titik masuk | Layout |
+| --- | --- | --- |
+| **Platform Admin** | Operator dan admin Dagantara masuk melalui alamat Platform tersendiri. | Navigasi dan area kerja untuk tugas platform. |
+| **Tenant Admin** | Pemilik dan staf masuk melalui `/admin` di alamat toko, misalnya `kopigayo.example/admin` atau `toko.dagantara.example/kopi-gayo/admin`. | Identitas toko, navigasi sesuai permission, dan area kerja pengelolaan toko. |
+| **Storefront** | Pengunjung dan pembeli membuka domain toko atau alamat Dagantara dengan prefiks toko. | Kerangka publik dengan navigasi, area katalog, identitas toko, dan footer. |
+
+Setiap aplikasi punya target build dan rilis sendiri. Pada MVP, satu versi Storefront melayani semua tenant dengan alamat, identitas, dan katalog masing-masing. Platform Admin dan Tenant Admin berbagi pola form, tabel, filter, dialog konfirmasi, dan pesan error. Rujuk [konteks login tenant](../specs/user-management.md#login-dan-konteks-tenant), [pemetaan Storefront](../specs/product-management.md#publikasi-dan-storefront), dan [rute Store Settings](../specs/store-settings.md#akses-dan-kepemilikan).
+
+### Fondasi Angular dan Tailwind
+
+| Urutan | Pekerjaan | Prasyarat dan peluang paralel | Bukti selesai |
+| --- | --- | --- | --- |
+| **0A** | Bootstrap Angular dan Tailwind | Mulai saat fase frontend dibuka. Susun konfigurasi proyek, Node, package manager, lockfile, dan koneksi API lokal. Bisa berjalan bersama 0B. | Dari checkout bersih, tiap aplikasi bisa dijalankan dan di-build secara mandiri. Catat perintah dev dan build serta konfigurasi API lokal. |
+| **0B** | Rute dan akses | Rujuk User Management dan kontrak toko yang sudah ada. Kerjakan pemetaan host dan prefiks URL sambil 0A berjalan. | Platform punya titik masuk sendiri. URL toko memuat Storefront atau Tenant Admin sesuai jalur, termasuk saat tautan langsung dibuka atau halaman dimuat ulang. |
+| **0C** | Pola UI bersama | Gunakan satu contoh form login dan satu tabel akun untuk menyepakati pola admin. Sketsa ketiga layout bisa berjalan bersamaan. | Form, tabel, filter, dan keadaan memuat, kosong, serta gagal bisa direview sebelum layar kedua aplikasi admin dirinci. |
+| **1A** | Layout Platform Admin | Setelah rute utama dan pola admin disepakati, jalan paralel dengan 1B dan 1C. | Navigasi dan area konten Platform bisa diperiksa dengan contoh halaman daftar operator. |
+| **1B** | Layout Tenant Admin | Setelah rute utama dan pola admin disepakati, jalan paralel dengan 1A dan 1C. | Nama toko dan navigasi sesuai permission bisa diperiksa dengan contoh halaman daftar staf. |
+| **1C** | Layout Storefront | Setelah konteks toko dan rute publik jelas, jalan paralel dengan layout admin. | Kerangka katalog, identitas toko, dan footer bisa diperiksa pada layar kecil. Rujuk spec Tenant Management untuk keadaan toko tidak tersedia. |
+
+### Alur pertama yang diverifikasi di browser
+
+| Aplikasi | Alur pertama | Hasil yang diperiksa |
+| --- | --- | --- |
+| **Platform Admin** | Login → buka daftar operator → buka detail operator. | Akun Platform masuk dari alamat yang benar dan dapat melihat daftar serta detail sesuai permission. |
+| **Tenant Admin** | Buka `/admin` di URL toko → masuk dengan password sementara → ganti password → buka daftar staf. | Akses operasional tersedia setelah ganti password. Sesi satu toko ditolak saat dipakai pada alamat toko lain. |
+| **Storefront** | Buka URL toko → buka daftar produk → buka detail → pilih varian. | Pengunjung melihat produk terbit milik toko dan status stok varian yang dipilih. |
+
+Dua alur admin bisa dibangun paralel setelah contoh form login dan tabel direview. Alur Storefront bisa berjalan bersamaan setelah rute publik dan layoutnya siap. Gunakan kontrak [User Management](../specs/user-management.md), [Product Management](../specs/product-management.md#publikasi-dan-storefront), dan [Inventory Management](../specs/inventory-management.md#ketersediaan-untuk-storefront) untuk ketiga alur tersebut.
+
+### Urutan sesi desain lintas modul
+
+Urutan ini adalah urutan review. Mulai pekerjaan yang prasyaratnya sudah siap pada fase frontend. Tunda integrasi layar yang masih menunggu kontrak spesifik, sambil melanjutkan bagian yang bisa direview dengan data contoh.
+
+| Urutan | Sesi dan modul rujukan | Dapat dikerjakan paralel | Prasyarat dan hasil review |
+| --- | --- | --- | --- |
+| **1** | **Login Platform dan Tenant Admin** — [User Management](../specs/user-management.md#login-dan-konteks-tenant) | Rinci kedua alur login setelah pola form dan konteks akses jelas. Review awal Storefront bisa berjalan bersamaan. | Verifikasi titik masuk, ganti password sementara, dan keadaan ketika akses ditolak pada alur pertama tiap aplikasi admin. |
+| **2** | **Kelola akun dan role** — [User Management](../specs/user-management.md#role-permission-dan-akun-yang-dilindungi) | Akun operator, role Platform, dan Help Center bisa maju bersama akun staf dan role Tenant Admin. | Gunakan pola daftar, detail, dan aksi akun yang sama. Periksa bahwa tiap aplikasi memperlihatkan tindakan sesuai izin pengguna. |
+| **3** | **Katalog dan stok di Tenant Admin** — [Product](../specs/product-management.md#opsi-varian-dan-sku) + [Inventory](../specs/inventory-management.md#penerimaan-barang) | Setelah pola pemilihan produk, varian, dan SKU jelas, kategori, media, dan publikasi bisa maju bersama penerimaan, koreksi, dan saldo stok. Sesi ini bisa maju sambil jalur akun dirinci. | Perlu konteks akses Tenant Admin dan kontrak varian yang stabil. Review dari memilih SKU sampai saldo dan riwayatnya terlihat. |
+| **4** | **Identitas toko dan katalog publik** — [Store Settings](../specs/store-settings.md#isian-penyimpanan-dan-tampilan) + [Storefront](#storefront-management) + [Product](../specs/product-management.md#publikasi-dan-storefront) + [Inventory](../specs/inventory-management.md#ketersediaan-untuk-storefront) + [Discovery](../specs/product-discovery.md#perilaku-tahap-frontend) | Form identitas toko dan kerangka katalog publik bisa maju bersamaan setelah data identitas jelas. Detail produk dapat direview memakai kontrak publik yang sudah ada. | Review perubahan identitas dari admin ke toko, pencarian, pemilihan kategori, detail dan stok varian. Integrasi Discovery menunggu API dan kontrak sumber pilihan kategori. Verifikasi `PD-AT-07` sampai `PD-AT-09` dengan browser. |
+| **5** | **Alur beli di Storefront** — [Customer](../specs/customer-management.md) + [Cart](../specs/cart-management.md) + [Checkout](../specs/checkout-management.md) + [Address & Location](../specs/address-location-management.md) + [Order](../specs/order-management.md) | Rinci bagian Cart dan alamat setelah identitas pembeli serta data wajib jelas. Satukan keduanya saat review Checkout. | Tunggu keputusan tamu atau login, identitas keranjang, data wajib, serta pilihan bayar dan kirim. Review dari keranjang sampai konfirmasi pesanan. |
+| **6** | **Pesanan setelah checkout** — [Order](../specs/order-management.md) + [Payment](../specs/payment-management.md) + [Shipping](../specs/shipping-management.md) | Desain bukti transfer dan verifikasi bisa maju bersama desain pemenuhan dan pelacakan setelah kontrak Order dan tindakan tiap aktor jelas. | Review halaman pesanan pembeli bersama tindakan admin. Periksa bahwa hasil verifikasi pembayaran dan pengiriman terlihat sesuai status yang disepakati. |
+
+### Storefront Management
+
+- [ ] Spec selesai — [Draf spec](../specs/storefront-management.md) untuk navigasi dan susunan storefront dasar.
+- [ ] Desain UI selesai — [daftar dan detail publik dasar](../tickets/product-management/03-publikasi-dan-storefront.md) tersedia sebagai acuan.
+- [ ] Implementasi frontend selesai.
+
+<details>
+<summary>Prompt spec Storefront Management</summary>
+
+```text
+$write-module-spec
+
+Gunakan docs/specs/storefront-management.md sebagai kerangka awal.
+Bahas Storefront Management versi dasar dengan melihat daftar dan detail publik yang sudah
+ada. Mulai dari satu keputusan. Navigasi apa yang perlu tersedia bagi pengunjung saat
+membuka toko? Rujuk Store Settings untuk identitas toko dan Product Discovery untuk
+pencarian.
+
+Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
+saya sebelum lanjut dan catat tambahan yang disepakati.
+
+Rangkum cakupan dan kriteria penerimaan untuk saya konfirmasi. Setelah saya setuju,
+lengkapi draf yang sama sesuai template skill, tautkan spec dari docs/README.md, dan
+perbarui Progres Modul.
+```
+
+</details>
+
+<details>
+<summary>Prompt implementasi Storefront Management</summary>
+
+```text
+$implement-from-spec storefront-management
+
+Baca docs/specs/storefront-management.md dan sesi katalog publik di
+docs/planning/progress.md. Mulai setelah spec dan cakupan implementasi disetujui.
+Gunakan layout Storefront dan kontrak backend yang dirujuk oleh sesi tersebut.
+
+Jalankan kriteria penerimaan yang berlaku, termasuk Bruno untuk API HTTP dalam cakupan.
+Perbarui status Implementasi frontend selesai setelah cakupan terverifikasi di browser.
 ```
 
 </details>
