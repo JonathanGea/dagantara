@@ -1,0 +1,57 @@
+meta {
+  name: SS-AT-03 Unggah, pertahankan, ganti, dan hapus logo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ss01-b/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set SS01_FIXTURE_PASSWORD");
+  req.setBody({ username: "ss01-owner", password });
+}
+
+tests {
+  const { fixture } = require("./store-settings/store-settings-fixture.js");
+  const logo = require("./store-settings/logo-fixture.js");
+
+  test("SS-AT-03 Unggah, pertahankan, ganti, dan hapus logo", async function () {
+    const f = await fixture(bru, expect, res);
+    const product = await f.publish(f.a, f.ownerA, "Kopi Logo SS03");
+    try {
+      const saved = await logo.replace(f, f.a, f.ownerA, logo.aFields, logo.png);
+      expect(saved.logoUrl).to.match(/^\/api\/v1\/storefront\/logo\/[0-9a-f-]{36}$/);
+      expect(await f.read(f.a, f.ownerA)).to.deep.equal(saved);
+      await logo.checkImage(f, expect, f.a, saved.logoUrl, "image/png", logo.png);
+      await f.pages(f.a, { ...logo.aFields, logoUrl: saved.logoUrl }, product);
+
+      const edited = { ...logo.aFields, displayName: "Kopi Pagi Baru" };
+      const kept = await f.save(f.a, f.ownerA, edited);
+      expect(kept.logoUrl).to.equal(saved.logoUrl);
+      expect(await f.read(f.a, f.ownerA)).to.deep.equal(kept);
+      await logo.checkImage(f, expect, f.a, kept.logoUrl, "image/png", logo.png);
+      await f.pages(f.a, { ...edited, logoUrl: kept.logoUrl }, product);
+
+      const replaced = await logo.replace(f, f.a, f.ownerA, edited, logo.webp);
+      expect(replaced.logoUrl).to.not.equal(kept.logoUrl);
+      expect(await f.read(f.a, f.ownerA)).to.deep.equal(replaced);
+      await logo.checkImage(f, expect, f.a, replaced.logoUrl, "image/webp", logo.webp);
+      await logo.missing(f, f.a, kept.logoUrl);
+      await f.pages(f.a, { ...edited, logoUrl: replaced.logoUrl }, product);
+
+      const removed = await f.save(f.a, f.ownerA, { ...edited, logoAction: "REMOVE" });
+      expect(removed.logoUrl).to.equal(null);
+      expect(await f.read(f.a, f.ownerA)).to.deep.equal(removed);
+      await logo.missing(f, f.a, replaced.logoUrl);
+      await f.pages(f.a, edited, product);
+    } finally {
+      await f.save(f.a, f.ownerA, { ...f.blank, logoAction: "REMOVE" });
+      await f.publication(f.a, f.ownerA, product, "DRAFT");
+    }
+  });
+}

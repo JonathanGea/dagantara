@@ -1,0 +1,57 @@
+meta {
+  name: SS-AT-06 Logo mengikuti tenant hostname langsung dan prefiks toko
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ss01-b/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set SS01_FIXTURE_PASSWORD");
+  req.setBody({ username: "ss01-owner", password });
+}
+
+tests {
+  const { fixture } = require("./store-settings/store-settings-fixture.js");
+  const logo = require("./store-settings/logo-fixture.js");
+
+  test("SS-AT-06 Logo mengikuti tenant hostname langsung dan prefiks toko", async function () {
+    const f = await fixture(bru, expect, res);
+    let productA;
+    let productB;
+    try {
+      productA = await f.publish(f.a, f.ownerA, "Kopi Logo SS06");
+      productB = await f.publish(f.b, f.ownerB, "Teh Logo SS06");
+      const a = await logo.replace(f, f.a, f.ownerA, logo.aFields, logo.png);
+      const b = await logo.replace(f, f.b, f.ownerB, logo.bFields, logo.webp);
+      expect(a.logoUrl).to.match(/^\/api\/v1\/storefront\/logo\/[0-9a-f-]{36}$/);
+      expect(b.logoUrl).to.match(/^\/ss01-b\/api\/v1\/storefront\/logo\/[0-9a-f-]{36}$/);
+      await logo.checkImage(f, expect, f.a, a.logoUrl, "image/png", logo.png);
+      await logo.checkImage(f, expect, f.b, b.logoUrl, "image/webp", logo.webp);
+
+      const aFields = { ...logo.aFields, displayName: "Kopi Pagi Baru" };
+      const changed = await logo.replace(f, f.a, f.ownerA, aFields, logo.webp);
+      expect(await f.read(f.a, f.ownerA)).to.deep.equal(changed);
+      expect(await f.read(f.b, f.ownerB)).to.deep.equal(b);
+      await logo.missing(f, f.a, a.logoUrl);
+      await logo.checkImage(f, expect, f.a, changed.logoUrl, "image/webp", logo.webp);
+      await logo.checkImage(f, expect, f.b, b.logoUrl, "image/webp", logo.webp);
+      await f.pages(f.a, { ...aFields, logoUrl: changed.logoUrl }, productA);
+      await f.pages(f.b, { ...logo.bFields, logoUrl: b.logoUrl }, productB);
+
+      await logo.missing(f, f.b, "/ss01-b" + changed.logoUrl);
+      await logo.missing(f, f.platform, "/ss02-unmapped" + changed.logoUrl);
+      await logo.missing(f, f.a, logo.logoPath + b.logoUrl.split("/").pop());
+    } finally {
+      await f.save(f.a, f.ownerA, { ...f.blank, logoAction: "REMOVE" });
+      await f.save(f.b, f.ownerB, { ...f.blank, logoAction: "REMOVE" });
+      await f.publication(f.a, f.ownerA, productA, "DRAFT");
+      await f.publication(f.b, f.ownerB, productB, "DRAFT");
+    }
+  });
+}

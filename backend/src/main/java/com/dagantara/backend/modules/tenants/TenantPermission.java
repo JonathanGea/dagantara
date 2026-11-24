@@ -18,7 +18,8 @@ public enum TenantPermission {
     MANAGE_CATALOG("catalog.manage"),
     READ_INVENTORY("inventory.read"),
     RECEIVE_INVENTORY("inventory.receive"),
-    CORRECT_INVENTORY("inventory.correct");
+    CORRECT_INVENTORY("inventory.correct"),
+    MANAGE_STORE_SETTINGS("store_settings.manage");
 
     public static final Set<String> CODES = Arrays.stream(values())
             .map(TenantPermission::code)

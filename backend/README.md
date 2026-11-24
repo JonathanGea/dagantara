@@ -18,7 +18,7 @@ Excluded by decision: automated database migration tooling, Redis/cache, rate li
 ## Development
 
 1. Install JDK 25 and PostgreSQL 15 or later.
-2. Create an empty PostgreSQL database named dagantara, apply the User Management, Product, and Inventory migrations below, and grant your local database user access.
+2. Create an empty PostgreSQL database named dagantara, apply the User Management, Product, Inventory and Store Settings migrations below, and grant your local database user access.
 3. Copy `.env.example` to `.env`. Set `DB_PASSWORD` and `APP_JWT_SECRET_BASE64`. The `dev` profile defaults to PostgreSQL at `127.0.0.1:5433` with user `dagantara_app`. Set `DB_URL` and `DB_USERNAME` if your local instance differs. Export the values before launching Spring Boot.
 4. Generate a signing secret: `openssl rand -base64 48`. Do not reuse one secret across environments.
 5. For first-time Admin Platform setup, set the two bootstrap variables described below.
@@ -77,7 +77,7 @@ Salin [railway.env.example.json](railway.env.example.json) ke **Variables → Ra
 - Isi `APP_JWT_SECRET_BASE64` dengan hasil `openssl rand -base64 48`. Simpan nilainya di Railway.
 - Buat domain publik untuk service backend agar `RAILWAY_PUBLIC_DOMAIN` tersedia. `APP_PLATFORM_HOST` berisi hostname yang dipakai untuk akses platform. Isi `APP_CORS_ALLOWED_ORIGINS` dengan origin frontend jika berbeda dari origin backend. Spring Boot membaca `PORT` yang disediakan Railway. [Referensi variabel Railway](https://docs.railway.com/variables/reference) · [Port dan health check](https://docs.railway.com/deployments/healthchecks)
 - Isi kedua variabel `APP_BOOTSTRAP_*` saat membuat Admin Platform pertama. Gunakan username dan hash BCrypt cost 12. Setelah akun dibuat, hapus kedua variabel dari Railway. Ikuti [panduan setup admin](#setup-admin-platform-pertama-um-07).
-- Terapkan [migrasi PostgreSQL 01–05](#setup-admin-platform-pertama-um-07) yang belum dijalankan sebelum startup. Jika menggunakan `backend/Dockerfile`, sesuaikan tahap build dan runtime ke Java 25. Proyek menargetkan Java 25 dan Dockerfile saat ini masih menggunakan Java 21.
+- Sebelum startup, terapkan migrasi PostgreSQL yang belum dijalankan dari [User Management](#setup-admin-platform-pertama-um-07), [Product dan Inventory Management](#migrasi-product-dan-inventory-management), dan [Store Settings](#migrasi-store-settings). Jika menggunakan `backend/Dockerfile`, sesuaikan tahap build dan runtime ke Java 25. Proyek menargetkan Java 25 dan Dockerfile saat ini masih menggunakan Java 21.
 
 ## Setup Admin Platform pertama (UM-07)
 
@@ -155,6 +155,17 @@ psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/09-inventory-corrections.sql
 ```
 
 Migrasi mendaftarkan izin katalog dan Inventory serta memberikannya kepada role Admin Tenant yang sudah ada. Provisioning tenant baru memakai katalog permission yang sama. Ikuti [Product Management](../docs/specs/product-management.md) dan [Inventory Management](../docs/specs/inventory-management.md) untuk kontrak API dan skenario Bruno.
+
+## Migrasi Store Settings
+
+Setelah migrasi 01–09, jalankan perintah berikut dari folder `backend/`.
+
+```powershell
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/10-store-settings.sql
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/11-store-settings-logo.sql
+```
+
+Migrasi 10 menyiapkan pengaturan publik per tenant dan memberi izin `store_settings.manage` kepada role Admin Tenant yang sudah ada. Migrasi 11 menambahkan referensi logo aktif. Buka `/admin/store-settings` dari URL toko. Untuk penyimpanan logo lokal, setel `APP_STORE_SETTINGS_LOGO_DIRECTORY` ke direktori yang dapat ditulis backend. Default-nya `store-logos/` relatif terhadap direktori kerja backend. Gunakan database dan direktori yang sama saat restart. [Spesifikasi Store Settings](../docs/specs/store-settings.md)
 
 ## Verification
 

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Store Settings</title>
+  <style nonce="{{nonce}}">
+    :root {
+      color-scheme: light;
+      font-family: system-ui, sans-serif;
+      color: #1d2924;
+      background: #f7f7f2;
+      line-height: 1.5;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; }
+    main { width: min(36rem, 100% - 2rem); margin: clamp(2rem, 8vw, 6rem) auto; }
+    h1 { margin: 0 0 1.5rem; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.04em; }
+    form {
+      display: grid;
+      gap: 1rem;
+      padding: clamp(1.25rem, 4vw, 2rem);
+      border: 1px solid #d9e0d9;
+      border-radius: 1rem;
+      background: #fff;
+    }
+    label { display: grid; gap: .375rem; font-weight: 620; }
+    label span { font-size: .875rem; font-weight: 400; color: #4a5b52; }
+    fieldset { display: grid; gap: .75rem; min-width: 0; margin: 0; border: 1px solid #d9e0d9; border-radius: .5rem; }
+    legend { font-weight: 650; }
+    #current-logo { width: 5rem; height: 5rem; object-fit: contain; }
+    #remove-logo-label { display: flex; align-items: center; gap: .5rem; }
+    #remove-logo { width: 1rem; min-height: 1rem; }
+    input, button { min-height: 2.75rem; padding: .5rem .75rem; border-radius: .5rem; font: inherit; }
+    input { width: 100%; color: inherit; border: 1px solid #87998e; }
+    button {
+      justify-self: start;
+      min-width: 6rem;
+      border: 1px solid transparent;
+      background: #245c45;
+      color: white;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .65; cursor: wait; }
+    :focus-visible { outline: 3px solid #236048; outline-offset: 3px; }
+    #notice { margin: 0 0 1rem; }
+    #notice:empty { display: none; }
+    #notice[data-error="true"] { color: #a13524; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Store Settings</h1>
+    <noscript>Aktifkan JavaScript untuk masuk dan mengubah pengaturan toko.</noscript>
+    <p id="notice" role="status"></p>
+    <form id="login" hidden>
+      <label>Username <input name="username" autocomplete="username" required></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+      <button>Masuk</button>
+    </form>
+    <form id="password-change" hidden>
+      <label>Password baru <input name="newPassword" type="password" autocomplete="new-password" required></label>
+      <button>Ganti password</button>
+    </form>
+    <form id="settings" novalidate hidden>
+      <label>Nama tampilan
+        <input name="displayName" aria-describedby="display-name-hint">
+        <span id="display-name-hint"></span>
+      </label>
+      <label>WhatsApp publik
+        <input name="publicWhatsapp" type="tel" inputmode="tel" aria-describedby="whatsapp-hint">
+        <span id="whatsapp-hint">Gunakan format internasional. Contoh +6281234567890.</span>
+      </label>
+      <label>Email publik <input name="publicEmail" type="email" autocomplete="email"></label>
+      <fieldset>
+        <legend>Logo toko</legend>
+        <img id="current-logo" alt="Logo toko saat ini" hidden>
+        <label>File logo
+          <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="logo-hint">
+          <span id="logo-hint">PNG, JPEG, atau WebP. Maksimal 2 MiB.</span>
+        </label>
+        <label id="remove-logo-label" hidden>
+          <input id="remove-logo" name="removeLogo" type="checkbox"> Hapus logo
+        </label>
+      </fieldset>
+      <button>Simpan</button>
+    </form>
+  </main>
+  <script nonce="{{nonce}}" type="module">
+    const api = new URL("../api/v1/", location.href);
+    const login = document.querySelector("#login");
+    const passwordChange = document.querySelector("#password-change");
+    const settings = document.querySelector("#settings");
+    const notice = document.querySelector("#notice");
+    const currentLogo = document.querySelector("#current-logo");
+    const fileInput = settings.elements.logo;
+    const removeLogo = settings.elements.removeLogo;
+    let token;
+
+    currentLogo.addEventListener("load", () => { currentLogo.hidden = false; });
+    currentLogo.addEventListener("error", () => { currentLogo.hidden = true; });
+    fileInput.addEventListener("change", () => { removeLogo.checked = false; });
+    removeLogo.addEventListener("change", () => {
+      if (removeLogo.checked) fileInput.value = "";
+    });
+
+    function showForm(form) {
+      for (const candidate of [login, passwordChange, settings]) candidate.hidden = candidate !== form;
+    }
+
+    function announce(text, error = false) {
+      notice.textContent = text;
+      notice.dataset.error = error;
+    }
+
+    async function request(path, options) {
+      const response = await fetch(new URL(path, api), {...options, cache: "no-store", credentials: "omit"});
+      if (response.status === 204) return;
+      const body = await response.json();
+      if (!response.ok) {
+        const error = new Error(body.detail);
+        error.status = response.status;
+        error.fields = body.violations?.map(violation => violation.field) ?? [];
+        throw error;
+      }
+      return body.data;
+    }
+
+    function credentials() {
+      return {Authorization: "Bearer " + token};
+    }
+
+    function render(data) {
+      settings.elements.displayName.placeholder = data.tenantName;
+      document.querySelector("#display-name-hint").textContent = "Nama saat isian kosong: " + data.tenantName;
+      for (const field of ["displayName", "publicWhatsapp", "publicEmail"]) {
+        settings.elements[field].value = data[field] ?? "";
+      }
+      fileInput.value = "";
+      removeLogo.checked = false;
+      document.querySelector("#remove-logo-label").hidden = !data.logoUrl;
+      if (currentLogo.getAttribute("src") !== data.logoUrl) {
+        currentLogo.hidden = true;
+        if (data.logoUrl) currentLogo.src = data.logoUrl;
+        else currentLogo.removeAttribute("src");
+      }
+      showForm(settings);
+    }
+
+    function onSubmit(form, action) {
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const button = form.querySelector("button");
+        button.disabled = true;
+        announce("");
+        try {
+          await action(Object.fromEntries(new FormData(form)));
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    onSubmit(login, async input => {
+      try {
+        const session = await request("auth/login", {
+          method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(input)
+        });
+        login.reset();
+        token = session.accessToken;
+        if (session.passwordChangeRequired) {
+          showForm(passwordChange);
+          announce("Ganti password sementara untuk melanjutkan.");
+        } else {
+          render(await request("store-settings", {headers: credentials()}));
+        }
+      } catch (error) {
+        token = undefined;
+        announce(error.status === 403 ? "Akun ini tidak memiliki izin mengelola pengaturan toko."
+          : error.status === 401 ? "Username atau password tidak valid."
+          : "Pengaturan toko gagal dimuat. Coba lagi.", true);
+      }
+    });
+
+    onSubmit(passwordChange, async input => {
+      try {
+        await request("auth/password", {
+          method: "POST", headers: {...credentials(), "Content-Type": "application/json"},
+          body: JSON.stringify(input)
+        });
+        token = undefined;
+        passwordChange.reset();
+        showForm(login);
+        announce("Password berhasil diganti. Masuk dengan password baru.");
+      } catch (error) {
+        if (error.status === 401) {
+          token = undefined;
+          passwordChange.reset();
+          showForm(login);
+          announce("Sesi berakhir. Masuk kembali.", true);
+        } else {
+          announce("Password gagal diganti. Gunakan password berbeda dengan panjang maksimal 72 byte.", true);
+        }
+      }
+    });
+
+    onSubmit(settings, async input => {
+      const {logo, removeLogo: remove, ...fields} = input;
+      const hasFile = Boolean(logo.name);
+      const logoAction = remove ? "REMOVE" : hasFile ? "REPLACE" : "KEEP";
+      const data = new FormData();
+      data.append("settings", new Blob([JSON.stringify({...fields, logoAction})],
+        {type: "application/json"}));
+      if (hasFile && logoAction === "REPLACE") data.append("logo", logo);
+      try {
+        render(await request("store-settings", {method: "PUT", headers: credentials(), body: data}));
+        announce("Pengaturan toko tersimpan.");
+      } catch (error) {
+        const fieldMessages = {
+          displayName: "Nama tampilan maksimal 255 karakter.",
+          publicWhatsapp: "Gunakan nomor WhatsApp dalam format internasional.",
+          publicEmail: "Masukkan satu alamat email yang valid."
+        };
+        const fields = error.fields?.map(field => fieldMessages[field]).filter(Boolean) ?? [];
+        if (error.status === 413) fields.push("Ukuran logo maksimal 2 MiB.");
+        if (error.status === 400 && hasFile && fields.length === 0) {
+          fields.push("Pilih gambar PNG, JPEG, atau WebP yang dapat dibuka.");
+        }
+        if (error.status === 401) {
+          token = undefined;
+          showForm(login);
+          announce("Sesi berakhir. Masuk kembali.", true);
+        } else if (error.status === 403) {
+          token = undefined;
+          showForm(login);
+          announce("Akun ini tidak memiliki izin mengelola pengaturan toko.", true);
+        } else {
+          announce(["Pengaturan toko gagal disimpan.", ...fields].join(" "), true);
+        }
+      }
+    });
+
+    showForm(login);
+  </script>
+</body>
+</html>

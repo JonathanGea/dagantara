@@ -1,0 +1,87 @@
+meta {
+  name: SS-AT-05 Tolak sesi tanpa akses, uji provisioning dan aturan delegasi
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ss01-b/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set SS01_FIXTURE_PASSWORD");
+  req.setBody({ username: "ss01-owner", password });
+}
+
+tests {
+  const { fixture } = require("./store-settings/store-settings-fixture.js");
+
+  test("Tolak sesi tanpa akses, uji provisioning dan aturan delegasi", async function () {
+    const f = await fixture(bru, expect, res);
+    const limited = await f.login(f.a, "ss01-limited");
+    const platformAdmin = await f.login(f.platform, "ss01-platform");
+    const ownerFields = { ...f.blank, displayName: "Kopi Pagi" };
+    const otherFields = { ...f.blank, displayName: "Teh Sore" };
+    const validAttempt = { ...f.blank, displayName: "Perubahan tanpa akses" };
+    const rolesPath = "/api/v1/tenant/roles";
+    const roles = (await f.request(f.a, "GET", rolesPath, { token: f.ownerA })).data;
+    const limitedRole = roles.find(role => role.code === "SS01_LIMITED");
+    expect(limitedRole.permissions).to.deep.equal(["roles.permissions.update"]);
+    const changeRolePath = rolesPath + "/" + limitedRole.id + "/permissions";
+    const management = "store_settings.manage";
+
+    try {
+      f.checkSettings(f.a, await f.save(f.a, f.ownerA, ownerFields), ownerFields);
+      f.checkSettings(f.b, await f.save(f.b, f.ownerB, otherFields), otherFields);
+      for (const [store, token, status, error] of [
+        [f.a, undefined, 401, "UNAUTHORIZED"], [f.a, limited, 403, "FORBIDDEN"],
+        [f.platform, platformAdmin, 403, "FORBIDDEN"], [f.b, f.ownerA, 403, "FORBIDDEN"]
+      ]) {
+        await f.read(store, token, { status, error });
+        await f.save(store, token, validAttempt, { status, error });
+      }
+      f.checkSettings(f.a, await f.read(f.a, f.ownerA), ownerFields);
+      f.checkSettings(f.b, await f.read(f.b, f.ownerB), otherFields);
+
+      const delegated = ["roles.permissions.update", management];
+      await f.request(f.a, "PUT", changeRolePath, {
+        token: limited, body: { permissions: delegated }, status: 403, error: "FORBIDDEN"
+      });
+      await f.read(f.a, limited, { status: 403, error: "FORBIDDEN" });
+      const granted = await f.request(f.a, "PUT", changeRolePath, {
+        token: f.ownerA, body: { permissions: delegated }
+      });
+      expect(granted.data.permissions).to.have.members(delegated);
+      f.checkSettings(f.a, await f.read(f.a, limited), ownerFields);
+      f.checkSettings(f.a, await f.save(f.a, limited, ownerFields), ownerFields);
+      await f.read(f.b, limited, { status: 403, error: "FORBIDDEN" });
+
+      const newStore = f.platform + "/ss01-new-" + f.suffix;
+      const tenant = (await f.request(f.platform, "POST", "/api/v1/tenants", {
+        token: platformAdmin, status: 201, body: {
+          storeName: "Toko Baru SS01", phoneNumber: "+6281100000000",
+          ownerUsername: "ss01-new-owner", loginUrl: newStore, loginUrlReady: true
+        }
+      })).data;
+      const temporary = await f.login(newStore, tenant.ownerUsername, tenant.temporaryPassword, true);
+      const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+      await f.request(newStore, "POST", "/api/v1/auth/password",
+        { token: temporary, status: 204, body: { newPassword: password } });
+      const owner = await f.login(newStore, tenant.ownerUsername, password);
+      const newRoles = (await f.request(newStore, "GET", rolesPath, { token: owner })).data;
+      expect(newRoles.find(role => role.code === "TENANT_ADMIN").permissions).to.include(management);
+      expect(await f.read(newStore, owner)).to.deep.equal({
+        tenantName: "Toko Baru SS01", ...f.blank, logoUrl: null
+      });
+    } finally {
+      await f.request(f.a, "PUT", changeRolePath, {
+        token: f.ownerA, body: { permissions: limitedRole.permissions }
+      });
+      await f.save(f.a, f.ownerA, f.blank);
+      await f.save(f.b, f.ownerB, f.blank);
+    }
+  });
+}

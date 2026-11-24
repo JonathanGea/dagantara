@@ -84,9 +84,7 @@ Jalankan skenario HTTP dengan Bruno dari `bruno/` memakai `bru run --env Local`.
 
 ## Implementation Tickets
 
-Menunggu persetujuan pembagian tiket.
-
 | No. | Hasil | Prasyarat |
 | --- | --- | --- |
-| 01 | Admin tenant menyimpan nama tampilan dan kontak publik. Pengunjung melihat nama dan kontak yang tepat pada daftar dan detail. Bruno dan browser membuktikan fallback, permission, dan isolasi tenant. | Dapat dimulai dengan pemetaan URL, login, dan storefront yang tersedia. |
-| 02 | Admin mengunggah, mengganti, dan menghapus logo lokal dalam tindakan Simpan yang sama. Bruno dan browser membuktikan tampilan, persistensi setelah restart, penolakan file, dan isolasi URL logo. | 01 menyediakan form, izin, pengaturan per tenant, dan header storefront. |
+| [01](../tickets/store-settings/01-nama-dan-kontak-publik.md) | Admin tenant menyimpan nama tampilan dan kontak publik. Pengunjung melihat nama dan kontak yang tepat pada daftar dan detail. Bruno dan browser membuktikan fallback, permission, dan isolasi tenant. | Dapat dimulai dengan pemetaan URL, login, dan storefront yang tersedia. |
+| [02](../tickets/store-settings/02-logo-toko.md) | Admin mengunggah, mengganti, dan menghapus logo lokal dalam tindakan Simpan yang sama. Bruno dan browser membuktikan tampilan, persistensi setelah restart, penolakan file, dan isolasi URL logo. | 01 menyediakan form, izin, pengaturan per tenant, dan header storefront. |

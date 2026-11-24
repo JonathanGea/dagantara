@@ -1,0 +1,47 @@
+meta {
+  name: SS-AT-04 Tolak file dan kontak tidak valid tanpa mengubah logo atau teks
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ss01-b/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const password = bru.getProcessEnv("SS01_FIXTURE_PASSWORD");
+  if (!password) throw new Error("Set SS01_FIXTURE_PASSWORD");
+  req.setBody({ username: "ss01-owner", password });
+}
+
+tests {
+  const { fixture } = require("./store-settings/store-settings-fixture.js");
+  const logo = require("./store-settings/logo-fixture.js");
+
+  test("SS-AT-04 Tolak file dan kontak tidak valid tanpa mengubah logo atau teks", async function () {
+    const f = await fixture(bru, expect, res);
+    const product = await f.publish(f.a, f.ownerA, "Kopi Logo SS04");
+    try {
+      const before = await logo.replace(f, f.a, f.ownerA, logo.aFields, logo.png);
+      const edit = { ...logo.aFields, displayName: "Gagal disimpan", logoAction: "REPLACE" };
+      for (const [image, fields, status, error] of [
+        [logo.png.subarray(0, 33), edit, 400, "INVALID_LOGO"],
+        [logo.oversizePng(), edit, 413, "PAYLOAD_TOO_LARGE"],
+        [logo.webp, { ...edit, publicEmail: "invalid-email" }, 400, "VALIDATION_ERROR"]
+      ]) {
+        const problem = await f.save(f.a, f.ownerA, fields, { logos: [image], status, error });
+        if (error === "VALIDATION_ERROR") {
+          expect(problem.violations.map(item => item.field)).to.include("publicEmail");
+        }
+        expect(await f.read(f.a, f.ownerA)).to.deep.equal(before);
+        await logo.checkImage(f, expect, f.a, before.logoUrl, "image/png", logo.png);
+        await f.pages(f.a, { ...logo.aFields, logoUrl: before.logoUrl }, product);
+      }
+    } finally {
+      await f.save(f.a, f.ownerA, { ...f.blank, logoAction: "REMOVE" });
+      await f.publication(f.a, f.ownerA, product, "DRAFT");
+    }
+  });
+}

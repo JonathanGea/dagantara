@@ -7,11 +7,13 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import static com.dagantara.backend.common.api.ApiRoutes.STORE_SETTINGS_PAGE;
+
 @Component
 public class TenantLoginAddress {
     public static final String SHOP_PATH_PATTERN = "/[a-z0-9][a-z0-9-]{0,62}";
     private static final Pattern SHOP_REQUEST = Pattern.compile(
-            "^(/[^/]+)(/api/v1/.*|/products(?:/[^/]+)?)$");
+            "^(/[^/]+)(/api/v1/.*|/products(?:/[^/]+)?|" + STORE_SETTINGS_PAGE + ")$");
 
     private final String platformHost;
 
