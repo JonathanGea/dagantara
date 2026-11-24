@@ -11,12 +11,15 @@ import com.dagantara.backend.modules.catalog.dto.CatalogRequests.MediaOptionValu
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.MediaRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.OptionValueRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogRequests.ProductDetailsRequest;
+import com.dagantara.backend.modules.catalog.dto.CatalogRequests.PublicationRequest;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Category;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Media;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.OptionValue;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductCategories;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductDetail;
+import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductStatus;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.ProductSummary;
+import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Publication;
 import com.dagantara.backend.modules.catalog.dto.CatalogResponses.Variant;
 import com.dagantara.backend.modules.catalog.service.CatalogMediaService;
 import com.dagantara.backend.modules.catalog.service.CatalogService;
@@ -84,6 +87,14 @@ public class CatalogController {
             @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, @PathVariable UUID productId,
             @Valid @RequestBody ProductDetailsRequest request) {
         return ApiResponse.success("Product details updated", catalog.updateDetails(actor, productId, request));
+    }
+
+    @PutMapping("/products/{productId}/publication")
+    public ApiResponse<Publication> updatePublication(
+            @RequestAttribute(ACCOUNT_ATTRIBUTE) AccountSession actor, @PathVariable UUID productId,
+            @Valid @RequestBody PublicationRequest request) {
+        return ApiResponse.success("Product publication updated",
+                catalog.updatePublication(actor, productId, ProductStatus.valueOf(request.status())));
     }
 
     @PutMapping("/products/{productId}/categories")

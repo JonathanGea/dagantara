@@ -14,6 +14,9 @@ public final class CatalogResponses {
     public record ProductCategories(List<UUID> categoryIds, UUID primaryCategoryId) {
     }
 
+    public record Publication(ProductStatus status) {
+    }
+
     public record ProductSummary(UUID id, String name, Long priceIdr, ProductStatus status, UUID primaryCategoryId) {
     }
 

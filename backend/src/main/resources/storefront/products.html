@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Produk</title>
+  <style nonce="{{nonce}}">
+    :root {
+      color-scheme: light;
+      font-family: system-ui, sans-serif;
+      color: #1d2924;
+      background: #f7f7f2;
+      line-height: 1.5;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main {
+      width: min(72rem, 100% - 3rem);
+      margin: 0 auto;
+      padding: clamp(2rem, 6vw, 5rem) 0;
+    }
+    h1, h2, p { margin: 0; overflow-wrap: anywhere; }
+    h1 { font-size: clamp(2rem, 5vw, 3.75rem); line-height: 1.05; letter-spacing: -.04em; }
+    a { color: #236048; text-underline-offset: .2em; }
+    a:hover { color: #163f2e; }
+    :focus-visible { outline: 3px solid #236048; outline-offset: 4px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .card {
+      display: block;
+      border: 1px solid #d9e0d9;
+      border-radius: 1rem;
+      background: #fff;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover h2 { text-decoration: underline; text-underline-offset: .2em; }
+    .card-body { display: grid; gap: .25rem; padding: 1rem 1.25rem 1.25rem; }
+    .card h2 { font-size: 1.125rem; }
+    img { display: block; width: 100%; object-fit: contain; }
+    img, .missing-photo { background: #e8ede7; }
+    .card img, .missing-photo { aspect-ratio: 4 / 3; object-fit: cover; }
+    .missing-photo { display: grid; place-items: center; color: #4a5b52; }
+    .price { color: #245c45; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .empty { margin-top: 2rem; }
+    .pagination { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2rem; }
+    .detail {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: clamp(1.75rem, 5vw, 4rem);
+      align-items: start;
+      margin-top: 1.5rem;
+    }
+    .gallery { display: grid; gap: 1rem; }
+    .gallery img { border-radius: .75rem; max-height: 36rem; }
+    .detail-info { display: grid; gap: 1rem; }
+    .detail-info .price { font-size: 1.375rem; }
+    .categories { color: #4a5b52; }
+    .description { white-space: pre-wrap; }
+    .options { display: grid; gap: .75rem; }
+    label { display: grid; gap: .25rem; font-weight: 600; overflow-wrap: anywhere; }
+    select {
+      width: 100%;
+      min-height: 2.75rem;
+      border: 1px solid #87998e;
+      border-radius: .5rem;
+      padding: .5rem .75rem;
+      color: inherit;
+      background: #fff;
+      font: inherit;
+    }
+    .stock { border-top: 1px solid #d9e0d9; padding-top: .875rem; font-weight: 650; }
+    .stock[data-state="IN_STOCK"] { color: #236048; }
+    .stock[data-state="OUT_OF_STOCK"] { color: #a13524; }
+    @media (max-width: 46rem) {
+      main { width: calc(100% - 2rem); }
+      .detail { grid-template-columns: minmax(0, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <main id="storefront">
+    <noscript>Aktifkan JavaScript untuk melihat produk dan memilih opsi.</noscript>
+  </main>
+  <script type="application/json" id="product-data">{{data}}</script>
+  <script nonce="{{nonce}}" type="module">
+    const main = document.querySelector("#storefront");
+    const {data, meta} = JSON.parse(document.querySelector("#product-data").textContent);
+    const rupiah = new Intl.NumberFormat("id-ID", {
+      style: "currency", currency: "IDR", maximumFractionDigits: 0, minimumFractionDigits: 0
+    });
+
+    function element(tag, text, className) {
+      const node = document.createElement(tag);
+      if (text) node.textContent = text;
+      if (className) node.className = className;
+      return node;
+    }
+
+    function link(text, href) {
+      const anchor = element("a", text);
+      anchor.href = href;
+      return anchor;
+    }
+
+    function photo(url, alt) {
+      const img = element("img");
+      img.src = url;
+      img.alt = alt;
+      return img;
+    }
+
+    function showList(products, pagination) {
+      main.append(element("h1", "Produk"));
+      if (products.length === 0) main.append(element("p", "Belum ada produk di halaman ini.", "empty"));
+      const cards = element("div", null, "cards");
+      for (const product of products) {
+        const card = link(null, "products/" + product.id);
+        card.className = "card";
+        const body = element("div", null, "card-body");
+        body.append(element("h2", product.name), element("p", rupiah.format(BigInt(product.priceIdr)), "price"));
+        card.append(product.imageUrl ? photo(product.imageUrl, "") :
+          element("div", "Foto belum tersedia", "missing-photo"), body);
+        cards.append(card);
+      }
+      main.append(cards);
+
+      const nav = element("nav", null, "pagination");
+      nav.setAttribute("aria-label", "Halaman daftar produk");
+      const page = Number(pagination.page);
+      if (!pagination.first) nav.append(link("Sebelumnya", "?page=" + (page - 1) + "&size=" + pagination.size));
+      if (!pagination.last) nav.append(link("Berikutnya", "?page=" + (page + 1) + "&size=" + pagination.size));
+      if (nav.childElementCount) main.append(nav);
+    }
+
+    function showDetail(product) {
+      document.title = product.name;
+      main.append(link("Semua produk", "../products"));
+      const detail = element("div", null, "detail");
+      const info = element("div", null, "detail-info");
+      const gallery = element("section", null, "gallery");
+      gallery.setAttribute("aria-label", "Galeri produk");
+      info.append(element("h1", product.name), element("p", rupiah.format(BigInt(product.priceIdr)), "price"));
+      info.append(element("p", product.categories.map(category => category.name).join(" · "), "categories"));
+      if (product.description) info.append(element("p", product.description, "description"));
+
+      const options = element("div", null, "options");
+      const controls = product.options.map(option => {
+        const label = element("label", option.name);
+        const select = element("select");
+        select.append(new Option("Pilih " + option.name, ""));
+        for (const value of option.values) select.append(new Option(value.label, value.id));
+        label.append(select);
+        options.append(label);
+        return select;
+      });
+      if (controls.length) info.append(options);
+
+      const stock = element("p", null, "stock");
+      stock.setAttribute("role", "status");
+      info.append(stock);
+      detail.append(gallery, info);
+      main.append(detail);
+
+      function renderSelection() {
+        const selected = controls.map(select => select.value);
+        const galleryValue = selected.find(value => product.media.some(media => media.optionValueIds.includes(value)));
+        const visible = galleryValue
+          ? product.media.filter(media => media.optionValueIds.includes(galleryValue))
+          : product.media;
+        gallery.replaceChildren(...visible.map((media, index) => photo(media.url, product.name + " – foto " + (index + 1))));
+        if (visible.length === 0) gallery.append(element("p", "Foto belum tersedia", "missing-photo"));
+
+        const incomplete = selected.includes("");
+        const combination = incomplete ? undefined : product.variants.find(variant =>
+          variant.optionValueIds.length === selected.length && variant.optionValueIds.every((id, i) => id === selected[i])
+        );
+        const status = combination?.availability;
+        stock.dataset.state = status ?? "";
+        if (incomplete) stock.textContent = "Lengkapi pilihan produk";
+        else if (!combination) stock.textContent = "Kombinasi tidak disediakan";
+        else stock.textContent = status === "IN_STOCK" ? "Tersedia" : "Habis";
+      }
+
+      options.addEventListener("change", renderSelection);
+      renderSelection();
+    }
+
+    if (meta) showList(data, meta);
+    else showDetail(data);
+  </script>
+</body>
+</html>

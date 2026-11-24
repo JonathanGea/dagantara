@@ -35,6 +35,12 @@ public class CatalogVariantRepository {
                 .query(CatalogVariantRepository::readVariant).list();
     }
 
+    public boolean existsForProduct(UUID tenantId, UUID productId) {
+        return jdbc.sql("""
+                SELECT EXISTS (SELECT 1 FROM product_variants WHERE tenant_id = :tenantId AND product_id = :productId)
+                """).param("tenantId", tenantId).param("productId", productId).query(Boolean.class).single();
+    }
+
     public List<VariantRow> findByIds(UUID tenantId, Collection<UUID> variantIds) {
         if (variantIds.isEmpty()) {
             return List.of();

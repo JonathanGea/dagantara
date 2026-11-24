@@ -76,6 +76,12 @@ public class CatalogRepository {
                 .param("description", description).param("price", price).param("code", code).update();
     }
 
+    public void updatePublication(UUID tenantId, UUID productId, ProductStatus status) {
+        jdbc.sql("""
+                UPDATE products SET status = :status WHERE tenant_id = :tenantId AND id = :productId
+                """).param("tenantId", tenantId).param("productId", productId).param("status", status.name()).update();
+    }
+
     public Page<ProductSummary> listProducts(UUID tenantId, Pageable page) {
         List<ProductSummary> items = jdbc.sql("""
                 SELECT id, name, price_idr, status, primary_category_id FROM products WHERE tenant_id = :tenantId
@@ -91,6 +97,19 @@ public class CatalogRepository {
 
     public Optional<Product> findProduct(UUID tenantId, UUID productId) {
         return productQuery(PRODUCT_SELECT, tenantId, productId);
+    }
+
+    public Optional<Product> findPublishedProduct(UUID tenantId, UUID productId) {
+        return productQuery(PRODUCT_SELECT + " AND status = 'PUBLISHED'", tenantId, productId);
+    }
+
+    public List<Category> listProductCategories(UUID tenantId, UUID productId) {
+        return jdbc.sql("""
+                SELECT c.id, c.name FROM product_categories pc
+                JOIN categories c ON c.tenant_id = pc.tenant_id AND c.id = pc.category_id
+                WHERE pc.tenant_id = :tenantId AND pc.product_id = :productId ORDER BY c.name, c.id
+                """).param("tenantId", tenantId).param("productId", productId)
+                .query((row, index) -> new Category(row.getObject("id", UUID.class), row.getString("name"))).list();
     }
 
     @Transactional(propagation = Propagation.MANDATORY)

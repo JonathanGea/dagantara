@@ -5,6 +5,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -60,6 +61,9 @@ public final class CatalogRequests {
     }
 
     public record MediaOptionValuesRequest(@NotNull Set<@NotNull UUID> optionValueIds) {
+    }
+
+    public record PublicationRequest(@NotNull @Pattern(regexp = "DRAFT|PUBLISHED") String status) {
     }
 
     public enum SkuMode {

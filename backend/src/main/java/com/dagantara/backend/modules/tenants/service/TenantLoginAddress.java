@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class TenantLoginAddress {
     public static final String SHOP_PATH_PATTERN = "/[a-z0-9][a-z0-9-]{0,62}";
     private static final Pattern SHOP_REQUEST = Pattern.compile(
-            "^(/[^/]+)(/api/v1/.*)$");
+            "^(/[^/]+)(/api/v1/.*|/products(?:/[^/]+)?)$");
 
     private final String platformHost;
 
