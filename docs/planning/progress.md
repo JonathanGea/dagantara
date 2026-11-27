@@ -903,6 +903,29 @@ Setiap aplikasi punya target build dan rilis sendiri. Pada MVP, satu versi Store
 | **1B** | Layout Tenant Admin | Setelah rute utama dan pola admin disepakati, jalan paralel dengan 1A dan 1C. | Nama toko dan navigasi sesuai permission bisa diperiksa dengan contoh halaman daftar staf. |
 | **1C** | Layout Storefront | Setelah konteks toko dan rute publik jelas, jalan paralel dengan layout admin. | Kerangka katalog, identitas toko, dan footer bisa diperiksa pada layar kecil. Rujuk spec Tenant Management untuk keadaan toko tidak tersedia. |
 
+<details>
+<summary>Prompt fondasi Angular dan Tailwind (0A)</summary>
+
+```text
+Kerjakan 0A (Bootstrap Angular dan Tailwind) di bagian Frontend dan desain UI pada
+docs/planning/progress.md. Baca AGENTS.md dan docs/README.md, lalu periksa struktur repo
+dan konfigurasi frontend yang sudah ada.
+
+Siapkan fondasi untuk Platform Admin, Tenant Admin, dan Storefront. Pastikan setiap
+aplikasi memakai Tailwind dan punya target dev serta build sendiri. Ikuti konvensi repo
+untuk versi Node, package manager, dan lockfile. Jika belum ada, pilih versi yang saling
+kompatibel dan catat pilihannya. Sediakan konfigurasi koneksi ke API lokal dengan merujuk
+backend/README.md.
+
+Verifikasi instalasi dari lockfile di direktori bersih. Jalankan dev server dan build
+setiap aplikasi secara mandiri. Periksa bahwa styling Tailwind tampil, lalu uji koneksi
+API lokal jika backend tersedia. Catat versi Node, package manager, cara instalasi,
+perintah dev dan build, serta konfigurasi API lokal. Laporkan hasil per aplikasi dan
+pemeriksaan yang masih tertahan. Gunakan 0B dan seterusnya sebagai rujukan pekerjaan lanjutan.
+```
+
+</details>
+
 ### Alur pertama yang diverifikasi di browser
 
 | Aplikasi | Alur pertama | Hasil yang diperiksa |
