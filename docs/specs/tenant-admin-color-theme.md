@@ -39,5 +39,5 @@ Jalankan `npm run dev:tenant-admin` dari `frontend/` untuk verifikasi di browser
 
 ## Further Notes
 
-- Perubahan ini mendukung pekerjaan pola UI pada fondasi frontend. Nama token bisa dipakai kembali saat cakupan tema diperluas. [Fondasi Angular dan Tailwind](../planning/progress.md#fondasi-angular-dan-tailwind)
+- Perubahan ini mendukung pekerjaan pola UI pada fondasi frontend. Perluasan untuk pemilih tema dan mode gelap ditetapkan dalam spesifikasi lanjutan. [Fondasi Angular dan Tailwind](../planning/progress.md#fondasi-angular-dan-tailwind) · [Tema Light, Dark, dan Ikuti Sistem](tenant-admin-light-dark-theme.md)
 - Spesifikasi Store Settings tetap menjadi rujukan pengaturan identitas publik toko. [Store Settings](store-settings.md)

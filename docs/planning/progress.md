@@ -925,6 +925,11 @@ pemeriksaan yang masih tertahan. Gunakan 0B dan seterusnya sebagai rujukan peker
 
 </details>
 
+### Tema Light, Dark, dan Ikuti Sistem di Tenant Admin
+
+- [x] Spec selesai — [Tema Light, Dark, dan Ikuti Sistem](../specs/tenant-admin-light-dark-theme.md).
+- [x] Implementasi frontend selesai — `TA-MODE-AT-01` sampai `TA-MODE-AT-04` lulus di Chromium dengan viewport desktop dan seluler. Pemeriksaan mencakup emulasi tema perangkat, pemuatan ulang, pembukaan ulang profil browser, serta navigasi Produk dan fokus keyboard pada kedua palet. `npm run build:tenant-admin` lulus. [Skenario penerimaan](../specs/tenant-admin-light-dark-theme.md#testing-decisions)
+
 ### Alur pertama yang diverifikasi di browser
 
 | Aplikasi | Alur pertama | Hasil yang diperiksa |

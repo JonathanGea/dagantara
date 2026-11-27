@@ -1,32 +1,37 @@
 :root {
-  --color-page: #fbfcfd;
-  --color-surface: #fff;
-  --color-text: #22262b;
-  --color-text-muted: #61666f;
-  --color-border: #e3e5e8;
-  --color-primary: #34598a;
-  --color-focus: #34598a;
+  color-scheme: light dark;
 
-  --color-sidebar: #f7f8f9;
-  --color-nav-text: #4f545d;
-  --color-nav-hover: #eef0f3;
-  --color-nav-active: #e9edf3;
-  --color-icon-button: #4c4c4c;
-  --color-icon-button-hover: #f1f1f1;
-  --color-action-hover: #f2f5fa;
+  --color-page: light-dark(#fbfcfd, #171b22);
+  --color-surface: light-dark(#fff, #202631);
+  --color-text: light-dark(#22262b, #edf1f6);
+  --color-text-muted: light-dark(#61666f, #b2bdcb);
+  --color-border: light-dark(#e3e5e8, #3b4656);
+  --color-primary: light-dark(#34598a, #9ec5fd);
+  --color-focus: light-dark(#34598a, #9ec5fd);
 
-  --color-store-mark: #eaf0f7;
-  --color-store-mark-border: #dbe2ec;
-  --color-on-store-mark: #354f71;
-  --color-avatar: #e8edf4;
-  --color-popover-shadow: #00000012;
-  --color-tooltip: #333;
-  --color-on-tooltip: #fff;
-  --color-drawer-backdrop: #0005;
+  --color-sidebar: light-dark(#f7f8f9, #191e26);
+  --color-nav-text: light-dark(#4f545d, #c2ccda);
+  --color-nav-hover: light-dark(#eef0f3, #283241);
+  --color-nav-active: light-dark(#e9edf3, #2d3a4e);
+  --color-icon-button: light-dark(#4c4c4c, #c2ccda);
+  --color-icon-button-hover: light-dark(#f1f1f1, #303a4a);
+  --color-action-hover: light-dark(#f2f5fa, #2b3647);
 
-  --color-table-heading: #fafafa;
-  --color-status-draft: #f1f1f1;
-  --color-on-status-draft: #555;
-  --color-status-published: #eaf3ee;
-  --color-on-status-published: #32624c;
+  --color-store-mark: light-dark(#eaf0f7, #27364c);
+  --color-store-mark-border: light-dark(#dbe2ec, #3b4b64);
+  --color-on-store-mark: light-dark(#354f71, #c1d8fa);
+  --color-avatar: light-dark(#e8edf4, #2b384b);
+  --color-popover-shadow: light-dark(#00000012, #0006);
+  --color-tooltip: light-dark(#333, #333e50);
+  --color-on-tooltip: light-dark(#fff, #edf1f6);
+  --color-drawer-backdrop: light-dark(#0005, #0009);
+
+  --color-table-heading: light-dark(#fafafa, #252e3b);
+  --color-status-draft: light-dark(#f1f1f1, #343d4b);
+  --color-on-status-draft: light-dark(#555, #dde4ee);
+  --color-status-published: light-dark(#eaf3ee, #213c33);
+  --color-on-status-published: light-dark(#32624c, #a7dec1);
 }
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
