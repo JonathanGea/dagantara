@@ -40,7 +40,9 @@
       }
       <button type="button" class="theme-toggle" role="switch" aria-label="Tema gelap" title="Tema gelap"
         [attr.aria-checked]="darkTheme()" (click)="toggleTheme()">
-        <span class="theme-thumb"><app-icon [name]="darkTheme() ? 'moon' : 'sun'" /></span>
+        <app-icon class="theme-sun" name="sun" />
+        <span class="theme-track"><span class="theme-thumb"></span></span>
+        <app-icon class="theme-moon" name="moon" />
       </button>
     </header>
 
