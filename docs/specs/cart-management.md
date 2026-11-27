@@ -18,7 +18,9 @@ Isi daftar cerita pengguna setelah pelaku, kebutuhan, dan batas versi pertama di
 
 **Keputusan pembuka.** Bagaimana toko mengenali keranjang pembeli ketika ia kembali membuka URL toko?
 
-**Rujukan pembahasan.** [DEP-02 dan DEP-04](../planning/development-dependencies.md#open-decisions--blockers)
+**Aturan identitas.** Cart melayani pengunjung tanpa login dan setiap keranjang tamu dimiliki satu tenant. Ikuti [CM-01 dan CM-02](customer-management.md#implementation-decisions).
+
+**Rujukan pembahasan.** [DEP-02](../planning/development-dependencies.md#open-decisions--blockers)
 
 ## Testing Decisions
 

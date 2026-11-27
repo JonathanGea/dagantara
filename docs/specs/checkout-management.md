@@ -18,7 +18,9 @@ Isi daftar cerita pengguna setelah pelaku, kebutuhan, dan batas versi pertama di
 
 **Keputusan pembuka.** Data apa yang wajib diisi pembeli sebelum bisa membuat pesanan?
 
-**Rujukan pembahasan.** [DEP-04, DEP-05, dan DEP-07](../planning/development-dependencies.md#open-decisions--blockers)
+**Aturan identitas.** Checkout menerima keranjang tamu dari toko yang sama dan meneruskan identitas serta kontak tamu untuk disimpan pada pesanan. Ikuti [CM-01 sampai CM-03](customer-management.md#implementation-decisions).
+
+**Rujukan pembahasan.** [DEP-05 dan DEP-07](../planning/development-dependencies.md#open-decisions--blockers)
 
 ## Testing Decisions
 

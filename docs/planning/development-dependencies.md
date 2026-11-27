@@ -25,9 +25,9 @@ This plan records interface contracts, integration gates, and workstream ownersh
 | Storefront Management (basic) | Tenant resolution, public settings contract | Advanced customization | Static UI and mock data can begin immediately |
 | Inventory Management | Tenant, product/variant IDs | Warehouse/multi-location | Variant identity for stock in v1. Reservation integration follows DEP-03. |
 | Product Catalog / Discovery | Tenant resolution, published product/variant read contract | Live inventory badge, advanced filtering | Mock public catalog contract; final gate requires real product data |
-| Customer Management | Tenant context, customer identity/guest policy | Loyalty | Customer identity and guest-order decision |
-| Address & Location | Tenant/customer ownership contract | External geocoding | Shipping address and origin schema agreed |
-| Cart Management | Tenant, product/variant selection and pricing snapshot contract | Customer login | Cart item contract; guest cart decision |
+| Customer Management | Tenant context and guest checkout policy | Buyer accounts and loyalty | [DEP-04](#dep-04-guest-checkout-and-customer-identity) defines guest identity per order |
+| Address & Location | Tenant context and order address contract | External geocoding | Shipping address and origin schema agreed |
+| Cart Management | Tenant, product/variant selection, guest cart and pricing snapshot contracts | — | Cart item and guest cart resumption contracts agreed |
 | Checkout Management | Cart contract, order creation contract, payment/shipping selection contracts | Promotion engine | Shared checkout request/response and validation agreed |
 | Order Management | Tenant, customer/guest identity, item/price snapshot, inventory reservation contract | Notification | State machine and idempotent order creation agreed |
 | Payment Management | Order identity/amount/state contract | Gateway integrations | Manual transfer proof and verification contract agreed |
@@ -68,7 +68,7 @@ Arrows show **integration prerequisites**, not a ban on parallel coding. A node 
 | 1 | A — Platform & identity | Tenant Management + User integration | Wave 0 | Tenant isolation and domain routing verified |
 | 1 | B — Catalog data | Product Management + variant contract | Wave 0 | Published product/variant contract verified |
 | 1 | C — Store experience | Store Settings + Storefront shell | Wave 0 | Correct tenant branding and route resolution |
-| 1 | D — Customer | Customer identity, address model | Wave 0 | Customer/guest flow contract verified |
+| 1 | D — Customer | Guest checkout policy and buyer identity per order | Wave 0 | Verify agreed [DEP-04](#dep-04-guest-checkout-and-customer-identity) policy through Cart, Checkout and Order integration |
 | 2 | E — Stock | Inventory, stock reservations | Variant contract | Reserve/release/commit semantics verified |
 | 2 | F — Discovery | Public catalog, search/detail | Public product contract | Only correct tenant's published products visible |
 | 2 | G — Cart | Cart and price snapshots | Variant + customer/guest contract | Valid cart items and tenant isolation |
@@ -86,7 +86,8 @@ Arrows show **integration prerequisites**, not a ban on parallel coding. A node 
 | Tenant ID, resolution, security context | Platform/Identity | All tenant modules | Parallel feature integration |
 | Product/variant ID and publication | Catalog data | Inventory, Discovery, Cart, Order | Wave 2 |
 | Stock reservation API and expiry | Inventory | Checkout, Order | Transaction integration |
-| Customer/guest ID and address snapshot | Customer | Cart, Checkout, Order, Shipping | Wave 2 |
+| Guest checkout and buyer identity policy | Customer | Cart, Checkout, Order | Wave 2 |
+| Order address snapshot | To be agreed in Checkout and Address & Location | Order, Shipping | Checkout/Order integration |
 | Money, currency, pricing snapshot | Transaction core + Product | Cart, Checkout, Order, Payment | Wave 2 |
 | Order ID, state transitions, idempotency | Order | Checkout, Payment, Shipping | Wave 3 |
 | Manual payment proof and verification | Payment | Order, Tenant Admin | Wave 3 |
@@ -111,7 +112,6 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 | --- | --- | --- |
 | DEP-02 | Cart rules for adding or updating items when a product is withdrawn, a variant is unavailable, or stock changes. | Cart integration |
 | DEP-03 | Reservation duration, expiration and payment verification timing | Inventory/Order/Payment integration |
-| DEP-04 | Guest checkout and customer identity policy | Customer/Cart/Checkout |
 | DEP-05 | Shipping fee calculation, origin and delivery methods for MVP | Checkout/Shipping |
 | DEP-06 | Order/payment/shipping state machine and cancellation rules | Order/Payment/Shipping |
 | DEP-07 | Money, price snapshots, discount/tax treatment | Cart/Checkout/Order |
@@ -125,3 +125,7 @@ Resolve blockers in their module specifications and link stable requirement IDs 
 ### DEP-01 Tenant lifecycle
 
 [Tenant Management v1](../specs/tenant-management.md#implementation-decisions) defines how operators change tenant status, how inactive tenants retain their store address, and how storefront and internal access are suspended and restored. [Changing the store URL](../specs/tenant-management.md#further-notes) is a deferred enhancement.
+
+### DEP-04 Guest checkout and customer identity
+
+[Customer Management v1](../specs/customer-management.md#implementation-decisions) requires guest checkout for all purchases, restricts cart use to the same tenant, and stores guest identity and contact details per order. Cart, Checkout and Order apply and verify this policy as their contracts become available.

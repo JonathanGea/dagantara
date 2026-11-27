@@ -18,6 +18,8 @@ Isi daftar cerita pengguna setelah pelaku, kebutuhan, dan batas versi pertama di
 
 **Keputusan pembuka.** Apa status awal pesanan ketika pembeli berhasil checkout?
 
+**Aturan identitas.** Setiap pesanan menyimpan identitas dan kontak yang diberikan ketika tamu checkout. Ikuti [CM-03](customer-management.md#implementation-decisions).
+
 **Rujukan pembahasan.** [DEP-06](../planning/development-dependencies.md#open-decisions--blockers)
 
 ## Testing Decisions
