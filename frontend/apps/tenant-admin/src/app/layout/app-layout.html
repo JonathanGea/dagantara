@@ -38,25 +38,10 @@
           </a>
         }
       }
-      <div class="theme-control" data-layout-popover>
-        <button type="button" class="theme-toggle" aria-label="Tema" title="Tema"
-          aria-controls="header-theme" [attr.aria-expanded]="popover() === 'theme'"
-          (click)="togglePopover('theme', $event)">
-          <app-icon name="theme" /><span>Tema</span>
-        </button>
-        <div class="theme-panel" id="header-theme" [hidden]="popover() !== 'theme'">
-          <fieldset class="theme-options">
-            <legend>Tema</legend>
-            @for (option of themeOptions; track option.value) {
-              <label class="theme-option">
-                <input type="radio" name="tenant-admin-theme" [checked]="theme() === option.value"
-                  (change)="setTheme(option.value)">
-                {{ option.label }}
-              </label>
-            }
-          </fieldset>
-        </div>
-      </div>
+      <button type="button" class="theme-toggle" role="switch" aria-label="Tema gelap" title="Tema gelap"
+        [attr.aria-checked]="darkTheme()" (click)="toggleTheme()">
+        <span class="theme-thumb"><app-icon [name]="darkTheme() ? 'moon' : 'sun'" /></span>
+      </button>
     </header>
 
     <main #pageContent id="app-main" class="page" tabindex="-1">
@@ -159,6 +144,9 @@
     <div class="account-panel" id="sidebar-account" [hidden]="popover() !== 'account'">
       <strong>Rani</strong>
       <span>Akun contoh lokal</span>
+      <button type="button" class="system-theme" [disabled]="theme() === 'system'" (click)="followSystemTheme()">
+        {{ theme() === 'system' ? 'Ikuti Sistem (aktif)' : 'Ikuti Sistem' }}
+      </button>
       <button type="button" disabled>Ganti Password</button>
       <button type="button" disabled>Keluar</button>
     </div>
