@@ -18,6 +18,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 - [Inventory Management](specs/inventory-management.md)
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
+- [Tenant Admin — Tema Warna dari Satu File](specs/tenant-admin-color-theme.md)
 
 Draf spec untuk modul yang menunggu pembahasan ditautkan dari [Progres Modul](planning/progress.md).
 
