@@ -1,0 +1,7 @@
+[
+  {
+    "context": ["/api/**", "/*/api/**", "/actuator/health"],
+    "target": "http://localhost:8080",
+    "changeOrigin": false
+  }
+]
