@@ -861,6 +861,27 @@ dilacak terverifikasi.
 
 Fondasi Angular dan Tailwind belum dimulai. Mulai fase ini dalam sesi baru setelah backend dalam cakupan yang disepakati selesai. Gunakan `$design-ui` untuk meninjau layout dan alur dengan spec backend, kontrak API, dan hasil penerimaannya sebagai konteks. Jika desain membutuhkan perilaku bisnis atau kontrak tambahan, catat keputusan itu pada spec modul terkait sebelum mengintegrasikannya.
 
+<details>
+<summary>Prompt mulai desain UI</summary>
+
+```text
+$design-ui
+
+Baca bagian Frontend dan desain UI di docs/planning/progress.md. Gunakan spesifikasi,
+kontrak API, dan hasil penerimaan yang tersedia untuk pekerjaan UI yang saya pilih.
+Jika saya belum memilih, mulai dari 0C (Pola UI bersama). Gunakan spesifikasi User
+Management untuk merancang satu form login dan satu tabel akun sebagai acuan bersama
+Platform Admin dan Tenant Admin.
+
+Buat wireframe atau prototipe dengan data contoh yang siap direview. Sertakan keadaan
+memuat, kosong, dan gagal jika relevan. Jika prototipe interaktif, periksa penggunaan
+keyboard dan fokus. Catat asumsi, keputusan yang perlu direview, dan cara mencoba hasilnya.
+Jika desain membutuhkan perubahan izin, aturan bisnis, atau kontrak API, catat pertanyaan
+dan rujuk spec atau tiket terkait sebelum integrasi.
+```
+
+</details>
+
 ### Tiga aplikasi frontend
 
 | Aplikasi | Pengguna dan titik masuk | Layout |
