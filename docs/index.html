@@ -2236,7 +2236,7 @@ dilacak terverifikasi.
 
 ## Frontend dan desain UI
 
-Fondasi Angular dan Tailwind belum dimulai. Mulai fase ini dalam sesi baru setelah backend dalam cakupan yang disepakati selesai. Gunakan `$design-ui` untuk meninjau layout dan alur dengan spec backend, kontrak API, dan hasil penerimaannya sebagai konteks. Jika desain membutuhkan perilaku bisnis atau kontrak tambahan, catat keputusan itu pada spec modul terkait sebelum mengintegrasikannya.
+Fondasi Angular dan Tailwind (0A) tersedia untuk ketiga aplikasi. Gunakan `$design-ui` untuk meninjau layout dan alur dengan spec backend, kontrak API, dan hasil penerimaannya sebagai konteks. Jika desain membutuhkan perilaku bisnis atau kontrak tambahan, catat keputusan itu pada spec modul terkait sebelum mengintegrasikannya.
 
 <details>
 <summary>Prompt mulai desain UI</summary>
@@ -2273,7 +2273,7 @@ Setiap aplikasi punya target build dan rilis sendiri. Pada MVP, satu versi Store
 
 | Urutan | Pekerjaan | Prasyarat dan peluang paralel | Bukti selesai |
 | --- | --- | --- | --- |
-| **0A** | Bootstrap Angular dan Tailwind | Mulai saat fase frontend dibuka. Susun konfigurasi proyek, Node, package manager, lockfile, dan koneksi API lokal. Bisa berjalan bersama 0B. | Dari checkout bersih, tiap aplikasi bisa dijalankan dan di-build secara mandiri. Catat perintah dev dan build serta konfigurasi API lokal. |
+| **0A** | Bootstrap Angular dan Tailwind | Workspace Angular dengan tiga proyek, lockfile npm, dan proxy dev bersama. | Instalasi bersih, dev, build produksi, serta Tailwind di browser terverifikasi untuk ketiga aplikasi. Uji proxy dengan server HTTP sementara lulus. Uji Spring Boot lokal tertahan. [Panduan dan bukti 0A](../../frontend/README.md#verifikasi-0a) |
 | **0B** | Rute dan akses | Rujuk User Management dan kontrak toko yang sudah ada. Kerjakan pemetaan host dan prefiks URL sambil 0A berjalan. | Platform punya titik masuk sendiri. URL toko memuat Storefront atau Tenant Admin sesuai jalur, termasuk saat tautan langsung dibuka atau halaman dimuat ulang. |
 | **0C** | Pola UI bersama | Gunakan satu contoh form login dan satu tabel akun untuk menyepakati pola admin. Sketsa ketiga layout bisa berjalan bersamaan. | Form, tabel, filter, dan keadaan memuat, kosong, serta gagal bisa direview sebelum layar kedua aplikasi admin dirinci. |
 | **1A** | Layout Platform Admin | Setelah rute utama dan pola admin disepakati, jalan paralel dengan 1B dan 1C. | Navigasi dan area konten Platform bisa diperiksa dengan contoh halaman daftar operator. |
