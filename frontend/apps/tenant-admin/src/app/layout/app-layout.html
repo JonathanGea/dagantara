@@ -1,0 +1,147 @@
+<a class="skip-link" href="#app-main">Ke konten utama</a>
+
+<div class="app-layout" [class.compact]="compact() && !isMobile()">
+  @if (isMobile()) {
+    <dialog #mobileDrawer id="sidebar-drawer" class="drawer" aria-label="Menu Tenant Admin"
+      (click)="closeOnBackdrop($event)" (close)="onDrawerClosed()">
+      <div class="drawer-surface">
+        <ng-container [ngTemplateOutlet]="sidebar" [ngTemplateOutletContext]="{ $implicit: 'mobile' }" />
+      </div>
+    </dialog>
+  } @else {
+    <aside id="app-sidebar" class="sidebar" aria-label="Tenant Admin">
+      <ng-container [ngTemplateOutlet]="sidebar" [ngTemplateOutletContext]="{ $implicit: compact() ? 'compact' : 'full' }" />
+    </aside>
+  }
+
+  <div class="workspace">
+    <header class="topbar">
+      @if (isMobile()) {
+        <button #sidebarToggle type="button" class="icon-button sidebar-toggle" aria-label="Buka menu"
+          [attr.aria-expanded]="mobileOpen()" aria-controls="sidebar-drawer" (click)="toggleSidebar()">
+          <app-icon name="menu" />
+        </button>
+      }
+      @if (active(); as context) {
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          @if (context.group) {
+            <span class="breadcrumb-group">{{ context.group }}</span><app-icon name="chevron" />
+          }
+          @if (context.product) {
+            <a [routerLink]="'/' + context.page.path">{{ context.page.label }}</a><app-icon name="chevron" />
+          }
+          <span class="breadcrumb-current" aria-current="page">{{ title() }}</span>
+        </nav>
+        @if (context.product) {
+          <a class="header-action" [routerLink]="'/' + productsPage.path">
+            <app-icon name="back" /><span>Daftar Produk</span>
+          </a>
+        }
+      }
+    </header>
+
+    <main #pageContent id="app-main" class="page" tabindex="-1">
+      @if (title(); as pageTitle) {
+        <h1>{{ pageTitle }}</h1>
+      }
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<ng-template #sidebar let-mode>
+  <div class="store">
+    <span class="store-mark" aria-hidden="true">KG</span>
+    <div class="store-name"><strong>Kopi Gayo</strong><span>Tenant Admin</span></div>
+    @if (mode === 'mobile') {
+      <button type="button" class="icon-button drawer-close" aria-label="Tutup menu" autofocus (click)="closeDrawer()">
+        <app-icon name="close" />
+      </button>
+    } @else {
+      <button type="button" class="icon-button sidebar-toggle" [attr.aria-label]="sidebarLabel()"
+        [title]="sidebarLabel()" [attr.aria-expanded]="!compact()" aria-controls="app-sidebar" (click)="toggleSidebar()">
+        <app-icon name="sidebar" />
+      </button>
+    }
+  </div>
+
+  @if (mode !== 'compact') {
+    <label class="menu-search">
+      <app-icon name="search" />
+      <input type="search" aria-label="Cari menu" placeholder="Cari menu" [value]="menuSearch()"
+        (input)="menuSearch.set($event.target.value)">
+    </label>
+  }
+
+  <nav class="sidebar-nav" aria-label="Navigasi toko">
+    @if (mode !== 'compact' && menuQuery()) {
+      @for (page of menuResults(); track page.path) {
+        <a class="nav-item search-result" [class.active-indicator]="active()?.page?.path === page.path"
+          [attr.aria-current]="active()?.page?.path === page.path ? (active()?.product ? 'location' : 'page') : null"
+          [routerLink]="'/' + page.path" (click)="selectPage(); pageContent.focus()">
+          <span>{{ page.label }}</span>
+          @if (page.group) { <small>{{ page.group }}</small> }
+        </a>
+      } @empty {
+        <p class="empty-menu" role="status">Menu tidak ditemukan.</p>
+      }
+    } @else {
+      <p class="section-label">Operasional</p>
+      @for (group of navigation; track group.label; let index = $index) {
+        @if (group.icon === 'team') {
+          <p class="section-label section-start">Pengelolaan</p>
+        }
+        <div class="nav-group" data-sidebar-popover>
+          <button type="button" class="nav-item group-button"
+            [class.group-current]="active()?.group === group.label"
+            [class.active-indicator]="active()?.group === group.label && (mode === 'compact' || !showGroup(group.label, mode))"
+            [attr.aria-label]="group.label" [attr.aria-expanded]="showGroup(group.label, mode)"
+            [attr.aria-controls]="'sidebar-group-' + index" (click)="toggleGroup(group.label, mode, $event)">
+            <app-icon [name]="group.icon" />
+            <span class="nav-label">{{ group.label }}</span>
+            <app-icon name="chevron" class="group-chevron" />
+          </button>
+          @if (mode === 'compact' && !showGroup(group.label, mode)) {
+            <span class="rail-tooltip" aria-hidden="true">{{ group.label }}</span>
+          }
+          <div class="subnav" [class.flyout]="mode === 'compact'" [id]="'sidebar-group-' + index"
+            [hidden]="!showGroup(group.label, mode)">
+            @if (mode === 'compact') {
+              <span class="flyout-title">{{ group.label }}</span>
+            }
+            @for (page of group.pages; track page.path) {
+              <a class="nav-item subnav-item" [class.active-indicator]="active()?.page?.path === page.path"
+                [attr.aria-current]="active()?.page?.path === page.path ? (active()?.product ? 'location' : 'page') : null"
+                [routerLink]="'/' + page.path" (click)="selectPage()">{{ page.label }}</a>
+            }
+          </div>
+        </div>
+      }
+      <div class="nav-group">
+        <a class="nav-item settings-link" [class.active-indicator]="active()?.page?.path === settingsPage.path"
+          [attr.aria-current]="active()?.page?.path === settingsPage.path ? 'page' : null"
+          [attr.aria-label]="settingsPage.label" [routerLink]="'/' + settingsPage.path" (click)="selectPage()">
+          <app-icon name="settings" /><span class="nav-label">{{ settingsPage.label }}</span>
+        </a>
+        @if (mode === 'compact') {
+          <span class="rail-tooltip" aria-hidden="true">{{ settingsPage.label }}</span>
+        }
+      </div>
+    }
+  </nav>
+
+  <div class="account" data-sidebar-popover>
+    <button type="button" class="nav-item account-button" aria-label="Akun Rani"
+      aria-controls="sidebar-account" [attr.aria-expanded]="popover() === 'account'" (click)="togglePopover('account', $event)">
+      <span class="avatar" aria-hidden="true">RA</span>
+      <span class="account-name"><strong>Rani</strong><span>Admin Tenant</span></span>
+      <app-icon name="chevron" class="account-chevron" />
+    </button>
+    <div class="account-panel" id="sidebar-account" [hidden]="popover() !== 'account'">
+      <strong>Rani</strong>
+      <span>Akun contoh lokal</span>
+      <button type="button" disabled>Ganti Password</button>
+      <button type="button" disabled>Keluar</button>
+    </div>
+  </div>
+</ng-template>

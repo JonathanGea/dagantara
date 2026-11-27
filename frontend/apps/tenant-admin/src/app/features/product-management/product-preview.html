@@ -1,0 +1,37 @@
+@if (product(); as selected) {
+  <dl class="product-facts">
+    <div><dt>SKU</dt><dd>{{ selected.sku }}</dd></div>
+    <div><dt>Kategori</dt><dd>{{ selected.category }}</dd></div>
+    <div><dt>Status</dt><dd>{{ selected.published ? 'Terbit' : 'Draf' }}</dd></div>
+    <div><dt>Harga</dt><dd>{{ currency.format(selected.price) }}</dd></div>
+  </dl>
+} @else {
+  <div class="table-toolbar">
+    <input type="search" aria-label="Cari nama produk atau SKU" placeholder="Cari produk atau SKU"
+      [value]="search()" (input)="search.set($event.target.value)">
+  </div>
+  <div class="table-panel">
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Daftar produk">
+      <table>
+        <thead>
+          <tr><th scope="col">Produk</th><th scope="col">SKU</th><th scope="col">Kategori</th>
+            <th scope="col">Status</th><th scope="col">Harga</th></tr>
+        </thead>
+        <tbody>
+          @for (row of visibleProducts(); track row.slug) {
+            <tr>
+              <td><a [routerLink]="[row.slug]">{{ row.name }}</a></td>
+              <td>{{ row.sku }}</td>
+              <td>{{ row.category }}</td>
+              <td><span class="status" [class.published]="row.published">{{ row.published ? 'Terbit' : 'Draf' }}</span></td>
+              <td>{{ currency.format(row.price) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty-result">Produk tidak ditemukan.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="table-count" role="status">{{ visibleProducts().length }} produk</p>
+  </div>
+}

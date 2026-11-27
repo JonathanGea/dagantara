@@ -1,4 +1,8 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { App } from './app';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { App } from './app/app';
+import { routes } from './app/app.routes';
 
-bootstrapApplication(App).catch((error: unknown) => console.error(error));
+bootstrapApplication(App, {
+  providers: [provideRouter(routes, withComponentInputBinding())],
+}).catch((error: unknown) => console.error(error));

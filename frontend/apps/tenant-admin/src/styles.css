@@ -1,1 +1,10 @@
 @import "tailwindcss" source("./");
+
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: #fff;
+}
+
+body { margin: 0; }
+body:has(.drawer[open]) { overflow: hidden; }
