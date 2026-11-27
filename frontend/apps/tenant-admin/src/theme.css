@@ -8,8 +8,9 @@
   --color-border: light-dark(#e3e5e8, #3b4656);
   --color-primary: light-dark(#34598a, #9ec5fd);
   --color-focus: light-dark(#34598a, #9ec5fd);
-  --color-theme-track: light-dark(#303236, #f4f6f9);
-  --color-theme-thumb: light-dark(#fff, #171b22);
+  --color-theme-track: light-dark(#e0e5eb, #292f3c);
+  --color-theme-thumb: light-dark(#f4f6f8, #697487);
+  --color-theme-edge: light-dark(#a4aebb, #596576);
 
   --color-sidebar: light-dark(#f7f8f9, #191e26);
   --color-nav-text: light-dark(#4f545d, #c2ccda);
