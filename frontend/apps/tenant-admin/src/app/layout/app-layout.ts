@@ -161,7 +161,7 @@ export class AppLayout {
   }
 
   protected closeOnOutsideClick(event: MouseEvent): void {
-    if (event.target instanceof Element && !event.target.closest('[data-sidebar-popover]')) {
+    if (event.target instanceof Element && !event.target.closest('[data-layout-popover]')) {
       this.closePopover();
     }
   }

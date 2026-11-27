@@ -38,6 +38,25 @@
           </a>
         }
       }
+      <div class="theme-control" data-layout-popover>
+        <button type="button" class="theme-toggle" aria-label="Tema" title="Tema"
+          aria-controls="header-theme" [attr.aria-expanded]="popover() === 'theme'"
+          (click)="togglePopover('theme', $event)">
+          <app-icon name="theme" /><span>Tema</span>
+        </button>
+        <div class="theme-panel" id="header-theme" [hidden]="popover() !== 'theme'">
+          <fieldset class="theme-options">
+            <legend>Tema</legend>
+            @for (option of themeOptions; track option.value) {
+              <label class="theme-option">
+                <input type="radio" name="tenant-admin-theme" [checked]="theme() === option.value"
+                  (change)="setTheme(option.value)">
+                {{ option.label }}
+              </label>
+            }
+          </fieldset>
+        </div>
+      </div>
     </header>
 
     <main #pageContent id="app-main" class="page" tabindex="-1">
@@ -91,7 +110,7 @@
         @if (group.icon === 'team') {
           <p class="section-label section-start">Pengelolaan</p>
         }
-        <div class="nav-group" data-sidebar-popover>
+        <div class="nav-group" data-layout-popover>
           <button type="button" class="nav-item group-button"
             [class.group-current]="active()?.group === group.label"
             [class.active-indicator]="active()?.group === group.label && (mode === 'compact' || !showGroup(group.label, mode))"
@@ -130,7 +149,7 @@
     }
   </nav>
 
-  <div class="account" data-sidebar-popover>
+  <div class="account" data-layout-popover>
     <button type="button" class="nav-item account-button" aria-label="Akun Rani"
       aria-controls="sidebar-account" [attr.aria-expanded]="popover() === 'account'" (click)="togglePopover('account', $event)">
       <span class="avatar" aria-hidden="true">RA</span>
@@ -140,16 +159,6 @@
     <div class="account-panel" id="sidebar-account" [hidden]="popover() !== 'account'">
       <strong>Rani</strong>
       <span>Akun contoh lokal</span>
-      <fieldset class="theme-options">
-        <legend>Tema</legend>
-        @for (option of themeOptions; track option.value) {
-          <label class="theme-option">
-            <input type="radio" name="tenant-admin-theme" [checked]="theme() === option.value"
-              (change)="setTheme(option.value)">
-            {{ option.label }}
-          </label>
-        }
-      </fieldset>
       <button type="button" disabled>Ganti Password</button>
       <button type="button" disabled>Keluar</button>
     </div>

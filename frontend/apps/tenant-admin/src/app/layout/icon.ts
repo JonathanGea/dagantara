@@ -8,6 +8,7 @@ const paths = {
   sidebar: 'M3 5h18v14H3zM9 5v14',
   search: 'M16 10.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-1.6 3.9L20 20',
   menu: 'M4 6h16M4 12h16M4 18h16',
+  theme: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0v18m0-14 4 4m-4 0 6 6m-6-2 4 4',
   close: 'm6 6 12 12M18 6 6 18',
   chevron: 'm9 6 6 6-6 6',
   back: 'M19 12H5m7 7-7-7 7-7',
