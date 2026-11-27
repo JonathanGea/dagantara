@@ -18,7 +18,7 @@ Excluded by decision: automated database migration tooling, Redis/cache, rate li
 ## Development
 
 1. Install JDK 25 and PostgreSQL 15 or later.
-2. Create an empty PostgreSQL database named dagantara, apply the User Management, Product, Inventory and Store Settings migrations below, and grant your local database user access.
+2. Create an empty PostgreSQL database named dagantara, apply migrations 01–12 below in order, and grant your local database user access.
 3. Copy `.env.example` to `.env`. Set `DB_PASSWORD` and `APP_JWT_SECRET_BASE64`. The `dev` profile defaults to PostgreSQL at `127.0.0.1:5433` with user `dagantara_app`. Set `DB_URL` and `DB_USERNAME` if your local instance differs. Export the values before launching Spring Boot.
 4. Generate a signing secret: `openssl rand -base64 48`. Do not reuse one secret across environments.
 5. For first-time Admin Platform setup, set the two bootstrap variables described below.
@@ -77,7 +77,7 @@ Salin [railway.env.example.json](railway.env.example.json) ke **Variables → Ra
 - Isi `APP_JWT_SECRET_BASE64` dengan hasil `openssl rand -base64 48`. Simpan nilainya di Railway.
 - Buat domain publik untuk service backend agar `RAILWAY_PUBLIC_DOMAIN` tersedia. `APP_PLATFORM_HOST` berisi hostname yang dipakai untuk akses platform. Isi `APP_CORS_ALLOWED_ORIGINS` dengan origin frontend jika berbeda dari origin backend. Spring Boot membaca `PORT` yang disediakan Railway. [Referensi variabel Railway](https://docs.railway.com/variables/reference) · [Port dan health check](https://docs.railway.com/deployments/healthchecks)
 - Isi kedua variabel `APP_BOOTSTRAP_*` saat membuat Admin Platform pertama. Gunakan username dan hash BCrypt cost 12. Setelah akun dibuat, hapus kedua variabel dari Railway. Ikuti [panduan setup admin](#setup-admin-platform-pertama-um-07).
-- Sebelum startup, terapkan migrasi PostgreSQL yang belum dijalankan dari [User Management](#setup-admin-platform-pertama-um-07), [Product dan Inventory Management](#migrasi-product-dan-inventory-management), dan [Store Settings](#migrasi-store-settings). Jika menggunakan `backend/Dockerfile`, sesuaikan tahap build dan runtime ke Java 25. Proyek menargetkan Java 25 dan Dockerfile saat ini masih menggunakan Java 21.
+- Sebelum startup, terapkan migrasi PostgreSQL yang belum dijalankan dari [User Management](#setup-admin-platform-pertama-um-07), [Product dan Inventory Management](#migrasi-product-dan-inventory-management), [Store Settings](#migrasi-store-settings), dan [Tenant Management](#migrasi-tenant-management). Jika menggunakan `backend/Dockerfile`, sesuaikan tahap build dan runtime ke Java 25. Proyek menargetkan Java 25 dan Dockerfile saat ini masih menggunakan Java 21.
 
 ## Setup Admin Platform pertama (UM-07)
 
@@ -167,11 +167,21 @@ psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/11-store-settings-logo.sql
 
 Migrasi 10 menyiapkan pengaturan publik per tenant dan memberi izin `store_settings.manage` kepada role Admin Tenant yang sudah ada. Migrasi 11 menambahkan referensi logo aktif. Buka `/admin/store-settings` dari URL toko. Untuk penyimpanan logo lokal, setel `APP_STORE_SETTINGS_LOGO_DIRECTORY` ke direktori yang dapat ditulis backend. Default-nya `store-logos/` relatif terhadap direktori kerja backend. Gunakan database dan direktori yang sama saat restart. [Spesifikasi Store Settings](../docs/specs/store-settings.md)
 
+## Migrasi Tenant Management
+
+Setelah migrasi 01–11, jalankan perintah berikut dari folder `backend/` sebelum startup.
+
+```powershell
+psql -X -v ON_ERROR_STOP=1 -f src/main/resources/db/12-tenant-management.sql
+```
+
+Migrasi 12 memberi status `ACTIVE` pada tenant yang sudah ada serta menambahkan `tenants.read`, `tenants.deactivate`, dan `tenants.activate` pada role `SUPERADMIN`. Ketiga izin dapat didelegasikan melalui API role platform. Saat tenant dinonaktifkan, alamatnya tetap dicadangkan, storefront mengembalikan `404`, dan sesi internal dicabut. [Spesifikasi Tenant Management](../docs/specs/tenant-management.md) · [Penerimaan lokal](../bruno/tenant-management/README.md)
+
 ## Verification
 
 Untuk membuat JAR, jalankan `./mvnw clean package` dari folder `backend` (atau `.\mvnw.cmd clean package` di PowerShell).
 
-Untuk regresi gabungan User Management, pakai database fixture terisolasi dengan migrasi 01–05. Selain fixture onboarding, atur `DAGANTARA_TEST_PLATFORM_ROLE_ID` ke ID role `SUPERADMIN`. Jalankan `bruno/user-management/UM-AT-05-platform-scope/fixture.sql` dengan `psql -X -v ON_ERROR_STOP=1` sebelum tes.
+Untuk regresi gabungan User Management, pakai database fixture terisolasi dengan migrasi 01–12. Selain fixture onboarding, atur `DAGANTARA_TEST_PLATFORM_ROLE_ID` ke ID role `SUPERADMIN`. Jalankan `bruno/user-management/UM-AT-05-platform-scope/fixture.sql` dengan `psql -X -v ON_ERROR_STOP=1` sebelum tes.
 
 Jalankan perintah berikut dari `bruno/`. Sesuaikan `baseUrl` di environment `Local` dengan backend uji jika memakai port lain.
 

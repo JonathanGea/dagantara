@@ -7,7 +7,6 @@ import com.dagantara.backend.modules.catalog.service.StorefrontService;
 import com.dagantara.backend.modules.storesettings.dto.StoreIdentity;
 import com.dagantara.backend.modules.storesettings.service.StoreSettingsService;
 import com.dagantara.backend.modules.tenants.service.TenantRequestContext;
-import com.dagantara.backend.modules.tenants.service.TenantRequestContext.Scope;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +19,7 @@ import java.util.UUID;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +33,8 @@ import static com.dagantara.backend.common.api.ApiRoutes.STOREFRONT_SHOP;
 
 @RestController
 public class StorefrontController {
+    private static final MediaType HTML_UTF8 = new MediaType("text", "html", StandardCharsets.UTF_8);
+
     private final TenantRequestContext contexts;
     private final StorefrontService storefront;
     private final StoreSettingsService settings;
@@ -65,7 +67,20 @@ public class StorefrontController {
     public ResponseEntity<String> page(HttpServletRequest request, Pageable page,
                                        @PathVariable(required = false) String productId,
                                        @PathVariable(required = false) String shopSlug) throws JsonProcessingException {
-        UUID tenant = tenantId(request);
+        var activeTenant = contexts.resolveActiveTenant(request);
+        if (activeTenant.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(HTML_UTF8)
+                    .cacheControl(CacheControl.noStore())
+                    .header("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+                    .body("""
+                            <!doctype html>
+                            <html lang="id">
+                            <head><meta charset="utf-8"><title>Toko tidak tersedia</title></head>
+                            <body><main><h1>Toko tidak tersedia</h1></main></body>
+                            </html>
+                            """);
+        }
+        UUID tenant = activeTenant.get();
         ApiResponse<?> catalog = productId == null
                 ? ApiResponse.paged("Products", storefront.list(tenant, page))
                 : ApiResponse.success("Product detail", storefront.detail(tenant, parseId(productId)));
@@ -73,7 +88,7 @@ public class StorefrontController {
         String nonce = UUID.randomUUID().toString();
         String json = pageWriter.writeValueAsString(data).replace("<", "\\u003c");
         String html = template.replace("{{nonce}}", nonce).replace("{{data}}", json);
-        return ResponseEntity.ok().contentType(new MediaType("text", "html", StandardCharsets.UTF_8))
+        return ResponseEntity.ok().contentType(HTML_UTF8)
                 .cacheControl(CacheControl.noStore())
                 .header("Content-Security-Policy", "default-src 'none'; img-src http: https:; "
                         + "script-src 'nonce-" + nonce + "'; style-src 'nonce-" + nonce + "'; "
@@ -86,7 +101,7 @@ public class StorefrontController {
     }
 
     private UUID tenantId(HttpServletRequest request) {
-        return contexts.resolve(request).map(Scope::tenantId).orElseThrow(StorefrontService::notFound);
+        return contexts.resolveActiveTenant(request).orElseThrow(StorefrontService::notFound);
     }
 
     private static UUID parseId(String value) {

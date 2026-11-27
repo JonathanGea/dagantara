@@ -80,7 +80,8 @@ class StoreSettingsPostgresTest {
 
         var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
         tx.executeWithoutResult(status -> insertExistingTenant());
-        new ResourceDatabasePopulator(migration("10-store-settings"), migration("11-store-settings-logo"))
+        new ResourceDatabasePopulator(migration("10-store-settings"), migration("11-store-settings-logo"),
+                migration("12-tenant-management"))
                 .execute(source);
 
         byte[] key = new byte[32];

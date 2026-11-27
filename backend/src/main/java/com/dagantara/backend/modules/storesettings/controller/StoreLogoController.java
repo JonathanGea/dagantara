@@ -3,7 +3,6 @@ package com.dagantara.backend.modules.storesettings.controller;
 import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.modules.storesettings.service.StoreSettingsService;
 import com.dagantara.backend.modules.tenants.service.TenantRequestContext;
-import com.dagantara.backend.modules.tenants.service.TenantRequestContext.Scope;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
 import org.springframework.http.CacheControl;
@@ -29,7 +28,7 @@ public class StoreLogoController {
 
     @GetMapping({STOREFRONT_LOGO + "/{logoId}", STOREFRONT_SHOP + STOREFRONT_LOGO + "/{logoId}"})
     public ResponseEntity<byte[]> logo(HttpServletRequest request, @PathVariable String logoId) {
-        UUID tenant = contexts.resolve(request).map(Scope::tenantId).orElseThrow(StoreLogoController::notFound);
+        UUID tenant = contexts.resolveActiveTenant(request).orElseThrow(StoreLogoController::notFound);
         var logo = settings.publicLogo(tenant, parseId(logoId)).orElseThrow(StoreLogoController::notFound);
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(logo.contentType()))
                 .cacheControl(CacheControl.noStore()).body(logo.bytes());

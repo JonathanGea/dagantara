@@ -4,6 +4,7 @@ import com.dagantara.backend.common.exception.ApiException;
 import com.dagantara.backend.modules.auth.dto.ChangeTemporaryPasswordRequest;
 import com.dagantara.backend.modules.auth.dto.LoginRequest;
 import com.dagantara.backend.modules.auth.dto.LoginResponse;
+import com.dagantara.backend.modules.tenants.repository.TenantRepository;
 import com.dagantara.backend.modules.tenants.service.TenantRequestContext.Scope;
 import com.dagantara.backend.modules.users.dto.AccountSession;
 import com.dagantara.backend.modules.users.repository.AccountRepository;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
     private final AccountRepository accounts;
+    private final TenantRepository tenants;
     private final PasswordEncoder passwordEncoder;
     private final String dummyPasswordHash;
     private final JwtEncoder jwtEncoder;
@@ -37,6 +39,7 @@ public class AuthService {
 
     public AuthService(
             AccountRepository accounts,
+            TenantRepository tenants,
             PasswordEncoder passwordEncoder,
             JwtEncoder jwtEncoder,
             @Value("${app.security.jwt.issuer:dagantara-backend}") String issuer,
@@ -48,6 +51,7 @@ public class AuthService {
             throw new IllegalStateException("JWT access token TTL must be 1 minute to 24 hours");
         }
         this.accounts = accounts;
+        this.tenants = tenants;
         this.passwordEncoder = passwordEncoder;
         this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
         this.jwtEncoder = jwtEncoder;
@@ -56,8 +60,11 @@ public class AuthService {
         this.accessTokenTtl = accessTokenTtl;
     }
 
+    @Transactional
     public LoginResponse login(LoginRequest request, Optional<Scope> scope) {
         AccountCredentials account = scope
+                // Serialize token issuance with deactivation and session revocation.
+                .filter(context -> context.tenantId() == null || tenants.lockActiveTenantForLogin(context.tenantId()))
                 .flatMap(context -> accounts.findLogin(request.username(), context.tenantId()))
                 .orElse(null);
         String passwordHash = account == null ? dummyPasswordHash : account.passwordHash();
