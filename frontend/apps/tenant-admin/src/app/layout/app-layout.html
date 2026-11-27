@@ -140,6 +140,16 @@
     <div class="account-panel" id="sidebar-account" [hidden]="popover() !== 'account'">
       <strong>Rani</strong>
       <span>Akun contoh lokal</span>
+      <fieldset class="theme-options">
+        <legend>Tema</legend>
+        @for (option of themeOptions; track option.value) {
+          <label class="theme-option">
+            <input type="radio" name="tenant-admin-theme" [checked]="theme() === option.value"
+              (change)="setTheme(option.value)">
+            {{ option.label }}
+          </label>
+        }
+      </fieldset>
       <button type="button" disabled>Ganti Password</button>
       <button type="button" disabled>Keluar</button>
     </div>

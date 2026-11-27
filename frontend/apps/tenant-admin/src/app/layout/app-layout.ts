@@ -14,6 +14,14 @@ interface PageContext {
 }
 
 const sidebarPreference = 'dagantara.tenant-admin.sidebar';
+const themePreference = 'dagantara.tenant-admin.theme';
+const themeOptions = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'Ikuti Sistem' },
+] as const;
+type ThemeMode = (typeof themeOptions)[number]['value'];
+
 const searchablePages = [
   ...navigation.flatMap((group) => group.pages.map((page) => ({ ...page, group: group.label }))),
   { ...settingsPage, group: '' },
@@ -31,7 +39,8 @@ const searchablePages = [
 })
 export class AppLayout {
   private readonly router = inject(Router);
-  private readonly browser = inject(DOCUMENT).defaultView!;
+  private readonly document = inject(DOCUMENT);
+  private readonly browser = this.document.defaultView!;
   private readonly mobileQuery = this.browser.matchMedia('(max-width: 760px)');
   private readonly drawer = viewChild<ElementRef<HTMLDialogElement>>('mobileDrawer');
   private readonly sidebarToggle = viewChild<ElementRef<HTMLButtonElement>>('sidebarToggle');
@@ -40,6 +49,8 @@ export class AppLayout {
   protected readonly navigation = navigation;
   protected readonly productsPage = productsPage;
   protected readonly settingsPage = settingsPage;
+  protected readonly themeOptions = themeOptions;
+  protected readonly theme = signal(this.readThemePreference());
   protected readonly isMobile = signal(this.mobileQuery.matches);
   protected readonly compact = signal(this.readCompactPreference());
   protected readonly mobileOpen = signal(false);
@@ -57,6 +68,7 @@ export class AppLayout {
   );
 
   constructor() {
+    this.document.documentElement.dataset['theme'] = this.theme();
     this.syncPage();
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
@@ -69,6 +81,16 @@ export class AppLayout {
       this.closePopover();
       this.openActiveGroup();
     });
+  }
+
+  protected setTheme(theme: ThemeMode): void {
+    this.document.documentElement.dataset['theme'] = theme;
+    this.theme.set(theme);
+    try {
+      this.browser.localStorage.setItem(themePreference, theme);
+    } catch {
+      // The theme still applies when storage is unavailable.
+    }
   }
 
   protected toggleSidebar(): void {
@@ -171,6 +193,15 @@ export class AppLayout {
       return this.browser.localStorage.getItem(sidebarPreference) === 'compact';
     } catch {
       return false;
+    }
+  }
+
+  private readThemePreference(): ThemeMode {
+    try {
+      const saved = this.browser.localStorage.getItem(themePreference);
+      return themeOptions.find(({ value }) => value === saved)?.value ?? 'system';
+    } catch {
+      return 'system';
     }
   }
 }

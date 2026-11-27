@@ -259,6 +259,29 @@
 .account-panel span, .account-panel button { color: var(--color-text-muted); }
 .account-panel button:disabled { opacity: .75; }
 
+.theme-options {
+  min-width: 0;
+  margin: 6px 0;
+  padding: 2px 0 5px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+}
+
+.theme-options legend { padding: 0 7px; color: var(--color-text-muted); font-weight: 650; }
+
+.theme-option {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.theme-option:hover { background: var(--color-action-hover); }
+.theme-option input { accent-color: var(--color-primary); }
+
 .compact .sidebar-nav { overflow: visible; }
 .compact :is(.store-mark, .store-name, .section-label, .nav-label, .group-chevron, .account-name, .account-chevron) { display: none; }
 .compact :is(.store, .group-button, .settings-link, .account-button) { justify-content: center; padding-inline: 0; }
