@@ -199,7 +199,7 @@
 .breadcrumb-group, .breadcrumb a { flex: none; }
 .breadcrumb-current { overflow: hidden; color: var(--color-text); font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 
-.header-action, .theme-toggle {
+.header-action {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -212,14 +212,37 @@
   font-weight: 600;
 }
 
-.header-action:hover, .theme-toggle:hover, .theme-toggle[aria-expanded="true"] { background: var(--color-action-hover); }
+.header-action:hover { background: var(--color-action-hover); }
 
-.theme-control { position: relative; flex: none; margin-inline-start: auto; }
-.theme-toggle { color: var(--color-text); }
+.theme-toggle {
+  display: flex;
+  flex: none;
+  width: 56px;
+  height: 32px;
+  align-items: center;
+  margin-inline-start: auto;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-theme-track);
+  cursor: pointer;
+}
 
-.theme-panel {
-  top: calc(100% + 6px);
-  right: 0;
+.theme-thumb {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-theme-thumb);
+  color: var(--color-theme-track);
+}
+
+.theme-thumb app-icon { --app-icon-size: 15px; }
+.theme-toggle[aria-checked="true"] .theme-thumb { transform: translateX(24px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .theme-thumb { transition: transform 160ms ease; }
 }
 
 .page { padding: 30px var(--workspace-gutter) 44px; }
@@ -242,7 +265,7 @@
 .avatar { width: 27px; height: 27px; border-radius: 50%; background: var(--color-avatar); }
 .account-chevron { color: var(--color-text-muted); transform: rotate(90deg); }
 
-.account-panel, .flyout, .theme-panel {
+.account-panel, .flyout {
   position: absolute;
   z-index: 1;
   min-width: 170px;
@@ -268,26 +291,18 @@
 .account-panel span, .account-panel button { color: var(--color-text-muted); }
 .account-panel button:disabled { opacity: .75; }
 
-.theme-options {
-  min-width: 0;
-  padding-block: 4px 0;
-  font-size: 12px;
+.account-panel .system-theme {
+  width: 100%;
+  border-radius: 5px;
+  text-align: left;
 }
 
-.theme-options legend { padding: 0 7px; color: var(--color-text-muted); font-weight: 650; }
-
-.theme-option {
-  display: flex;
-  min-height: 32px;
-  align-items: center;
-  gap: 7px;
-  padding: 4px 7px;
-  border-radius: 5px;
+.account-panel .system-theme:enabled {
+  color: var(--color-text);
   cursor: pointer;
 }
 
-.theme-option:hover { background: var(--color-action-hover); }
-.theme-option input { accent-color: var(--color-primary); }
+.system-theme:enabled:hover { background: var(--color-action-hover); }
 
 .compact .sidebar-nav { overflow: visible; }
 .compact :is(.store-mark, .store-name, .section-label, .nav-label, .group-chevron, .account-name, .account-chevron) { display: none; }
@@ -351,7 +366,7 @@
 }
 
 @media (max-width: 440px) {
-  :is(.header-action, .theme-toggle) span {
+  .header-action span {
     position: absolute;
     width: 1px;
     height: 1px;

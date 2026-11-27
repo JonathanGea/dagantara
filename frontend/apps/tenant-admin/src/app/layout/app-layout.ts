@@ -15,12 +15,7 @@ interface PageContext {
 
 const sidebarPreference = 'dagantara.tenant-admin.sidebar';
 const themePreference = 'dagantara.tenant-admin.theme';
-const themeOptions = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'Ikuti Sistem' },
-] as const;
-type ThemeMode = (typeof themeOptions)[number]['value'];
+type ThemeMode = 'light' | 'dark' | 'system';
 
 const searchablePages = [
   ...navigation.flatMap((group) => group.pages.map((page) => ({ ...page, group: group.label }))),
@@ -42,6 +37,8 @@ export class AppLayout {
   private readonly document = inject(DOCUMENT);
   private readonly browser = this.document.defaultView!;
   private readonly mobileQuery = this.browser.matchMedia('(max-width: 760px)');
+  private readonly systemThemeQuery = this.browser.matchMedia('(prefers-color-scheme: dark)');
+  private readonly systemDark = signal(this.systemThemeQuery.matches);
   private readonly drawer = viewChild<ElementRef<HTMLDialogElement>>('mobileDrawer');
   private readonly sidebarToggle = viewChild<ElementRef<HTMLButtonElement>>('sidebarToggle');
   private popoverTrigger?: HTMLButtonElement;
@@ -49,8 +46,10 @@ export class AppLayout {
   protected readonly navigation = navigation;
   protected readonly productsPage = productsPage;
   protected readonly settingsPage = settingsPage;
-  protected readonly themeOptions = themeOptions;
   protected readonly theme = signal(this.readThemePreference());
+  protected readonly darkTheme = computed(() =>
+    this.theme() === 'system' ? this.systemDark() : this.theme() === 'dark',
+  );
   protected readonly isMobile = signal(this.mobileQuery.matches);
   protected readonly compact = signal(this.readCompactPreference());
   protected readonly mobileOpen = signal(false);
@@ -74,6 +73,9 @@ export class AppLayout {
       filter((event) => event instanceof NavigationEnd),
       takeUntilDestroyed(),
     ).subscribe(() => this.syncPage());
+    fromEvent<MediaQueryListEvent>(this.systemThemeQuery, 'change').pipe(takeUntilDestroyed()).subscribe(({ matches }) => {
+      this.systemDark.set(matches);
+    });
     fromEvent<MediaQueryListEvent>(this.mobileQuery, 'change').pipe(takeUntilDestroyed()).subscribe(({ matches }) => {
       this.isMobile.set(matches);
       this.mobileOpen.set(false);
@@ -83,14 +85,13 @@ export class AppLayout {
     });
   }
 
-  protected setTheme(theme: ThemeMode): void {
-    this.document.documentElement.dataset['theme'] = theme;
-    this.theme.set(theme);
-    try {
-      this.browser.localStorage.setItem(themePreference, theme);
-    } catch {
-      // The theme still applies when storage is unavailable.
-    }
+  protected toggleTheme(): void {
+    this.setTheme(this.darkTheme() ? 'light' : 'dark');
+  }
+
+  protected followSystemTheme(): void {
+    this.setTheme('system');
+    this.closePopover(true);
   }
 
   protected toggleSidebar(): void {
@@ -199,9 +200,19 @@ export class AppLayout {
   private readThemePreference(): ThemeMode {
     try {
       const saved = this.browser.localStorage.getItem(themePreference);
-      return themeOptions.find(({ value }) => value === saved)?.value ?? 'system';
+      return saved === 'light' || saved === 'dark' ? saved : 'system';
     } catch {
       return 'system';
+    }
+  }
+
+  private setTheme(theme: ThemeMode): void {
+    this.document.documentElement.dataset['theme'] = theme;
+    this.theme.set(theme);
+    try {
+      this.browser.localStorage.setItem(themePreference, theme);
+    } catch {
+      // The theme still applies when storage is unavailable.
     }
   }
 }
