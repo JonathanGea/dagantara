@@ -418,9 +418,9 @@ This plan records interface contracts, integration gates, and workstream ownersh
 | Storefront Management (basic) | Tenant resolution, public settings contract | Advanced customization | Static UI and mock data can begin immediately |
 | Inventory Management | Tenant, product/variant IDs | Warehouse/multi-location | Variant identity for stock in v1. Reservation integration follows DEP-03. |
 | Product Catalog / Discovery | Tenant resolution, published product/variant read contract | Live inventory badge, advanced filtering | Mock public catalog contract; final gate requires real product data |
-| Customer Management | Tenant context, customer identity/guest policy | Loyalty | Customer identity and guest-order decision |
-| Address & Location | Tenant/customer ownership contract | External geocoding | Shipping address and origin schema agreed |
-| Cart Management | Tenant, product/variant selection and pricing snapshot contract | Customer login | Cart item contract; guest cart decision |
+| Customer Management | Tenant context and guest checkout policy | Buyer accounts and loyalty | [DEP-04](#dep-04-guest-checkout-and-customer-identity) defines guest identity per order |
+| Address & Location | Tenant context and order address contract | External geocoding | Shipping address and origin schema agreed |
+| Cart Management | Tenant, product/variant selection, guest cart and pricing snapshot contracts | — | Cart item and guest cart resumption contracts agreed |
 | Checkout Management | Cart contract, order creation contract, payment/shipping selection contracts | Promotion engine | Shared checkout request/response and validation agreed |
 | Order Management | Tenant, customer/guest identity, item/price snapshot, inventory reservation contract | Notification | State machine and idempotent order creation agreed |
 | Payment Management | Order identity/amount/state contract | Gateway integrations | Manual transfer proof and verification contract agreed |
@@ -461,7 +461,7 @@ Arrows show **integration prerequisites**, not a ban on parallel coding. A node 
 | 1 | A — Platform & identity | Tenant Management + User integration | Wave 0 | Tenant isolation and domain routing verified |
 | 1 | B — Catalog data | Product Management + variant contract | Wave 0 | Published product/variant contract verified |
 | 1 | C — Store experience | Store Settings + Storefront shell | Wave 0 | Correct tenant branding and route resolution |
-| 1 | D — Customer | Customer identity, address model | Wave 0 | Customer/guest flow contract verified |
+| 1 | D — Customer | Guest checkout policy and buyer identity per order | Wave 0 | Verify agreed [DEP-04](#dep-04-guest-checkout-and-customer-identity) policy through Cart, Checkout and Order integration |
 | 2 | E — Stock | Inventory, stock reservations | Variant contract | Reserve/release/commit semantics verified |
 | 2 | F — Discovery | Public catalog, search/detail | Public product contract | Only correct tenant's published products visible |
 | 2 | G — Cart | Cart and price snapshots | Variant + customer/guest contract | Valid cart items and tenant isolation |
@@ -479,7 +479,8 @@ Arrows show **integration prerequisites**, not a ban on parallel coding. A node 
 | Tenant ID, resolution, security context | Platform/Identity | All tenant modules | Parallel feature integration |
 | Product/variant ID and publication | Catalog data | Inventory, Discovery, Cart, Order | Wave 2 |
 | Stock reservation API and expiry | Inventory | Checkout, Order | Transaction integration |
-| Customer/guest ID and address snapshot | Customer | Cart, Checkout, Order, Shipping | Wave 2 |
+| Guest checkout and buyer identity policy | Customer | Cart, Checkout, Order | Wave 2 |
+| Order address snapshot | To be agreed in Checkout and Address & Location | Order, Shipping | Checkout/Order integration |
 | Money, currency, pricing snapshot | Transaction core + Product | Cart, Checkout, Order, Payment | Wave 2 |
 | Order ID, state transitions, idempotency | Order | Checkout, Payment, Shipping | Wave 3 |
 | Manual payment proof and verification | Payment | Order, Tenant Admin | Wave 3 |
@@ -504,7 +505,6 @@ Each agent owns its module files and tests. Shared DTOs, migrations, auth middle
 | --- | --- | --- |
 | DEP-02 | Cart rules for adding or updating items when a product is withdrawn, a variant is unavailable, or stock changes. | Cart integration |
 | DEP-03 | Reservation duration, expiration and payment verification timing | Inventory/Order/Payment integration |
-| DEP-04 | Guest checkout and customer identity policy | Customer/Cart/Checkout |
 | DEP-05 | Shipping fee calculation, origin and delivery methods for MVP | Checkout/Shipping |
 | DEP-06 | Order/payment/shipping state machine and cancellation rules | Order/Payment/Shipping |
 | DEP-07 | Money, price snapshots, discount/tax treatment | Cart/Checkout/Order |
@@ -518,6 +518,10 @@ Resolve blockers in their module specifications and link stable requirement IDs 
 ### DEP-01 Tenant lifecycle
 
 [Tenant Management v1](../specs/tenant-management.md#implementation-decisions) defines how operators change tenant status, how inactive tenants retain their store address, and how storefront and internal access are suspended and restored. [Changing the store URL](../specs/tenant-management.md#further-notes) is a deferred enhancement.
+
+### DEP-04 Guest checkout and customer identity
+
+[Customer Management v1](../specs/customer-management.md#implementation-decisions) requires guest checkout for all purchases, restricts cart use to the same tenant, and stores guest identity and contact details per order. Cart, Checkout and Order apply and verify this policy as their contracts become available.
 </script>
   <script id="offline-module-roadmap" type="text/markdown" data-doc="planning/module-roadmap.md">
 # Module Roadmap & Ownership
@@ -545,7 +549,7 @@ The matrix records module ownership and proposed priorities. Module specificatio
 | 5 | Storefront Management | Tenant Admin | P0/P1 | P0 basic layout/navigation; P1 advanced customization |
 | 6 | Inventory Management | Tenant Admin | P0 | Stock receipts, corrections, and variant availability in [v1](../specs/inventory-management.md). Reservation rules are tracked in [DEP-03](development-dependencies.md#open-decisions--blockers). |
 | 7 | Product Catalog / Discovery | Storefront | P0 | Public listing and detail are available. [Discovery v1](../specs/product-discovery.md) adds name search and one category filter. Collections remain a future discussion. |
-| 8 | Customer Management | Tenant Admin / Storefront | P0 | Customer identity, guest/registered decisions |
+| 8 | Customer Management | Tenant Admin / Storefront | P0 | [Guest checkout v1](../specs/customer-management.md) and buyer identity per order. Buyer accounts are deferred. |
 | 9 | Cart Management | Storefront | P0 | Cart items and quantity |
 | 10 | Checkout Management | Storefront | P0 | Checkout validation and order submission |
 | 11 | Order Management | Tenant Admin / Storefront | P0 | Order lifecycle and history |
@@ -581,7 +585,8 @@ The matrix records module ownership and proposed priorities. Module specificatio
 - Online commerce comes before POS.
 - Tenant-specific storefront domains are supported in the architecture; the exact tenant/domain lifecycle needs a dedicated specification.
 - Subscription & Billing remains conditional on a future SaaS pricing decision.
-- Guest checkout, tax handling, delivery rate calculation, promotion rules and several lifecycle details remain open for dedicated module discussions.
+- [DEP-04](development-dependencies.md#dep-04-guest-checkout-and-customer-identity) establishes guest checkout and buyer identity per order for v1.
+- Tax handling, delivery rate calculation, promotion rules and several lifecycle details remain open for dedicated module discussions.
 
 For technical sequencing and safe parallel work, see [Development Dependencies & Parallel Workstreams](development-dependencies.md).
 
@@ -749,6 +754,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 - [Inventory Management](specs/inventory-management.md)
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
+- [Customer Management — Checkout Tamu v1](specs/customer-management.md)
 - [Tenant Admin — Tema Warna dari Satu File](specs/tenant-admin-color-theme.md)
 - [Tenant Admin — Tema Light, Dark, dan Ikuti Sistem](specs/tenant-admin-light-dark-theme.md)
 
@@ -1468,6 +1474,52 @@ Jalankan `npm run dev:tenant-admin` dari `frontend/` untuk verifikasi di browser
 
 Spesifikasi ini memperluas cakupan fondasi palet terpusat dengan preferensi tampilan lokal pengguna. [Tenant Admin — Tema Warna dari Satu File](tenant-admin-color-theme.md)
 </script>
+  <script id="offline-customer-management" type="text/markdown" data-doc="specs/customer-management.md">
+# Customer Management — Checkout Tamu v1
+
+> **Status — Disetujui.** Spesifikasi ini menetapkan kebijakan identitas pembeli untuk [DEP-04](../planning/development-dependencies.md#dep-04-guest-checkout-and-customer-identity).
+
+## Problem Statement
+
+Pembeli baru ingin membeli produk di toko tanpa harus mendaftar atau masuk ke akun. Toko memerlukan informasi pembeli untuk menangani setiap pesanan dan memastikan keranjang serta pesanan tetap berada di tenant yang sama.
+
+## Solution
+
+Semua pembelian di Storefront v1 memakai checkout tamu. Pengunjung memilih produk dan mengubah keranjang tanpa login, lalu memberikan informasi pembeli saat checkout. Toko menyimpan identitas dan kontak tamu pada pesanan yang dibuat.
+
+## User Stories
+
+1. Sebagai pengunjung baru, saya bisa menambah Kopi Arabika Gayo ke keranjang, mengubah jumlahnya, dan memesan tanpa mendaftar agar pembelian pertama bisa langsung selesai.
+2. Sebagai pengunjung yang berpindah toko, saya ingin pilihan saya tetap berada di toko asal agar keranjang dari satu toko tidak menghasilkan pesanan di toko lain.
+3. Sebagai pembeli yang kembali, saya bisa memakai kontak yang sama dengan nama pembeli yang berbeda agar tiap pesanan menyimpan informasi yang saya berikan untuk pembelian itu.
+
+## Implementation Decisions
+
+- **CM-01 — Pembelian tanpa akun.** Cart dan Checkout melayani pengunjung Storefront tanpa autentikasi pembeli. Pengunjung bisa menambah dan mengubah item di keranjang tamu serta mengirim pesanan dengan data checkout yang valid. Pembelian tidak membuat akun pembeli secara otomatis. Akun internal mengikuti aturan [User Management](user-management.md).
+- **CM-02 — Kepemilikan keranjang dan pesanan.** Keranjang tamu dimiliki satu tenant. Checkout memeriksa tenant keranjang terhadap konteks toko yang ditentukan server dan hanya membuat pesanan pada tenant yang sama. Tolak penggunaan keranjang lintas tenant tanpa membuat pesanan pada salah satu tenant.
+- **CM-03 — Identitas tamu per pesanan.** Simpan pada setiap pesanan identitas dan kontak yang diberikan untuk pesanan itu. Pemakaian ulang nomor HP atau email tidak menautkan pesanan ke profil pelanggan dan tidak memberi akses ke pesanan lain. Pesanan baru tidak mengubah identitas atau kontak yang sudah tersimpan pada pesanan sebelumnya.
+
+## Testing Decisions
+
+Verifikasi melalui API Cart dan Checkout setelah kontraknya tersedia dan penyimpanan pesanan terintegrasi. Jalankan `bru run --env Local` dari `bruno/`. Periksa respons HTTP dan keadaan pesanan yang tersimpan.
+
+| ID | Kondisi dan tindakan | Hasil yang harus teramati |
+| --- | --- | --- |
+| **CM-AT-01** (CM-01, CM-03) | Tanpa login, tambahkan satu bungkus Kopi Arabika Gayo 250 g di Toko Kopi Gayo, ubah jumlahnya menjadi dua, lalu kirim checkout dengan data valid. | Checkout berhasil dan pesanan tercatat di Toko Kopi Gayo dengan jumlah dua serta identitas dan kontak yang dikirim. Pembelian selesai tanpa pembuatan akun. |
+| **CM-AT-02** (CM-02) | Buat keranjang tamu di Toko Kopi Gayo, lalu ajukan checkout menggunakan keranjang tersebut di Toko B. | Permintaan ditolak. Tidak ada pesanan yang dibuat di Toko Kopi Gayo maupun Toko B akibat percobaan tersebut. |
+| **CM-AT-03** (CM-03) | Buat dua pesanan tamu di toko yang sama dengan nomor HP yang sama dan nama pembeli yang berbeda. | Kedua pesanan menyimpan nama dan kontak masing-masing. Penyimpanan pesanan kedua tidak mengubah data pesanan pertama atau menautkan keduanya ke satu profil pelanggan. |
+
+## Out of Scope
+
+- Pendaftaran, login, pemulihan akses akun pembeli, dan profil pelanggan lintas pesanan ditunda.
+- Identifikasi keranjang ketika pengunjung kembali dan aturan perubahan item dibahas di [Cart Management](cart-management.md).
+- Isian wajib checkout dan data alamat dibahas di [Checkout Management](checkout-management.md) dan [Address & Location Management](address-location-management.md).
+- Cara tamu mengakses status pesanannya dibahas di [Order Management](order-management.md).
+
+## Further Notes
+
+Terapkan CM-01 dan CM-02 dalam alur Cart dan Checkout, serta CM-03 saat Checkout membuat pesanan melalui Order. Kriteria CM-AT-01 sampai CM-AT-03 menjadi bagian penerimaan integrasi alur tersebut.
+</script>
   <script id="offline-progress" type="text/markdown" data-doc="planning/progress.md">
 # Progres Modul Dagantara
 
@@ -1478,13 +1530,13 @@ Selesaikan spesifikasi alur bisnis dan kode backend terlebih dahulu. Setelah fas
 | Status | Pekerjaan | Langkah berikutnya atau prasyarat |
 | --- | --- | --- |
 | **Siap dikerjakan** | [API Product Discovery v1](#product-catalog--discovery) | Implementasikan pencarian dan filter kategori dengan kontrak publikasi dan stok yang tersedia. Verifikasi `PD-AT-01` sampai `PD-AT-06` dengan Bruno. |
-| **Diskusi selanjutnya** | [Customer Management](#customer-management) | Putuskan checkout tamu atau wajib login ([DEP-04](development-dependencies.md#open-decisions--blockers)). Catat hasilnya untuk Cart dan Checkout. |
-| **Menunggu keputusan identitas** | [Cart Management](#cart-management) | Setelah DEP-04 disepakati, bahas cara mengenali keranjang yang dibuka kembali dan aturan item saat produk, varian, atau stok berubah (DEP-02). |
-| **Perlu keputusan bersama** | [Checkout](#checkout-management), [Order](#order-management), dan [reservasi stok](#inventory-management) | Selaraskan identitas pembeli, Cart, snapshot harga, status awal Order, dan waktu reservasi. Penerimaan Checkout terintegrasi juga memerlukan kontrak pilihan Payment dan Shipping. |
+| **Spec selesai** | [Customer Management](#customer-management) | [DEP-04](development-dependencies.md#dep-04-guest-checkout-and-customer-identity) menetapkan checkout tamu dan identitas pembeli per pesanan. Verifikasi melalui integrasi Cart, Checkout, dan Order. |
+| **Diskusi selanjutnya** | [Cart Management](#cart-management) | Bahas cara mengenali kembali keranjang tamu, lalu aturan item saat produk, varian, atau stok berubah (DEP-02). |
+| **Perlu keputusan bersama** | [Checkout](#checkout-management), [Order](#order-management), dan [reservasi stok](#inventory-management) | Terapkan kebijakan checkout tamu dan selaraskan kontrak Cart, snapshot harga, status awal Order, serta waktu reservasi. Penerimaan Checkout terintegrasi juga memerlukan kontrak pilihan Payment dan Shipping. |
 | **Menunggu kontrak Order** | [Payment](#payment-management) dan [Shipping](#shipping-management) | Setelah identitas dan status Order disepakati (DEP-06), implementasi transfer manual dan pemenuhan bisa maju paralel sesuai kontrak masing-masing. |
-| **Menunggu konteks alamat** | [Address & Location](#address--location-management) | Bahas data minimum alamat dan asal kirim bersama Shipping setelah identitas pembeli serta kepemilikan alamat jelas (DEP-04 dan DEP-05). |
+| **Menunggu konteks alamat** | [Address & Location](#address--location-management) | Bahas data minimum dan kepemilikan alamat pesanan bersama Checkout, serta asal kirim bersama Shipping (DEP-05). |
 
-API Product Discovery bisa dikerjakan bersamaan dengan diskusi Customer Management. Cart bisa lanjut setelah keputusan identitas tercatat. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
+API Product Discovery bisa dikerjakan bersamaan dengan diskusi Cart Management. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
 
 Pada tahap backend, bahas kebutuhan pembeli dan admin yang menentukan data, izin, validasi, status, atau respons sistem. Contohnya, data wajib untuk membuat pesanan dibahas di Checkout. Susunan form dan jumlah layar dibahas di sesi desain UI.
 
@@ -1599,10 +1651,8 @@ Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product
 
 ### Customer Management
 
-**Berikutnya dibahas.** Apakah pembeli bisa checkout sebagai tamu atau perlu login? [DEP-04](development-dependencies.md#open-decisions--blockers)
-
-- [ ] Spec selesai — [Draf spec](../specs/customer-management.md)
-- [ ] Kode selesai
+- [x] Spec selesai — [Checkout Tamu v1](../specs/customer-management.md)
+- [ ] Kode selesai — verifikasi [CM-AT-01 sampai CM-AT-03](../specs/customer-management.md#testing-decisions) setelah Cart, Checkout, dan Order terintegrasi.
 
 <details>
 <summary>Prompt spec Customer Management</summary>
@@ -1610,18 +1660,9 @@ Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product
 ```text
 $write-module-spec
 
-Gunakan docs/specs/customer-management.md sebagai kerangka awal.
-Bahas Customer Management dari DEP-04. Jika pengunjung baru ingin membeli Kopi Arabika
-Gayo, bolehkah dia checkout sebagai tamu atau perlu login? Beri rekomendasi untuk versi
-pertama, contoh konkret, dan konsekuensinya bagi keranjang dan checkout. Tunggu jawaban
-saya.
-
-Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
-saya sebelum lanjut dan catat tambahan yang disepakati.
-
-Rangkum cakupan dan kriteria penerimaan untuk saya konfirmasi. Setelah saya setuju,
-lengkapi draf yang sama sesuai template skill, tautkan spec dari docs/README.md, dan
-perbarui Progres Modul.
+Bahas perubahan berikutnya untuk Customer Management. Baca docs/specs/customer-management.md.
+Mulai dari kebutuhan pembeli yang ingin saya bahas dan dampaknya terhadap kebijakan checkout
+tamu, identitas per pesanan, serta aturan isolasi tenant.
 ```
 
 </details>
@@ -1632,18 +1673,17 @@ perbarui Progres Modul.
 ```text
 $implement-from-spec customer-management
 
-Baca docs/specs/customer-management.md dan cek status modul di docs/planning/progress.md.
-Mulai implementasi setelah spec dan cakupan pengerjaan disetujui. Jika spec masih draf
-atau tiket masih menunggu persetujuan, laporkan prasyarat yang tertahan.
-
-Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
-ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
-dilacak terverifikasi.
+Baca docs/specs/customer-management.md serta spec Cart, Checkout, dan Order. Terapkan CM-01
+sampai CM-03 dalam cakupan implementasi modul-modul tersebut yang sudah disetujui. Setelah
+alur terintegrasi, jalankan CM-AT-01 sampai CM-AT-03 dengan Bruno dan perbarui Kode selesai
+di Progres Modul setelah semua skenario lulus.
 ```
 
 </details>
 
 ### Cart Management
+
+**Berikutnya dibahas.** Bagaimana toko mengenali keranjang tamu ketika pengunjung kembali membuka URL toko?
 
 - [ ] Spec selesai — [Draf spec](../specs/cart-management.md)
 - [ ] Kode selesai
@@ -2421,7 +2461,7 @@ Urutan ini adalah urutan review. Mulai pekerjaan yang prasyaratnya sudah siap pa
 | **2** | **Kelola akun dan role** — [User Management](../specs/user-management.md#role-permission-dan-akun-yang-dilindungi) | Akun operator, role Platform, dan Help Center bisa maju bersama akun staf dan role Tenant Admin. | Gunakan pola daftar, detail, dan aksi akun yang sama. Periksa bahwa tiap aplikasi memperlihatkan tindakan sesuai izin pengguna. |
 | **3** | **Katalog dan stok di Tenant Admin** — [Product](../specs/product-management.md#opsi-varian-dan-sku) + [Inventory](../specs/inventory-management.md#penerimaan-barang) | Setelah pola pemilihan produk, varian, dan SKU jelas, kategori, media, dan publikasi bisa maju bersama penerimaan, koreksi, dan saldo stok. Sesi ini bisa maju sambil jalur akun dirinci. | Perlu konteks akses Tenant Admin dan kontrak varian yang stabil. Review dari memilih SKU sampai saldo dan riwayatnya terlihat. |
 | **4** | **Identitas toko dan katalog publik** — [Store Settings](../specs/store-settings.md#isian-penyimpanan-dan-tampilan) + [Storefront](#storefront-management) + [Product](../specs/product-management.md#publikasi-dan-storefront) + [Inventory](../specs/inventory-management.md#ketersediaan-untuk-storefront) + [Discovery](../specs/product-discovery.md#perilaku-tahap-frontend) | Form identitas toko dan kerangka katalog publik bisa maju bersamaan setelah data identitas jelas. Detail produk dapat direview memakai kontrak publik yang sudah ada. | Review perubahan identitas dari admin ke toko, pencarian, pemilihan kategori, detail dan stok varian. Integrasi Discovery menunggu API dan kontrak sumber pilihan kategori. Verifikasi `PD-AT-07` sampai `PD-AT-09` dengan browser. |
-| **5** | **Alur beli di Storefront** — [Customer](../specs/customer-management.md) + [Cart](../specs/cart-management.md) + [Checkout](../specs/checkout-management.md) + [Address & Location](../specs/address-location-management.md) + [Order](../specs/order-management.md) | Rinci bagian Cart dan alamat setelah identitas pembeli serta data wajib jelas. Satukan keduanya saat review Checkout. | Tunggu keputusan tamu atau login, identitas keranjang, data wajib, serta pilihan bayar dan kirim. Review dari keranjang sampai konfirmasi pesanan. |
+| **5** | **Alur beli di Storefront** — [Customer](../specs/customer-management.md) + [Cart](../specs/cart-management.md) + [Checkout](../specs/checkout-management.md) + [Address & Location](../specs/address-location-management.md) + [Order](../specs/order-management.md) | Rinci Cart tamu dan alamat setelah kontrak keranjang serta data wajib jelas. Satukan keduanya saat review Checkout. | Gunakan kebijakan checkout tamu. Tunggu kontrak identitas keranjang, data wajib, serta pilihan bayar dan kirim. Review dari keranjang sampai konfirmasi pesanan. |
 | **6** | **Pesanan setelah checkout** — [Order](../specs/order-management.md) + [Payment](../specs/payment-management.md) + [Shipping](../specs/shipping-management.md) | Desain bukti transfer dan verifikasi bisa maju bersama desain pemenuhan dan pelacakan setelah kontrak Order dan tindakan tiap aktor jelas. | Review halaman pesanan pembeli bersama tindakan admin. Periksa bahwa hasil verifikasi pembayaran dan pengiriman terlihat sesuai status yang disepakati. |
 
 ### Storefront Management

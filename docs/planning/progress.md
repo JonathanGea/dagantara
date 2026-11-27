@@ -7,13 +7,13 @@ Selesaikan spesifikasi alur bisnis dan kode backend terlebih dahulu. Setelah fas
 | Status | Pekerjaan | Langkah berikutnya atau prasyarat |
 | --- | --- | --- |
 | **Siap dikerjakan** | [API Product Discovery v1](#product-catalog--discovery) | Implementasikan pencarian dan filter kategori dengan kontrak publikasi dan stok yang tersedia. Verifikasi `PD-AT-01` sampai `PD-AT-06` dengan Bruno. |
-| **Diskusi selanjutnya** | [Customer Management](#customer-management) | Putuskan checkout tamu atau wajib login ([DEP-04](development-dependencies.md#open-decisions--blockers)). Catat hasilnya untuk Cart dan Checkout. |
-| **Menunggu keputusan identitas** | [Cart Management](#cart-management) | Setelah DEP-04 disepakati, bahas cara mengenali keranjang yang dibuka kembali dan aturan item saat produk, varian, atau stok berubah (DEP-02). |
-| **Perlu keputusan bersama** | [Checkout](#checkout-management), [Order](#order-management), dan [reservasi stok](#inventory-management) | Selaraskan identitas pembeli, Cart, snapshot harga, status awal Order, dan waktu reservasi. Penerimaan Checkout terintegrasi juga memerlukan kontrak pilihan Payment dan Shipping. |
+| **Spec selesai** | [Customer Management](#customer-management) | [DEP-04](development-dependencies.md#dep-04-guest-checkout-and-customer-identity) menetapkan checkout tamu dan identitas pembeli per pesanan. Verifikasi melalui integrasi Cart, Checkout, dan Order. |
+| **Diskusi selanjutnya** | [Cart Management](#cart-management) | Bahas cara mengenali kembali keranjang tamu, lalu aturan item saat produk, varian, atau stok berubah (DEP-02). |
+| **Perlu keputusan bersama** | [Checkout](#checkout-management), [Order](#order-management), dan [reservasi stok](#inventory-management) | Terapkan kebijakan checkout tamu dan selaraskan kontrak Cart, snapshot harga, status awal Order, serta waktu reservasi. Penerimaan Checkout terintegrasi juga memerlukan kontrak pilihan Payment dan Shipping. |
 | **Menunggu kontrak Order** | [Payment](#payment-management) dan [Shipping](#shipping-management) | Setelah identitas dan status Order disepakati (DEP-06), implementasi transfer manual dan pemenuhan bisa maju paralel sesuai kontrak masing-masing. |
-| **Menunggu konteks alamat** | [Address & Location](#address--location-management) | Bahas data minimum alamat dan asal kirim bersama Shipping setelah identitas pembeli serta kepemilikan alamat jelas (DEP-04 dan DEP-05). |
+| **Menunggu konteks alamat** | [Address & Location](#address--location-management) | Bahas data minimum dan kepemilikan alamat pesanan bersama Checkout, serta asal kirim bersama Shipping (DEP-05). |
 
-API Product Discovery bisa dikerjakan bersamaan dengan diskusi Customer Management. Cart bisa lanjut setelah keputusan identitas tercatat. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
+API Product Discovery bisa dikerjakan bersamaan dengan diskusi Cart Management. Checkout dan Order bisa mulai dikerjakan paralel setelah kontrak bersama disetujui. Lihat [roadmap](module-roadmap.md#module-matrix) untuk prioritas dan [dependensi pengembangan](development-dependencies.md#open-decisions--blockers) untuk rincian keputusan terbuka.
 
 Pada tahap backend, bahas kebutuhan pembeli dan admin yang menentukan data, izin, validasi, status, atau respons sistem. Contohnya, data wajib untuk membuat pesanan dibahas di Checkout. Susunan form dan jumlah layar dibahas di sesi desain UI.
 
@@ -128,10 +128,8 @@ Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product
 
 ### Customer Management
 
-**Berikutnya dibahas.** Apakah pembeli bisa checkout sebagai tamu atau perlu login? [DEP-04](development-dependencies.md#open-decisions--blockers)
-
-- [ ] Spec selesai — [Draf spec](../specs/customer-management.md)
-- [ ] Kode selesai
+- [x] Spec selesai — [Checkout Tamu v1](../specs/customer-management.md)
+- [ ] Kode selesai — verifikasi [CM-AT-01 sampai CM-AT-03](../specs/customer-management.md#testing-decisions) setelah Cart, Checkout, dan Order terintegrasi.
 
 <details>
 <summary>Prompt spec Customer Management</summary>
@@ -139,18 +137,9 @@ Implementasikan API pencarian nama dan filter kategori sesuai docs/specs/product
 ```text
 $write-module-spec
 
-Gunakan docs/specs/customer-management.md sebagai kerangka awal.
-Bahas Customer Management dari DEP-04. Jika pengunjung baru ingin membeli Kopi Arabika
-Gayo, bolehkah dia checkout sebagai tamu atau perlu login? Beri rekomendasi untuk versi
-pertama, contoh konkret, dan konsekuensinya bagi keranjang dan checkout. Tunggu jawaban
-saya.
-
-Ajukan satu keputusan per putaran dengan rekomendasi dan contoh konkret. Tunggu jawaban
-saya sebelum lanjut dan catat tambahan yang disepakati.
-
-Rangkum cakupan dan kriteria penerimaan untuk saya konfirmasi. Setelah saya setuju,
-lengkapi draf yang sama sesuai template skill, tautkan spec dari docs/README.md, dan
-perbarui Progres Modul.
+Bahas perubahan berikutnya untuk Customer Management. Baca docs/specs/customer-management.md.
+Mulai dari kebutuhan pembeli yang ingin saya bahas dan dampaknya terhadap kebijakan checkout
+tamu, identitas per pesanan, serta aturan isolasi tenant.
 ```
 
 </details>
@@ -161,18 +150,17 @@ perbarui Progres Modul.
 ```text
 $implement-from-spec customer-management
 
-Baca docs/specs/customer-management.md dan cek status modul di docs/planning/progress.md.
-Mulai implementasi setelah spec dan cakupan pengerjaan disetujui. Jika spec masih draf
-atau tiket masih menunggu persetujuan, laporkan prasyarat yang tertahan.
-
-Kerjakan cakupan yang disetujui dan jalankan kriteria penerimaannya, termasuk Bruno jika
-ada API HTTP. Perbarui Kode selesai di Progres Modul setelah seluruh cakupan versi yang
-dilacak terverifikasi.
+Baca docs/specs/customer-management.md serta spec Cart, Checkout, dan Order. Terapkan CM-01
+sampai CM-03 dalam cakupan implementasi modul-modul tersebut yang sudah disetujui. Setelah
+alur terintegrasi, jalankan CM-AT-01 sampai CM-AT-03 dengan Bruno dan perbarui Kode selesai
+di Progres Modul setelah semua skenario lulus.
 ```
 
 </details>
 
 ### Cart Management
+
+**Berikutnya dibahas.** Bagaimana toko mengenali keranjang tamu ketika pengunjung kembali membuka URL toko?
 
 - [ ] Spec selesai — [Draf spec](../specs/cart-management.md)
 - [ ] Kode selesai
@@ -950,7 +938,7 @@ Urutan ini adalah urutan review. Mulai pekerjaan yang prasyaratnya sudah siap pa
 | **2** | **Kelola akun dan role** — [User Management](../specs/user-management.md#role-permission-dan-akun-yang-dilindungi) | Akun operator, role Platform, dan Help Center bisa maju bersama akun staf dan role Tenant Admin. | Gunakan pola daftar, detail, dan aksi akun yang sama. Periksa bahwa tiap aplikasi memperlihatkan tindakan sesuai izin pengguna. |
 | **3** | **Katalog dan stok di Tenant Admin** — [Product](../specs/product-management.md#opsi-varian-dan-sku) + [Inventory](../specs/inventory-management.md#penerimaan-barang) | Setelah pola pemilihan produk, varian, dan SKU jelas, kategori, media, dan publikasi bisa maju bersama penerimaan, koreksi, dan saldo stok. Sesi ini bisa maju sambil jalur akun dirinci. | Perlu konteks akses Tenant Admin dan kontrak varian yang stabil. Review dari memilih SKU sampai saldo dan riwayatnya terlihat. |
 | **4** | **Identitas toko dan katalog publik** — [Store Settings](../specs/store-settings.md#isian-penyimpanan-dan-tampilan) + [Storefront](#storefront-management) + [Product](../specs/product-management.md#publikasi-dan-storefront) + [Inventory](../specs/inventory-management.md#ketersediaan-untuk-storefront) + [Discovery](../specs/product-discovery.md#perilaku-tahap-frontend) | Form identitas toko dan kerangka katalog publik bisa maju bersamaan setelah data identitas jelas. Detail produk dapat direview memakai kontrak publik yang sudah ada. | Review perubahan identitas dari admin ke toko, pencarian, pemilihan kategori, detail dan stok varian. Integrasi Discovery menunggu API dan kontrak sumber pilihan kategori. Verifikasi `PD-AT-07` sampai `PD-AT-09` dengan browser. |
-| **5** | **Alur beli di Storefront** — [Customer](../specs/customer-management.md) + [Cart](../specs/cart-management.md) + [Checkout](../specs/checkout-management.md) + [Address & Location](../specs/address-location-management.md) + [Order](../specs/order-management.md) | Rinci bagian Cart dan alamat setelah identitas pembeli serta data wajib jelas. Satukan keduanya saat review Checkout. | Tunggu keputusan tamu atau login, identitas keranjang, data wajib, serta pilihan bayar dan kirim. Review dari keranjang sampai konfirmasi pesanan. |
+| **5** | **Alur beli di Storefront** — [Customer](../specs/customer-management.md) + [Cart](../specs/cart-management.md) + [Checkout](../specs/checkout-management.md) + [Address & Location](../specs/address-location-management.md) + [Order](../specs/order-management.md) | Rinci Cart tamu dan alamat setelah kontrak keranjang serta data wajib jelas. Satukan keduanya saat review Checkout. | Gunakan kebijakan checkout tamu. Tunggu kontrak identitas keranjang, data wajib, serta pilihan bayar dan kirim. Review dari keranjang sampai konfirmasi pesanan. |
 | **6** | **Pesanan setelah checkout** — [Order](../specs/order-management.md) + [Payment](../specs/payment-management.md) + [Shipping](../specs/shipping-management.md) | Desain bukti transfer dan verifikasi bisa maju bersama desain pemenuhan dan pelacakan setelah kontrak Order dan tindakan tiap aktor jelas. | Review halaman pesanan pembeli bersama tindakan admin. Periksa bahwa hasil verifikasi pembayaran dan pengiriman terlihat sesuai status yang disepakati. |
 
 ### Storefront Management

@@ -18,6 +18,7 @@ Spesifikasi yang disepakati ditautkan di bagian ini. Judul atau nama file tanpa 
 - [Inventory Management](specs/inventory-management.md)
 - [Store Settings — Identitas Publik Toko](specs/store-settings.md)
 - [Product Catalog / Discovery — Pencarian dan Filter Produk Publik](specs/product-discovery.md)
+- [Customer Management — Checkout Tamu v1](specs/customer-management.md)
 - [Tenant Admin — Tema Warna dari Satu File](specs/tenant-admin-color-theme.md)
 - [Tenant Admin — Tema Light, Dark, dan Ikuti Sistem](specs/tenant-admin-light-dark-theme.md)
 

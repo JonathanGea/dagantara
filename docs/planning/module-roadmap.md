@@ -23,7 +23,7 @@ The matrix records module ownership and proposed priorities. Module specificatio
 | 5 | Storefront Management | Tenant Admin | P0/P1 | P0 basic layout/navigation; P1 advanced customization |
 | 6 | Inventory Management | Tenant Admin | P0 | Stock receipts, corrections, and variant availability in [v1](../specs/inventory-management.md). Reservation rules are tracked in [DEP-03](development-dependencies.md#open-decisions--blockers). |
 | 7 | Product Catalog / Discovery | Storefront | P0 | Public listing and detail are available. [Discovery v1](../specs/product-discovery.md) adds name search and one category filter. Collections remain a future discussion. |
-| 8 | Customer Management | Tenant Admin / Storefront | P0 | Customer identity, guest/registered decisions |
+| 8 | Customer Management | Tenant Admin / Storefront | P0 | [Guest checkout v1](../specs/customer-management.md) and buyer identity per order. Buyer accounts are deferred. |
 | 9 | Cart Management | Storefront | P0 | Cart items and quantity |
 | 10 | Checkout Management | Storefront | P0 | Checkout validation and order submission |
 | 11 | Order Management | Tenant Admin / Storefront | P0 | Order lifecycle and history |
@@ -59,7 +59,8 @@ The matrix records module ownership and proposed priorities. Module specificatio
 - Online commerce comes before POS.
 - Tenant-specific storefront domains are supported in the architecture; the exact tenant/domain lifecycle needs a dedicated specification.
 - Subscription & Billing remains conditional on a future SaaS pricing decision.
-- Guest checkout, tax handling, delivery rate calculation, promotion rules and several lifecycle details remain open for dedicated module discussions.
+- [DEP-04](development-dependencies.md#dep-04-guest-checkout-and-customer-identity) establishes guest checkout and buyer identity per order for v1.
+- Tax handling, delivery rate calculation, promotion rules and several lifecycle details remain open for dedicated module discussions.
 
 For technical sequencing and safe parallel work, see [Development Dependencies & Parallel Workstreams](development-dependencies.md).
 
